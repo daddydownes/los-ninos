@@ -57,7 +57,7 @@
           <button type="button" class="journey-bag-shop">Explore the snapback <span aria-hidden="true">↗</span></button>
         </div>
         <div class="journey-bag-item" hidden>
-          <img src="${thumbnail}" width="1254" height="1254" alt="Front concept render of the navy Los Niños snapback">
+          <img src="${thumbnail}" width="1254" height="1254" decoding="async" alt="Front concept render of the navy Los Niños snapback">
           <div class="journey-bag-details">
             <h3>Navy snapback</h3>
             <div class="journey-bag-controls">
@@ -266,7 +266,7 @@
     function beginVisualClose() {
       if (closeTimer !== null) return;
       phase = 'closing';
-      if (!dialog.open || reducedMotion.matches) { finishClose(); return; }
+      if (!dialog.open || reducedMotion.matches || document.hidden) { finishClose(); return; }
       dialog.classList.add('journey-bag-closing');
       closeTimer = setTimeout(finishClose, closeDuration);
     }
@@ -404,6 +404,13 @@
 
     window.addEventListener('hashchange', cancelPendingAdd);
     window.addEventListener('pagehide', cancelPendingAdd);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) return;
+      // Mobile Safari throttles background timers. Do not reopen a bag from a
+      // stale add confirmation when someone returns from another app or tab.
+      cancelPendingAdd();
+      if (closeTimer !== null && !awaitingBack) finishClose({ restoreFocus: false });
+    });
     window.addEventListener('pageshow', event => {
       loadQuantity();
       render();
@@ -417,7 +424,9 @@
       }
     });
     reducedMotion.addEventListener('change', () => {
-      if (reducedMotion.matches && closeTimer !== null && !awaitingBack) finishClose();
+      if (!reducedMotion.matches) return;
+      if (pendingAdd) open(pendingAdd.trigger);
+      if (closeTimer !== null && !awaitingBack) finishClose();
     });
 
     cleanMalformedMarker();

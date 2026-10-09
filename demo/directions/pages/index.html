@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080e16">
   <meta name="description" content="Los Niños Con Sueños. Shop the navy snapback and see it worn.">
   <title>Los Niños — Con Sueños</title>
@@ -40,24 +40,38 @@
     // Block page interaction only while the entrance is loading or playing.
     function guardOpening(event) {
       if (!document.documentElement.classList.contains('intro-pending')) return;
-      if (event.type === 'keydown' && (event.ctrlKey || event.metaKey || event.altKey || !['Tab','Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End'].includes(event.key))) return;
+      if (event.target.closest?.('[data-skip-intro]') && event.type === 'click' || event.type === 'keydown' && event.key === 'Escape') {
+        window.lnIntroFallback();
+        return;
+      }
+      if (event.target.closest?.('[data-skip-intro]')) return;
+      if (event.type === 'keydown' && (event.ctrlKey || event.metaKey || event.altKey || !['Enter',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End'].includes(event.key))) return;
       if (event.cancelable) event.preventDefault();
       event.stopImmediatePropagation();
     }
-    ['click','wheel','touchmove','keydown'].forEach(function(type) {
-      window.addEventListener(type, guardOpening, {capture:true, passive:false});
-    });
+    if (document.documentElement.classList.contains('intro-pending')) {
+      ['click','wheel','touchmove','keydown'].forEach(function(type) {
+        window.addEventListener(type, guardOpening, {capture:true, passive:false});
+      });
+      // A non-passive touch/wheel listener keeps scrolling on the main thread,
+      // even when its callback returns without cancelling the event.
+      document.addEventListener('ln:intro-complete', function () {
+        ['click','wheel','touchmove','keydown'].forEach(function(type) {
+          window.removeEventListener(type, guardOpening, true);
+        });
+      }, {once:true});
+    }
   </script>
-  <link rel="stylesheet" href="journey.css?v=17">
-  <link rel="stylesheet" href="journey-bag.css?v=4">
-  <link rel="stylesheet" href="purchase-motion.css?v=2">
-  <script defer src="purchase-motion.js?v=1"></script>
-  <link rel="stylesheet" href="hat-orbit.css?v=5">
-  <script defer src="hat-spin.js?v=9"></script>
-  <script defer src="hat-reveal.js"></script>
-  <script defer src="journey-intro.js?v=6"></script>
-  <script defer src="journey.js?v=8"></script>
-  <script defer src="journey-bag.js?v=7"></script>
+  <link rel="stylesheet" href="journey.css?v=20261009">
+  <link rel="stylesheet" href="journey-bag.css?v=20261009">
+  <link rel="stylesheet" href="purchase-motion.css?v=20261009">
+  <script defer src="purchase-motion.js?v=20261009"></script>
+  <link rel="stylesheet" href="hat-orbit.css?v=20261009">
+  <script defer src="hat-spin.js?v=20261009"></script>
+  <script defer src="hat-reveal.js?v=20261009"></script>
+  <script defer src="journey-intro.js?v=20261009"></script>
+  <script defer src="journey.js?v=20261009"></script>
+  <script defer src="journey-bag.js?v=20261009"></script>
 </head>
 <body>
   <a class="skip-link" href="#shop" data-journey-link>Skip to product</a>
@@ -72,6 +86,7 @@
   <main>
     <section class="hero journey-product" id="top" aria-label="The Los Niños navy snapback">
       <div class="studio-glow" aria-hidden="true"></div>
+      <button class="skip-intro quiet-link" type="button" data-skip-intro>Skip intro</button>
       <figure class="hat-figure">
         <div class="viewer-frame" data-view="front">
           <div class="product-lockup">
@@ -105,7 +120,7 @@
 <path class="sew-path" data-route="809,666 837,666 848,670 800,670 792,674 854,674 858,678 789,678 785,682 862,682 864,686 783,686 781,690 815,690 817,690 817,690 831,690 865,690 867,694 838,694 810,694 780,694 779,698 808,698 841,698 868,698 868,702 842,702 807,702 779,702 779,706 807,706 842,706 868,706 851,710 842,710 810,710 779,710 780,714 818,714 829,718 782,718 785,722 846,722 855,726 786,726 790,730 860,730 864,734 796,734 805,738 867,738 868,742 825,742 832,746 870,746 871,750 842,750 778,754 805,754 844,754 871,754 871,758 845,758 805,758 777,758 777,762 805,762 844,762 871,762 871,766 843,766 807,766 778,766 779,770 810,770 839,770 870,770 868,774 832,774 817,774 781,774 782,778 867,778 865,782 785,782 789,786 861,786 854,790 795,790 798,794 848,794 835,798 827,798 818,798 818,798" data-letter="S" d="M809,666 L837,666 L848,670 L800,670 L792,674 L854,674 L858,678 L789,678 L785,682 L862,682 L864,686 L783,686 L781,690 L815,690 L817,690 L817,690 L831,690 L865,690 L867,694 L838,694 L810,694 L780,694 L779,698 L808,698 L841,698 L868,698 L868,702 L842,702 L807,702 L779,702 L779,706 L807,706 L842,706 L868,706 L851,710 L842,710 L810,710 L779,710 L780,714 L818,714 L829,718 L782,718 L785,722 L846,722 L855,726 L786,726 L790,730 L860,730 L864,734 L796,734 L805,738 L867,738 L868,742 L825,742 L832,746 L870,746 L871,750 L842,750 L778,754 L805,754 L844,754 L871,754 L871,758 L845,758 L805,758 L777,758 L777,762 L805,762 L844,762 L871,762 L871,766 L843,766 L807,766 L778,766 L779,770 L810,770 L839,770 L870,770 L868,774 L832,774 L817,774 L781,774 L782,778 L867,778 L865,782 L785,782 L789,786 L861,786 L854,790 L795,790 L798,794 L848,794 L835,798 L827,798 L818,798 L818,798" pathLength="1" clip-path="url(#sew-glyph-7)"/>
 <path class="sew-finish" d="M812,665 L833,665 L844,668 L853,673 L862,682 L867,694 L869,705 L867,709 L856,708 L851,710 L842,710 L842,701 L840,695 L828,688 L819,688 L817,690 L815,689 L814,692 L812,692 L808,697 L807,706 L812,712 L829,718 L841,720 L857,727 L866,736 L871,748 L871,768 L865,782 L860,787 L854,789 L853,792 L850,792 L847,795 L840,797 L836,796 L835,798 L830,799 L823,797 L818,798 L814,796 L809,797 L808,795 L798,794 L794,789 L789,787 L787,783 L783,781 L781,773 L779,772 L777,760 L777,755 L779,753 L802,752 L805,754 L805,762 L807,767 L812,772 L819,775 L830,775 L837,772 L843,766 L843,763 L845,761 L844,753 L840,748 L832,746 L825,742 L809,740 L808,738 L805,738 L803,736 L800,737 L786,727 L786,724 L781,717 L779,710 L779,697 L783,685 L792,674 L799,671 L800,669 Z" fill-rule="evenodd"/>
 </mask></defs>
-<image class="sewn-embroidery" href="../../../assets/hat-front-logo-v1.webp" width="1254" height="1254" filter="url(#logo-thread)" mask="url(#sewn-thread-mask)"/>
+<image class="sewn-embroidery" href="../../../assets/hat-embroidery.webp" width="1254" height="1254" mask="url(#sewn-thread-mask)"/>
 <path class="sew-satin" d="M477,504 L502,504 L504,508 L475,508 L474,512 L504,512 L504,516 L474,516 L474,520 L504,520 L504,524 L475,524 L475,528 L504,528 L504,532 L475,532 L475,536 L504,536 L504,540 L474,540 L474,544 L504,544 L504,548 L474,548 L474,552 L504,552 L504,556 L474,556 L473,560 L504,560 L504,564 L473,564 L473,568 L504,568 L504,572 L473,572 L473,576 L504,576 L504,580 L473,580 L473,584 L504,584 L504,588 L473,588 L473,592 L504,592 L504,596 L473,596 L473,600 L504,600 L553,604 L473,604 L473,608 L553,608 L553,612 L473,612 L473,616 L553,616 L552,620 L473,620 L473,624 L552,624 L552,628 L545,628 L541,628 L538,628" pathLength="1" clip-path="url(#sew-glyph-0)"/>
 <path class="sew-satin" d="M600,501 L622,501 L636,505 L586,505 L578,509 L643,509 L650,513 L573,513 L568,517 L655,517 L659,521 L563,521 L561,525 L604,525 L614,525 L661,525 L663,529 L627,529 L592,529 L558,529 L555,533 L589,533 L631,533 L665,533 L667,537 L636,537 L585,537 L554,537 L552,541 L582,541 L638,541 L670,541 L670,545 L640,545 L579,545 L551,545 L550,549 L579,549 L641,549 L671,549 L672,553 L642,553 L579,553 L549,553 L548,557 L577,557 L643,557 L672,557 L673,561 L644,561 L576,561 L548,561 L548,565 L576,565 L644,565 L673,565 L673,569 L644,569 L576,569 L548,569 L548,573 L577,573 L644,573 L672,573 L672,577 L643,577 L578,577 L548,577 L549,581 L579,581 L641,581 L672,581 L670,585 L640,585 L580,585 L550,585 L550,589 L582,589 L639,589 L669,589 L668,593 L636,593 L584,593 L551,593 L553,597 L587,597 L633,597 L666,597 L663,601 L629,601 L593,601 L556,601 L559,605 L599,605 L618,605 L662,605 L657,609 L562,609 L564,613 L655,613 L650,617 L568,617 L573,621 L644,621 L636,625 L579,625 L588,629 L622,629" pathLength="1" clip-path="url(#sew-glyph-1)"/>
 <path class="sew-satin" d="M716,500 L730,500 L747,504 L699,504 L694,508 L756,508 L760,512 L689,512 L684,516 L764,516 L767,520 L682,520 L680,524 L717,524 L733,524 L769,524 L771,528 L740,528 L711,528 L679,528 L678,532 L708,532 L743,532 L772,532 L772,536 L744,536 L707,536 L678,536 L679,540 L708,540 L745,540 L772,540 L754,544 L746,544 L711,544 L679,544 L680,548 L720,548 L737,552 L681,552 L684,556 L751,556 L760,560 L686,560 L691,564 L764,564 L769,568 L701,568 L708,572 L771,572 L774,576 L727,576 L735,580 L775,580 L775,584 L745,584 L674,588 L703,588 L747,588 L776,588 L777,592 L748,592 L704,592 L675,592 L675,596 L705,596 L748,596 L776,596 L775,600 L745,600 L708,600 L676,600 L678,604 L712,604 L742,604 L774,604 L773,608 L680,608 L681,612 L771,612 L767,616 L685,616 L689,620 L764,620 L757,624 L696,624 L701,628 L747,628 L722,632 L722,632" pathLength="1" clip-path="url(#sew-glyph-2)"/>
@@ -117,7 +132,7 @@
 <path class="working-thread" d="M0,0"/>
 <g class="sewing-head"><line x1="-17" y1="0" x2="0" y2="0"/><circle class="needle-eye" cx="-13.5" cy="0" r=".9"/><circle r="1.5"/></g>
 </svg>
-            <div class="lettering-window" aria-hidden="true"><img class="stitch-ink" src="../../../assets/hat-front-logo-v1.webp" width="1254" height="1254" alt=""><div class="thread-sheen"><img class="stitch-ink" src="../../../assets/hat-front-logo-v1.webp" width="1254" height="1254" alt=""></div></div>
+            <div class="lettering-window" aria-hidden="true"><img class="stitch-ink" src="../../../assets/hat-embroidery.webp" width="1254" height="1254" alt=""><div class="thread-sheen"><img class="stitch-ink" src="../../../assets/hat-embroidery.webp" width="1254" height="1254" alt=""></div></div>
           </div>
           <div class="view-error" hidden><p data-image-error>The hat image couldn’t load.</p><button type="button" class="quiet-link" data-view-retry>Retry image</button></div>
         </div>
@@ -139,9 +154,9 @@
         <figure class="photo-slot" data-reveal><img src="../../../assets/photos/photo-34.webp" srcset="../../../assets/photos/photo-34-small.webp 427w, ../../../assets/photos/photo-34.webp 1067w" sizes="(max-width:700px) 88vw, 40vw" width="1067" height="1600" alt="The navy cap with a complete daylight outfit beside a concrete wall." loading="lazy" decoding="async"><div class="photo-error" hidden><p>This photograph couldn’t load.</p><button type="button" class="quiet-link" data-photo-retry>Retry photo</button></div></figure>
         <figure class="photo-slot" data-reveal><img src="../../../assets/photos/photo-38.webp" srcset="../../../assets/photos/photo-38-small.webp 480w, ../../../assets/photos/photo-38.webp 1200w" sizes="(max-width:700px) 88vw, 40vw" width="1200" height="1600" alt="The same Los Niños hat worn under violet night lighting." loading="lazy" decoding="async"><div class="photo-error" hidden><p>This photograph couldn’t load.</p><button type="button" class="quiet-link" data-photo-retry>Retry photo</button></div></figure>
       </div>
-      <section class="hat-orbit" aria-label="Explore the hat" data-orbit data-sequence="../../../assets/hat-spin/sequence.json">
+      <section class="hat-orbit" aria-label="Explore the hat" data-orbit data-sequence="../../../assets/hat-spin/sequence.json?v=20261009">
         <div class="orbit-stage" data-orbit-stage>
-          <img class="orbit-poster" src="../../../assets/hat-spin/ai-v1/frame-000.png" width="1280" height="1280" loading="lazy" alt="AI studio render of the Los Niños hat, viewed from the front.">
+          <img class="orbit-poster" src="../../../assets/hat-spin/optimized/ai-v1-frame-000.webp" srcset="../../../assets/hat-spin/optimized/ai-v1-frame-000-768.webp 768w, ../../../assets/hat-spin/optimized/ai-v1-frame-000.webp 1254w" sizes="(max-width:700px) calc(100vw - 48px), min(88vw,900px)" width="1254" height="1254" loading="lazy" decoding="async" alt="AI studio render of the Los Niños hat, viewed from the front.">
           <div class="orbit-canvas" data-orbit-canvas></div>
         </div>
         <div class="orbit-toolbar" hidden>
