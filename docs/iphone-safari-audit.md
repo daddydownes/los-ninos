@@ -23,9 +23,10 @@ Baseline: `3c5a145f946eb6afb6fce4743d1948d89a04d188`.
    mask pipeline; the small header logo retains its original live filter. Slow fonts no longer block it. A
    failed optional reveal script has a working fallback. Skip/Escape and leaving
    the page release the interface immediately.
-4. **Touch and motion preferences.** Rotation waits for horizontal intent before
-   pointer capture, leaves vertical panning and pinch zoom to the browser, and
-   renders at most once per animation frame. Initial canvas sizing preserves
+4. **Touch and motion preferences.** Rotation captures horizontal movement and reserves one-finger gestures
+   inside the canvas for the hat, preventing accidental vertical page pans.
+   Pinch zoom and page scrolling outside the viewer remain native. Rendering
+   happens at most once per animation frame. Initial canvas sizing preserves
    fractional CSS dimensions, avoiding a one-pixel reallocation on iPad. Reduced Motion disables inertia,
    magnetic pointer effects and decorative transitions, including changes made
    while the page is open. Offscreen/background motion stops.
@@ -114,6 +115,21 @@ physics remain unverified. A Chromium stress run with 4× CPU slowdown, 150ms
 network latency and 500,000 bytes/second download bandwidth completed the intro,
 Add/Close bag and rotation without runtime errors; rotation was ready 6.6 seconds
 after scrolling to the viewer.
+
+## Swipe feel refinement
+
+The follow-up swipe adjustment smooths recent finger velocity over 45ms and
+lets a quick flick coast through at most about one fifth of a turn. Exponential
+decay settles it promptly; changing direction resets stale momentum. Holding
+still before release, grabbing again, hiding the viewer, or enabling Reduce
+Motion stops the coast. The canvas uses `touch-action: pinch-zoom` from gesture
+start, so vertical finger drift cannot move the page. No page-wide scroll
+blocker is added.
+
+All 24 targeted swipe checks passed across the eight profiles. The expanded
+suite contains 112 checks. Native Chromium touch input checks diagonal and
+vertical swipes inside the viewer, followed by scrolling outside it; Safari
+is covered by WebKit pointer tests and computed touch policy.
 
 A physical iPhone was not attached and no iOS Simulator runtime was installed.
 Real-device follow-up should confirm sustained scroll/drag smoothness, Safari's

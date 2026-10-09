@@ -238,10 +238,10 @@ test('photo and shop navigation retain readable layout and browser history', asy
   await noHorizontalOverflow(page);
 });
 
-test('rotation loads near the viewer, responds to keyboard and preserves vertical touch scrolling', async ({ page }) => {
+test('rotation loads near the viewer, responds to keyboard and keeps swipes inside the hat', async ({ page, browserName }, testInfo) => {
   await ready(page);
   const canvas = await spinReady(page);
-  await expect(canvas).toHaveCSS('touch-action', /(?:^| )pan-y(?: |$)/);
+  await expect(canvas).toHaveCSS('touch-action', 'pinch-zoom');
   await expect(canvas).toHaveAttribute('aria-describedby', 'orbit-instructions');
   await expect(page.locator('#orbit-instructions')).toContainText('arrow keys');
   const front = await canvasImage(canvas);
@@ -259,6 +259,85 @@ test('rotation loads near the viewer, responds to keyboard and preserves vertica
   expect(dimensions.width).toBeLessThanOrEqual(Math.ceil(dimensions.displayWidth * 2));
   expect(dimensions.height).toBeLessThanOrEqual(Math.ceil(dimensions.displayHeight * 2));
   await noHorizontalOverflow(page);
+
+  if (browserName === 'chromium' && testInfo.project.use.isMobile) {
+    // CDP sends native touch input through Chromium's gesture handling. A
+    // synthetic pointer event cannot verify that the browser avoids page pans.
+    const session = await page.context().newCDPSession(page);
+    const box = await canvas.boundingBox();
+    const x = box.x + box.width * .65, y = box.y + box.height * .65;
+    const scrollBefore = await page.evaluate(() => scrollY);
+    async function swipe(startX, startY, deltaX, deltaY) {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart', touchPoints: [{ x: startX, y: startY }],
+      });
+      for (let step = 1; step <= 8; step++) {
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchMove', touchPoints: [{ x: startX + deltaX * step / 8, y: startY + deltaY * step / 8 }],
+        });
+        await page.waitForTimeout(20);
+      }
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await page.waitForTimeout(150);
+    }
+    // Include a mostly vertical diagonal: the accidental drift that used to
+    // cancel the rotation and move the whole website under the finger.
+    await swipe(x, y, -box.width * .25, -120);
+    expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore), 'A diagonal hat swipe must not pan the page').toBeLessThanOrEqual(1);
+    await expect.poll(() => canvasImage(canvas)).not.toBe(front);
+    await swipe(x, y, 0, -120);
+    expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore), 'A vertical finger drift inside the hat must not pan the page').toBeLessThanOrEqual(1);
+    await swipe(8, y, 0, -120);
+    await waitForScroll(page, scrollBefore);
+    await session.detach();
+  }
+});
+
+test('a quick swipe adds a restrained coast while a held release stops the hat', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await ready(page);
+  const canvas = await spinReady(page);
+  const box = await canvas.boundingBox();
+  const response = await page.request.get('/assets/hat-spin/sequence.json');
+  const frameCount = (await response.json()).frames.length;
+  const readFrame = () => canvas.evaluate(element => Number(element.dataset.frame));
+  const forwardDistance = (from, to) => (to - from + frameCount) % frameCount;
+
+  async function drag(stepDelay, hold = 0) {
+    await canvas.press('Home');
+    await expect.poll(readFrame).toBe(0);
+    const startX = box.x + box.width * .68, y = box.y + box.height * .5;
+    await page.mouse.move(startX, y);
+    await page.mouse.down();
+    for (let step = 1; step <= 8; step++) {
+      await page.waitForTimeout(stepDelay);
+      await page.mouse.move(startX - box.width * .28 * step / 8, y);
+    }
+    // Observe the final dragged frame before release, without depending on how
+    // many pointer events happen to land in one display refresh.
+    await canvas.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+    if (hold) await page.waitForTimeout(hold);
+    const released = await readFrame();
+    await page.mouse.up();
+    return released;
+  }
+
+  const slowRelease = await drag(110);
+  await page.waitForTimeout(1_700);
+  const slowCoast = forwardDistance(slowRelease, await readFrame());
+  const fastRelease = await drag(12);
+  await page.waitForTimeout(1_700);
+  const settled = await readFrame();
+  const fastCoast = forwardDistance(fastRelease, settled);
+  expect(fastCoast, 'A fast swipe should swivel farther than the same slow drag').toBeGreaterThan(slowCoast);
+  expect(fastCoast, 'A quick release should visibly glide through several views').toBeGreaterThanOrEqual(2);
+  expect(fastCoast, 'Momentum should stay below a third of a turn').toBeLessThan(frameCount / 3);
+  await page.waitForTimeout(300);
+  expect(await readFrame(), 'The hat should settle promptly instead of continuing to spin').toBe(settled);
+
+  const heldRelease = await drag(12, 180);
+  await page.waitForTimeout(400);
+  expect(await readFrame(), 'Holding the hat still before lifting should cancel momentum').toBe(heldRelease);
 });
 
 test('dragging rotates the image and Reduce Motion stops momentum after release', async ({ page }) => {
@@ -277,8 +356,18 @@ test('dragging rotates the image and Reduce Motion stops momentum after release'
   expect(await canvasImage(canvas), 'Reduce Motion should not continue spinning after the drag').toBe(released);
   await canvas.press('Home');
   await expect.poll(() => canvasImage(canvas)).toBe(front);
-  // Native touch-action is checked separately; synthetic mouse gestures do not
-  // claim to emulate iOS scroll physics or trusted touch events.
+  // Also honour a preference changed while the hat is already coasting.
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.mouse.move(box.x + box.width * .72, box.y + box.height * .5);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * .28, box.y + box.height * .5, { steps: 8 });
+  await page.mouse.up();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(50);
+  const motionDisabled = await canvasImage(canvas);
+  await page.waitForTimeout(300);
+  expect(await canvasImage(canvas), 'Enabling Reduce Motion should stop an existing coast').toBe(motionDisabled);
+  // These mouse inputs do not claim to emulate physical iOS scroll physics.
 });
 
 test('bag quantities, boundaries, removal and reload persistence work', async ({ page }) => {
