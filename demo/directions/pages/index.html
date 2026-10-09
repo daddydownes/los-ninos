@@ -58,6 +58,32 @@
       window.addEventListener('scroll', pinReloadOpening, {passive:true});
       window.addEventListener('pagehide', restoreOpeningScroll, {once:true});
       document.addEventListener('ln:intro-complete', openingComplete, {once:true});
+      // Reduced Motion can finish before layout exists. Correct the original
+      // fragment's scroll once after parsing, unless the visitor already acted.
+      let openingLayoutFrame = 0, openingLayoutPending = true;
+      const openingInputEvents = ['pointerdown', 'touchstart', 'wheel', 'keydown'];
+      const cancelOpeningLayoutReset = function () {
+        openingLayoutPending = false;
+        cancelAnimationFrame(openingLayoutFrame);
+        document.removeEventListener('DOMContentLoaded', resetOpeningLayout);
+        openingInputEvents.forEach(function (type) {
+          window.removeEventListener(type, cancelOpeningLayoutReset, true);
+        });
+        window.removeEventListener('pagehide', cancelOpeningLayoutReset);
+      };
+      const resetOpeningLayout = function () {
+        openingLayoutFrame = requestAnimationFrame(function () {
+          if (openingLayoutPending && !location.hash && !document.hidden) {
+            window.scrollTo({top:0,left:0,behavior:'instant'});
+          }
+          cancelOpeningLayoutReset();
+        });
+      };
+      openingInputEvents.forEach(function (type) {
+        window.addEventListener(type, cancelOpeningLayoutReset, {capture:true,passive:true});
+      });
+      window.addEventListener('pagehide', cancelOpeningLayoutReset, {once:true});
+      document.addEventListener('DOMContentLoaded', resetOpeningLayout, {once:true});
       try {
         const openingState = {...(history.state || {})};
         delete openingState.lnBag;
@@ -112,15 +138,14 @@
   <script defer src="hat-spin.js?v=20261009-slider1"></script>
   <script defer src="hat-reveal.js?v=20261009"></script>
   <script defer src="journey-intro.js?v=20261009-refresh3"></script>
-  <script defer src="journey.js?v=20261009-header2"></script>
+  <script defer src="journey.js?v=20261009-retry1"></script>
   <script defer src="journey-bag.js?v=20261009-arrows1"></script>
 </head>
 <body>
   <a class="skip-link" href="#shop" data-journey-link>Skip to product</a>
-  <svg class="filter-definitions" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><filter id="logo-thread" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="luminanceToAlpha" result="light"/><feComponentTransfer in="light" result="letters"><feFuncA type="linear" slope="8" intercept="-1.6"/></feComponentTransfer><feComposite in="SourceGraphic" in2="letters" operator="in"/></filter></defs></svg>
 
   <header class="journey-header">
-    <a class="journey-mark" href="#top" data-journey-link aria-label="Los Niños — back to top"><svg viewBox="380 485 505 330" aria-hidden="true"><image href="../../../assets/hat-front-logo-v1.webp" width="1254" height="1254" filter="url(#logo-thread)"/></svg></a>
+    <a class="journey-mark" href="#top" data-journey-link aria-label="Los Niños — back to top"><svg viewBox="380 485 505 330" fill="currentColor" aria-hidden="true" focusable="false"><path d="M479,503 L501,503 L504,505 L504,601 L551,602 L553,604 L552,629 L545,628 L543,626 L541,628 L538,628 L536,626 L500,627 L498,625 L480,625 L475,627 L473,625 L473,569 L475,529 L474,518 L475,505 Z"/><path d="M605,500 L617,500 L632,503 L652,514 L659,521 L667,537 L669,538 L673,560 L672,580 L666,598 L665,600 L663,600 L663,604 L657,609 L657,611 L655,611 L655,613 L650,615 L650,617 L648,617 L642,623 L639,623 L634,627 L616,630 L614,632 L588,629 L587,627 L579,625 L577,622 L574,622 L572,619 L570,619 L562,611 L562,609 L554,599 L551,592 L548,575 L548,557 L551,543 L556,531 L563,523 L563,521 L579,508 L590,503 Z M608,524 L594,528 L589,534 L586,535 L585,539 L580,545 L580,552 L577,559 L577,569 L581,586 L587,596 L600,605 L614,606 L627,602 L637,591 L643,573 L643,559 L639,543 L637,542 L637,539 L630,533 L630,531 L624,528 L620,528 L619,526 Z"/><path d="M720,499 L740,501 L756,508 L766,518 L772,531 L772,543 L768,542 L754,544 L746,544 L743,531 L738,526 L728,522 L719,523 L712,526 L707,533 L708,541 L711,544 L720,548 L746,554 L760,560 L770,569 L771,573 L774,576 L777,592 L773,610 L761,623 L758,623 L757,625 L754,625 L753,627 L747,628 L745,630 L722,632 L716,630 L711,631 L707,628 L701,628 L700,625 L697,626 L696,623 L690,621 L685,617 L684,614 L682,614 L675,597 L674,587 L677,585 L703,585 L705,597 L712,604 L725,608 L736,607 L742,604 L748,596 L747,587 L742,581 L735,580 L725,575 L709,573 L706,570 L702,570 L701,568 L692,565 L684,558 L684,555 L681,552 L679,546 L678,533 L680,524 L685,515 L699,504 Z"/><path d="M395,664 L423,664 L425,666 L425,669 L427,670 L433,684 L437,688 L440,697 L444,701 L448,711 L451,714 L451,717 L454,719 L456,726 L461,732 L466,745 L468,745 L469,668 L471,666 L475,666 L494,667 L496,669 L493,798 L463,797 L460,788 L458,787 L452,773 L447,767 L445,760 L442,758 L442,755 L440,754 L420,713 L418,713 L420,724 L419,795 L416,796 L392,794 L393,666 Z"/><path d="M506,668 L533,669 L533,783 L531,800 L506,800 L504,798 Z"/><path d="M544,669 L571,669 L573,671 L574,675 L584,689 L587,697 L589,698 L589,701 L599,715 L599,718 L601,719 L603,725 L613,739 L618,750 L620,750 L619,672 L622,670 L646,670 L648,672 L647,801 L617,802 L615,800 L615,797 L607,786 L607,783 L596,767 L595,762 L590,757 L588,751 L582,743 L582,740 L574,729 L570,718 L568,718 L570,726 L570,800 L544,801 L542,799 Z M580,640 L590,641 L597,646 L605,649 L613,647 L617,642 L623,642 L626,645 L626,651 L624,653 L624,656 L613,665 L601,665 L596,662 L592,662 L585,656 L578,656 L571,664 L567,664 L561,661 L564,649 L571,642 Z"/><path d="M709,667 L736,670 L750,677 L761,687 L761,689 L768,697 L771,708 L773,709 L775,717 L776,736 L774,754 L771,764 L766,774 L758,779 L757,784 L754,784 L753,787 L745,790 L744,793 L738,796 L718,800 L711,799 L706,801 L705,799 L699,799 L696,795 L688,795 L683,791 L679,791 L676,787 L673,786 L673,784 L669,783 L668,778 L664,776 L663,771 L660,769 L658,760 L656,758 L653,729 L657,708 L664,694 L671,687 L671,685 L689,672 Z M710,691 L699,696 L698,699 L696,699 L689,707 L683,727 L683,741 L687,758 L696,770 L707,776 L721,776 L729,773 L741,761 L747,744 L747,724 L741,704 L737,702 L737,699 L734,699 L732,696 L722,691 Z"/><path d="M812,665 L833,665 L844,668 L853,673 L862,682 L867,694 L869,705 L867,709 L856,708 L851,710 L842,710 L842,701 L840,695 L828,688 L819,688 L817,690 L815,689 L814,692 L812,692 L808,697 L807,706 L812,712 L829,718 L841,720 L857,727 L866,736 L871,748 L871,768 L865,782 L860,787 L854,789 L853,792 L850,792 L847,795 L840,797 L836,796 L835,798 L830,799 L823,797 L818,798 L814,796 L809,797 L808,795 L798,794 L794,789 L789,787 L787,783 L783,781 L781,773 L779,772 L777,760 L777,755 L779,753 L802,752 L805,754 L805,762 L807,767 L812,772 L819,775 L830,775 L837,772 L843,766 L843,763 L845,761 L844,753 L840,748 L832,746 L825,742 L809,740 L808,738 L805,738 L803,736 L800,737 L786,727 L786,724 L781,717 L779,710 L779,697 L783,685 L792,674 L799,671 L800,669 Z"/></svg></a>
     <button class="journey-bag-trigger" type="button" data-bag-open>Bag <span class="bag-count" data-bag-count>0</span></button>
   </header>
 

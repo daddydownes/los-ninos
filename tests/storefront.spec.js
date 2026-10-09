@@ -234,6 +234,29 @@ test('refresh from shop, photos, rotation and an open bag replays the opening at
   }
 });
 
+test('reduced-motion refresh resets photos and rotation to the top without blocking scrolling', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const start of ['photos', 'rotation']) {
+    await page.goto('about:blank');
+    await ready(page, '/#worn');
+    if (start === 'rotation') await spinReady(page);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(100);
+    await page.reload({ waitUntil: 'load' });
+    await expect.poll(() => page.evaluate(() => Math.abs(scrollY)), { timeout: 3_000 }).toBeLessThanOrEqual(1);
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
+    await expect(page.locator('#hero-hat')).toHaveCSS('opacity', '1');
+    await expect.poll(() => page.evaluate(() => history.scrollRestoration)).toBe('auto');
+    await photosLink(page).click();
+    await expect(page).toHaveURL(/#worn$/);
+    await waitForScroll(page, 0);
+    await expect(page.getByRole('heading', { name: 'Out in the world.' })).toBeFocused();
+    await shopLink(page).click();
+    await expect(page).toHaveURL(/#shop$/);
+    await expect(page.getByRole('button', { name: 'Add to bag', exact: true })).toBeVisible();
+  }
+});
+
 test('refresh plays and finishes the opening while font requests are still pending', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   let releaseFonts;
@@ -627,6 +650,41 @@ test('failed hero and photo downloads expose working retry controls', async ({ p
   await slot.getByRole('button', { name: 'Retry photo', exact: true }).click();
   await expect(slot.getByRole('button', { name: 'Retry photo', exact: true })).not.toBeVisible();
   expect(await slot.locator('img').evaluate(image => image.naturalWidth > 0)).toBe(true);
+  await page.getByRole('button', { name: /^Open bag/ }).click();
+  await expect(bag(page)).toBeVisible();
+});
+
+test('a stalled hero retry times out and permits a successful second attempt', async ({ page }, testInfo) => {
+  testInfo.annotations.push({ type: 'expected-network-failure', description: 'Aborted hero image followed by one stalled retry request' });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.clock.install();
+  let heldRequest;
+  await page.route('**/assets/hat-front-logo-v1.webp*', route => {
+    const retry = new URL(route.request().url()).searchParams.get('retry');
+    if (!retry) return route.abort();
+    if (retry === '1') { heldRequest = route; return; }
+    return route.continue();
+  });
+  await ready(page);
+  const retry = page.getByRole('button', { name: 'Retry image', exact: true });
+  await expect(retry).toBeVisible();
+  await retry.click();
+  await expect.poll(() => Boolean(heldRequest)).toBe(true);
+  await expect(retry).toBeDisabled();
+  await expect(page.locator('.viewer-frame')).toHaveAttribute('aria-busy', 'true');
+  // Simulate a connection that never returns headers or an error. Advancing
+  // browser time tests the actual recovery deadline without a 15-second wait.
+  await page.clock.fastForward(16_000);
+  await expect(retry).toBeEnabled();
+  await expect(page.locator('.viewer-frame')).toHaveAttribute('aria-busy', 'false');
+  await expect(page.locator('[data-view-status]')).toContainText('Retry is available');
+  await expect(retry).toBeVisible();
+  // The implementation may already have cancelled its timed-out image request.
+  await heldRequest.abort().catch(() => {});
+  await retry.click();
+  await expect(retry).not.toBeVisible();
+  await expect(page.locator('[data-view-status]')).toContainText('Hat image loaded');
+  expect(await page.locator('#hero-hat').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
   await page.getByRole('button', { name: /^Open bag/ }).click();
   await expect(bag(page)).toBeVisible();
 });

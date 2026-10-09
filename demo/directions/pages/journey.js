@@ -20,7 +20,7 @@
   retry.addEventListener('click',async()=>{
     const token=++requestId;
     const restoreFocus=document.activeElement===retry;
-    let recovered=false;
+    let recovered=false, timeout;
     retry.disabled=true;
     frame.setAttribute('aria-busy','true');
     status.textContent='Loading the hat image.';
@@ -28,11 +28,16 @@
     const url=new URL('../../../assets/hat-front-logo-v1.webp',document.baseURI);
     url.searchParams.set('retry',String(++retryCount));
     candidate.src=url.href;
+    // One deadline covers both decodes so a stalled retry cannot leave the
+    // only recovery control disabled until the browser gives up on its own.
+    const deadline=new Promise((_,reject)=>{
+      timeout=setTimeout(()=>reject(new Error('Image loading timed out')),15000);
+    });
     try {
-      await candidate.decode();
+      await Promise.race([candidate.decode(),deadline]);
       if(token!==requestId) return;
       image.src=candidate.src;
-      await image.decode();
+      await Promise.race([image.decode(),deadline]);
       if(token!==requestId) return;
       recovered=true;renderImage();
       error.hidden=true;
@@ -44,7 +49,12 @@
       if(token!==requestId) return;
       showFailure();status.textContent='The hat image could not load. Retry is available.';
     } finally {
+      clearTimeout(timeout);
+      candidate.removeAttribute('src');
       if(token===requestId) {
+        // If the visible image's decode stalled, cancel it too. A late load
+        // must not hide the error or revive an expired retry attempt.
+        if(!recovered&&image.src===url.href) image.removeAttribute('src');
         retry.disabled=false;frame.setAttribute('aria-busy','false');
         if(!recovered&&restoreFocus&&document.activeElement===document.body) retry.focus({preventScroll:true});
       }
