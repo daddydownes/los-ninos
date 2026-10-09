@@ -149,7 +149,7 @@ test('the mobile opening keeps Add to bag visible and the photo section below th
     expect(layout.scroll, 'Resizing the opening must not move the page').toBe(0);
     expect(layout.buttonTop).toBeGreaterThan(layout.headerBottom);
     expect(layout.buttonBottom, `Keep the buying action above the bottom of ${viewport.width}×${viewport.height}`).toBeLessThanOrEqual(viewport.height - 23);
-    expect(layout.photosTop, 'Keep the white photo section below the opening').toBeGreaterThanOrEqual(viewport.height - 1);
+    expect(layout.photosTop, 'Leave dark space beyond the opening so the white section cannot sit at its edge').toBeGreaterThanOrEqual(viewport.height + 95);
     expect(layout.headerBackground).toBe(layout.heroBackground);
     expect(layout.glowBackground).toBe('none');
     await noHorizontalOverflow(page);

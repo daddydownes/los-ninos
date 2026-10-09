@@ -60,9 +60,10 @@ html.intro-pending,html.intro-pending body{overflow:hidden;overscroll-behavior:n
 .journey-footer{padding-bottom:max(28px,env(safe-area-inset-bottom,0px))}
 .skip-intro{display:none;min-height:44px;min-width:72px}.intro-pending .skip-intro{display:inline-flex}
 @media(max-width:700px){.journey-header{padding-top:calc(12px + env(safe-area-inset-top,0px))}.hero,.journey-worn,.journey-footer{padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}}
-/* Keep the controls in Safari's small viewport. Extend only the dark space
-   beneath them through the larger viewport behind its floating browser bar. */
-@media(max-width:700px){.hero{min-height:calc(100lvh - var(--header-height));padding-bottom:calc(max(24px,env(safe-area-inset-bottom,0px)) + max(0px,100lvh - 100svh))}}
+/* Keep the controls in Safari's small viewport. Extend the dark surface beyond
+   the large viewport, since translucent browser chrome can reveal content below
+   its edge. Matching height and padding additions leave the controls in place. */
+@media(max-width:700px){.hero{min-height:calc(100lvh - var(--header-height) + 96px);padding-bottom:calc(max(24px,env(safe-area-inset-bottom,0px)) + max(0px,100lvh - 100svh) + 96px)}}
 /* The single-column invitation, explore link and button need 225px. Let the
    hat shrink on shorter screens before the buying action falls below the bar. */
 @media(max-width:559px){:root{--hat-size:min(96vw,80svh,calc(100vw - 20px),max(100px,calc((100svh - var(--header-height) - var(--hero-top) - max(24px,env(safe-area-inset-bottom,0px)) - 225px) / .84)))}}
