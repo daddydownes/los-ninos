@@ -42,7 +42,7 @@ async function noHorizontalOverflow(page) {
 async function spinReady(page) {
   const stage = page.locator('[data-orbit-stage]');
   await stage.scrollIntoViewIfNeeded();
-  const canvas = stage.getByRole('img', { name: 'Interactive AI-rendered 360-degree hat' });
+  const canvas = stage.getByRole('img', { name: '360-degree hat preview' });
   await expect(canvas).toBeVisible({ timeout: 15_000 });
   await expect(page.locator('[data-orbit-status]')).toContainText(/ready/i);
   await expect(stage).not.toHaveAttribute('aria-busy', 'true');
@@ -183,7 +183,7 @@ test('changing Reduce Motion during the opening immediately unlocks the page', a
     return animation.playState === 'running' && timing?.iterations === Infinity;
   }).length)).toBe(0);
   const front = await canvasImage(canvas);
-  await canvas.press('ArrowRight');
+  await page.getByRole('slider', { name: 'Rotate the hat', exact: true }).press('ArrowRight');
   await expect.poll(() => canvasImage(canvas)).not.toBe(front);
   await page.getByRole('button', { name: /^Open bag/ }).click();
   await expect(bag(page)).toBeVisible();
@@ -355,141 +355,137 @@ test('photo and shop navigation retain readable layout and browser history', asy
   await noHorizontalOverflow(page);
 });
 
-test('rotation loads near the viewer, responds to keyboard and keeps swipes inside the hat', async ({ page, browserName }, testInfo) => {
+test('rotation slider provides one accessible control with keyboard and full-turn endpoints', async ({ page }) => {
   await ready(page);
+  const slider = page.getByRole('slider', { name: 'Rotate the hat', exact: true });
+  await expect(page.locator('[data-orbit-slider]')).not.toBeVisible();
   const canvas = await spinReady(page);
-  await expect(canvas).toHaveCSS('touch-action', 'pinch-zoom');
-  await expect(canvas).toHaveAttribute('aria-describedby', 'orbit-instructions');
-  await expect(page.locator('#orbit-instructions')).toContainText('arrow keys');
+  await expect(slider).toBeVisible();
+  await expect(slider).toHaveAttribute('type', 'range');
+  await expect(slider).toHaveAttribute('min', '0');
+  await expect(slider).toHaveAttribute('step', '1');
+  const response = await page.request.get('/assets/hat-spin/sequence.json');
+  const manifest = await response.json();
+  const count = manifest.frames.length;
+  await expect(slider).toHaveAttribute('max', String(count));
+  expect(await canvas.getAttribute('tabindex'), 'The preview must not become a second keyboard control').toBeNull();
+  await expect(canvas).toHaveCSS('touch-action', 'auto');
+  await expect(slider).toHaveValue('0');
+  await expect(slider).toHaveAttribute('aria-valuetext', /^0 degrees/);
   const front = await canvasImage(canvas);
-  await canvas.press('ArrowRight');
+  await slider.press('ArrowRight');
+  await expect(slider).toHaveValue('1');
+  await expect(canvas).toHaveAttribute('data-frame', '1');
+  await expect(slider).toHaveAttribute('aria-valuetext', new RegExp(`^${manifest.frames[1].requestedAngle} degrees`));
   await expect.poll(() => canvasImage(canvas)).not.toBe(front);
-  await canvas.press('Home');
+  await slider.press('End');
+  await expect(slider).toHaveValue(String(count));
+  await expect(slider).toHaveAttribute('aria-valuetext', /^360 degrees/);
+  await expect(canvas).toHaveAttribute('data-frame', '0');
   await expect.poll(() => canvasImage(canvas)).toBe(front);
-  await expect(page.locator('[data-orbit-status]')).toContainText('returned to the front');
+  await slider.press('ArrowLeft');
+  await expect(slider).toHaveValue(String(count - 1));
+  await expect(canvas).toHaveAttribute('data-frame', String(count - 1));
+  await slider.press('Home');
+  await expect(slider).toHaveValue('0');
+  await expect(slider).toHaveAttribute('aria-valuetext', /^0 degrees/);
+  await expect.poll(() => canvasImage(canvas)).toBe(front);
   const dimensions = await canvas.evaluate(element => {
-    // Layout may use fractional CSS pixels; clientWidth/clientHeight truncate
-    // them and can falsely report a one-pixel excess at a 2× backing scale.
     const bounds = element.getBoundingClientRect();
     return { width: element.width, height: element.height, displayWidth: bounds.width, displayHeight: bounds.height };
   });
   expect(dimensions.width).toBeLessThanOrEqual(Math.ceil(dimensions.displayWidth * 2));
   expect(dimensions.height).toBeLessThanOrEqual(Math.ceil(dimensions.displayHeight * 2));
   await noHorizontalOverflow(page);
+});
+
+test('slider mouse selection stays on its chosen angle with and without Reduce Motion', async ({ page }) => {
+  await ready(page);
+  const canvas = await spinReady(page);
+  const slider = page.getByRole('slider', { name: 'Rotate the hat', exact: true });
+  for (const reducedMotion of ['no-preference', 'reduce']) {
+    await page.emulateMedia({ reducedMotion });
+    await slider.press('Home');
+    await expect(canvas).toHaveAttribute('data-frame', '0');
+    await slider.scrollIntoViewIfNeeded();
+    const box = await slider.boundingBox();
+    await slider.click({ position: { x: box.width * .25, y: box.height / 2 } });
+    const first = Number(await slider.inputValue());
+    expect(first, 'Clicking the range track should choose an angle').toBeGreaterThan(0);
+    await page.mouse.move(box.x + box.width * .25, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * .75, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
+    const selected = Number(await slider.inputValue());
+    expect(selected, 'Moving the slider thumb should choose a later angle').toBeGreaterThan(first);
+    await expect(canvas).toHaveAttribute('data-frame', String(selected));
+    const image = await canvasImage(canvas);
+    await page.waitForTimeout(350);
+    expect(await slider.inputValue(), 'The control must stay where it was released').toBe(String(selected));
+    expect(await canvasImage(canvas), 'The preview must not coast after the slider is released').toBe(image);
+  }
+});
+
+test('the hat image allows page scrolling while only the slider changes the angle', async ({ page, browserName }, testInfo) => {
+  await ready(page);
+  const canvas = await spinReady(page);
+  const slider = page.getByRole('slider', { name: 'Rotate the hat', exact: true });
+  await slider.press('ArrowRight');
+  await expect(canvas).toHaveAttribute('data-frame', '1');
+  await canvas.scrollIntoViewIfNeeded();
+  await expect(canvas).toHaveCSS('touch-action', 'auto');
+  const before = await canvasImage(canvas);
+  const box = await canvas.boundingBox();
+  await page.mouse.move(box.x + box.width * .65, box.y + box.height * .4);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * .35, box.y + box.height * .6, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(200);
+  await expect(slider).toHaveValue('1');
+  expect(await canvasImage(canvas), 'Dragging the image must not act as a second rotation control').toBe(before);
 
   if (browserName === 'chromium' && testInfo.project.use.isMobile) {
-    // CDP sends native touch input through Chromium's gesture handling. A
-    // synthetic pointer event cannot verify that the browser avoids page pans.
+    // Native Chromium input checks real browser panning. Synthetic pointer
+    // events would not establish whether an image swipe can scroll the page.
     const session = await page.context().newCDPSession(page);
-    const box = await canvas.boundingBox();
-    const x = box.x + box.width * .65, y = box.y + box.height * .65;
-    const scrollBefore = await page.evaluate(() => scrollY);
     async function swipe(startX, startY, deltaX, deltaY) {
-      await session.send('Input.dispatchTouchEvent', {
-        type: 'touchStart', touchPoints: [{ x: startX, y: startY }],
-      });
+      await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: startX, y: startY }] });
       for (let step = 1; step <= 8; step++) {
         await session.send('Input.dispatchTouchEvent', {
           type: 'touchMove', touchPoints: [{ x: startX + deltaX * step / 8, y: startY + deltaY * step / 8 }],
         });
         await page.waitForTimeout(20);
       }
+      // End a held pan so browser fling inertia cannot overlap the next case.
+      await page.waitForTimeout(140);
       await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       await page.waitForTimeout(150);
     }
-    // Include a mostly vertical diagonal: the accidental drift that used to
-    // cancel the rotation and move the whole website under the finger.
-    await swipe(x, y, -box.width * .25, -120);
-    expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore), 'A diagonal hat swipe must not pan the page').toBeLessThanOrEqual(1);
-    await expect.poll(() => canvasImage(canvas)).not.toBe(front);
-    await swipe(x, y, 0, -120);
-    expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore), 'A vertical finger drift inside the hat must not pan the page').toBeLessThanOrEqual(1);
-    await swipe(8, y, 0, -120);
-    await waitForScroll(page, scrollBefore);
+    for (const [dx, dy] of [[0, -120], [0, 120], [-80, -120], [80, -120], [-80, 120], [80, 120]]) {
+      await canvas.evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      const imageBox = await canvas.boundingBox();
+      const scrollBefore = await page.evaluate(() => scrollY);
+      await swipe(imageBox.x + imageBox.width / 2, imageBox.y + imageBox.height / 2, dx, dy);
+      const scrollAfter = await page.evaluate(() => scrollY);
+      expect((scrollAfter - scrollBefore) * -Math.sign(dy), 'Vertical and diagonal image swipes should scroll in the finger direction').toBeGreaterThan(20);
+      await expect(slider).toHaveValue('1');
+      await expect(canvas).toHaveAttribute('data-frame', '1');
+    }
+    await slider.press('Home');
+    await expect(canvas).toHaveAttribute('data-frame', '0');
+    await slider.scrollIntoViewIfNeeded();
+    const rangeBox = await slider.boundingBox();
+    const scrollBefore = await page.evaluate(() => scrollY);
+    await swipe(rangeBox.x + 14, rangeBox.y + rangeBox.height / 2, rangeBox.width * .65, 0);
+    const selected = Number(await slider.inputValue());
+    expect(selected, 'A horizontal touch on the slider should rotate the hat').toBeGreaterThan(0);
+    await expect(canvas).toHaveAttribute('data-frame', String(selected));
+    expect(Math.abs(await page.evaluate(() => scrollY) - scrollBefore), 'A horizontal slider swipe should not pan the page').toBeLessThanOrEqual(1);
+    const released = await canvasImage(canvas);
+    await page.waitForTimeout(250);
+    expect(await canvasImage(canvas), 'A touch release must leave the selected angle still').toBe(released);
     await session.detach();
   }
-});
-
-test('a quick swipe adds a restrained coast while a held release stops the hat', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await ready(page);
-  const canvas = await spinReady(page);
-  const box = await canvas.boundingBox();
-  const response = await page.request.get('/assets/hat-spin/sequence.json');
-  const frameCount = (await response.json()).frames.length;
-  const readFrame = () => canvas.evaluate(element => Number(element.dataset.frame));
-  const forwardDistance = (from, to) => (to - from + frameCount) % frameCount;
-
-  async function drag(stepDelay, hold = 0) {
-    await canvas.press('Home');
-    await expect.poll(readFrame).toBe(0);
-    const startX = box.x + box.width * .68, y = box.y + box.height * .5;
-    await page.mouse.move(startX, y);
-    await page.mouse.down();
-    for (let step = 1; step <= 8; step++) {
-      await page.waitForTimeout(stepDelay);
-      await page.mouse.move(startX - box.width * .28 * step / 8, y);
-    }
-    if (hold) await page.waitForTimeout(hold);
-    // Release immediately: measuring through browser round trips here can turn
-    // a quick swipe into an intentional hold on a busy CI worker.
-    await page.mouse.up();
-  }
-
-  // Measure the same drag's actual displacement with an intentional held
-  // release. This gives a rendered baseline without delaying the fast release.
-  await drag(12, 180);
-  await canvas.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-  const dragged = await readFrame();
-  expect(dragged, 'The drag itself must rotate the hat').not.toBe(0);
-  await page.waitForTimeout(400);
-  expect(await readFrame(), 'Holding the hat still before lifting should cancel momentum').toBe(dragged);
-
-  await drag(110);
-  await page.waitForTimeout(1_700);
-  const slowCoast = forwardDistance(dragged, await readFrame());
-  await drag(12);
-  await page.waitForTimeout(1_700);
-  const settled = await readFrame();
-  const fastCoast = forwardDistance(dragged, settled);
-  expect(fastCoast, 'A fast swipe should swivel farther than the same slow drag').toBeGreaterThan(slowCoast);
-  expect(fastCoast, 'A quick release should visibly glide through several views').toBeGreaterThanOrEqual(2);
-  expect(fastCoast, 'Momentum should stay below a third of a turn').toBeLessThan(frameCount / 3);
-  await page.waitForTimeout(300);
-  expect(await readFrame(), 'The hat should settle promptly instead of continuing to spin').toBe(settled);
-});
-
-test('dragging rotates the image and Reduce Motion stops momentum after release', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await ready(page);
-  const canvas = await spinReady(page);
-  const front = await canvasImage(canvas);
-  const box = await canvas.boundingBox();
-  await page.mouse.move(box.x + box.width * .72, box.y + box.height * .5);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * .28, box.y + box.height * .5, { steps: 8 });
-  await page.mouse.up();
-  // Pointer updates are intentionally drawn on the next display frame. Wait
-  // for the final dragged view before checking that reduced motion stays still.
-  await canvas.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-  await expect.poll(() => canvasImage(canvas)).not.toBe(front);
-  const released = await canvasImage(canvas);
-  await page.waitForTimeout(250);
-  expect(await canvasImage(canvas), 'Reduce Motion should not continue spinning after the drag').toBe(released);
-  await canvas.press('Home');
-  await expect.poll(() => canvasImage(canvas)).toBe(front);
-  // Also honour a preference changed while the hat is already coasting.
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.mouse.move(box.x + box.width * .72, box.y + box.height * .5);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width * .28, box.y + box.height * .5, { steps: 8 });
-  await page.mouse.up();
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.waitForTimeout(50);
-  const motionDisabled = await canvasImage(canvas);
-  await page.waitForTimeout(300);
-  expect(await canvasImage(canvas), 'Enabling Reduce Motion should stop an existing coast').toBe(motionDisabled);
-  // These mouse inputs do not claim to emulate physical iOS scroll physics.
 });
 
 test('bag quantities, boundaries, removal and reload persistence work', async ({ page }) => {
@@ -617,9 +613,11 @@ test('failed manifest and rotation images retain the poster and can be retried',
       await expect.poll(() => page.locator('.orbit-poster').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
       await expect(page.locator('[data-orbit-stage]')).not.toHaveAttribute('aria-busy', 'true');
       await expect(page.getByRole('progressbar')).toHaveCount(0);
+      await expect(page.locator('[data-orbit-slider]')).not.toBeVisible();
       await page.unroute(urlMatches);
       await page.getByRole('button', { name: 'Retry rotation', exact: true }).click();
       await spinReady(page);
+      await expect(page.getByRole('slider', { name: 'Rotate the hat', exact: true })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Retry rotation', exact: true })).toHaveCount(0);
     });
   }

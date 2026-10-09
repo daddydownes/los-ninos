@@ -23,13 +23,15 @@ Baseline: `3c5a145f946eb6afb6fce4743d1948d89a04d188`.
    mask pipeline; the small header logo retains its original live filter. Slow fonts no longer block it. A
    failed optional reveal script has a working fallback. Skip/Escape and leaving
    the page release the interface immediately.
-4. **Touch and motion preferences.** Rotation captures horizontal movement and reserves one-finger gestures
-   inside the canvas for the hat, preventing accidental vertical page pans.
-   Pinch zoom and page scrolling outside the viewer remain native. Rendering
-   happens at most once per animation frame. Initial canvas sizing preserves
-   fractional CSS dimensions, avoiding a one-pixel reallocation on iPad. Reduced Motion disables inertia,
-   magnetic pointer effects and decorative transitions, including changes made
-   while the page is open. Offscreen/background motion stops.
+4. **Touch and motion preferences.** A native range slider is the only rotation
+   control. The large hat image has no drag/pointer handlers and uses native
+   scrolling, so upward and diagonal page gestures cannot start rotation.
+   The slider has a 48px-high input area, a visible circular handle, native
+   keyboard support and spoken angle values. Rendering happens at most once per
+   animation frame; no inertia or idle animation runs. Initial canvas sizing
+   preserves fractional CSS dimensions, avoiding a one-pixel reallocation on
+   iPad. Reduce Motion disables magnetic pointer effects and decorative
+   transitions, including changes made while the page is open.
 5. **Bag and small-screen resilience.** Touch devices avoid backdrop blur and
    sticky hover transforms. Notch/home-indicator padding survives mobile and
    landscape rules; quantity controls remain at least 44px wide. Suspended tabs
@@ -89,8 +91,9 @@ cover iPhone SE (320px), iPhone 15 portrait/landscape, iPad Mini, desktop Safari
 iPhone Reduce Motion, Pixel 7, and desktop Chrome. These all use the installed
 engine versions; the profile names do not mean older iOS releases were tested.
 
-**Targeted verification: all 24 swipe checks and all 40 refresh/history checks passed.**
-The complete 136-check suite also runs in GitHub Actions.
+The complete suite has 136 checks across eight profiles and runs locally and in
+GitHub Actions. Rotation checks now exercise slider control and scrolling
+through the image, replacing the previous direct-drag and momentum expectations.
 The iPad sizing fix also passed all eight targeted profiles and ten repeated
 iPad runs; pixel comparisons retain exact RGBA equality. The white-dot regression
 fails the original WebKit rendering (40 bright pixels below unstarted letters)
@@ -100,8 +103,9 @@ is unchanged. All eight targeted bag profiles and nine repeated phone runs pass.
 The committed suite contains 136 checks (17 scenarios across eight profiles):
 entrance and scroll-listener cleanup, a rendered-pixel white-dot regression,
 live motion preference change, skip/Escape,
-blocked storage, photo/shop/history navigation, keyboard/touch-policy rotation,
-bounded swipe momentum, drag without momentum, bag limits/persistence, modal focus/scroll/history,
+blocked storage, photo/shop/history navigation, native slider keyboard/endpoints,
+slider pointer input and stillness, scrolling through the image without rotation,
+bag limits/persistence, modal focus/scroll/history,
 hero/photo failure retries, manifest/frame failure retries, and no JavaScript.
 It also fails on unexpected browser exceptions, console errors and HTTP errors.
 
@@ -109,29 +113,29 @@ Additional targeted lifecycle checks cover blocked image decoding, hung fonts,
 failed reveal helper, reload, synthetic pagehide/pageshow and cleanup of completed
 animation work. Screenshots were inspected for small phone, landscape, tablet
 and desktop layouts. Synthetic lifecycle events are not a real bfcache/device
-suspension test. Mouse-driven rotation and CSS touch-action assertions are not
-physical iOS touch-physics tests. The initial release allowed native vertical panning inside the viewer. The
-follow-up gesture change below intentionally reserves that area for rotation;
-native Safari touch physics remain unverified. A Chromium stress run with 4× CPU slowdown, 150ms
+suspension test. Mouse/Chromium-touch input and CSS touch-action assertions are not
+physical iOS touch-physics tests; native Safari touch physics remain unverified. A Chromium stress run with 4× CPU slowdown, 150ms
 network latency and 500,000 bytes/second download bandwidth completed the intro,
 Add/Close bag and rotation without runtime errors; rotation was ready 6.6 seconds
 after scrolling to the viewer.
 
-## Swipe feel refinement
+## Slider-only rotation
 
-The follow-up swipe adjustment smooths recent finger velocity over 45ms and
-lets a quick flick coast through at most about one fifth of a turn. Exponential
-decay settles it promptly; changing direction resets stale momentum. Holding
-still before release, grabbing again, hiding the viewer, or enabling Reduce
-Motion stops the coast. The canvas uses `touch-action: pinch-zoom` from gesture
-start, so vertical finger drift cannot move the page. No page-wide scroll
-blocker is added.
+The previous direct-drag interaction reserved gestures across the entire hat
+image. That prevented unwanted page movement during rotation, but made ordinary
+upward or diagonal scrolling feel trapped. It has been replaced with one native
+range slider under the image, rather than a second competing rotation mode.
+Dragging across the image now only scrolls the page. The slider selects each
+available view and returns to the front at the full-circle endpoint. Its value
+stops exactly where released, including with Reduce Motion enabled.
 
-All 24 targeted swipe checks passed across the eight profiles. The expanded
-suite verifies the final rendered frame before checking reduced-motion stillness,
-so an already-queued draw is not mistaken for ongoing momentum. Native Chromium touch input checks diagonal and
-vertical swipes inside the viewer, followed by scrolling outside it; Safari
-is covered by WebKit pointer tests and computed touch policy.
+All 40 focused slider, motion and recovery checks passed across the eight
+profiles. Regression checks cover arrow keys and Home/End, visible changes from dragging
+the circular handle, stillness after release, failure/retry visibility, and
+native Chromium touch scrolling up/down and diagonally across the image without
+changing the selected angle. Horizontal touches on the slider rotate the image
+without panning the page. WebKit profiles exercise the native range control and
+its accessibility values.
 
 ## Refresh from a scrolled page
 
@@ -170,3 +174,5 @@ behaviour and older Safari versions remain unverified.
 - [W3C Pointer Events](https://www.w3.org/TR/pointerevents/latest/) — touch gesture policy must be established before the gesture.
 - [W3C Navigation Timing](https://www.w3.org/TR/navigation-timing-2/) — reload and history navigation types.
 - [HTML navigation and restoration](https://html.spec.whatwg.org/multipage/browsing-the-web.html) — browser scroll restoration lifecycle.
+
+- [W3C slider pattern](https://www.w3.org/WAI/ARIA/apg/patterns/slider/) — keyboard and accessible value conventions.
