@@ -10,6 +10,8 @@ Baseline: `3c5a145f946eb6afb6fce4743d1948d89a04d188`.
    a time, and selects 768px WebP textures on small or coarse-pointer devices.
    Original registration coordinates and alpha are preserved. Desktop retains
    full-resolution WebP textures; PNG masters remain available for regeneration.
+   The manifest URL is versioned so returning visitors do not reuse cached
+   references to the old PNG sequence after deployment.
 2. **Main-thread scroll blockers.** Capturing, non-passive `touchmove` and `wheel`
    listeners stayed installed for the page lifetime. Both are now removed at intro
    completion, including skip, failure, and Reduce Motion paths.
