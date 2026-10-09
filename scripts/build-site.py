@@ -23,6 +23,11 @@ def source_files():
     manifest = json.loads((ROOT / 'assets/hat-spin/sequence.json').read_text(encoding='utf-8'))
     for frame in manifest['frames']:
         assets.add('assets/hat-spin/' + (frame if isinstance(frame, str) else frame['src']))
+        if isinstance(frame, dict) and frame.get('srcSmall'):
+            assets.add('assets/hat-spin/' + frame['srcSmall'])
+    for key in ('poster', 'posterSmall'):
+        if manifest.get(key):
+            assets.add('assets/hat-spin/' + manifest[key])
     files.update(ROOT / path for path in assets)
     for path in files:
         if not path.is_file() or not path.resolve().is_relative_to(ROOT):

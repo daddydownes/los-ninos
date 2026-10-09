@@ -1,0 +1,12 @@
+{
+  "name": "los-ninos",
+  "private": true,
+  "scripts": {
+    "build": "python3 scripts/build-site.py",
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1"
+  }
+}

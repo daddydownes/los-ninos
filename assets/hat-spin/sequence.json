@@ -5,7 +5,7 @@
   "bottom": 1.2228739002932552,
   "frames": [
     {
-      "src": "ai-v1/frame-000.png",
+      "src": "optimized/ai-v1-frame-000.webp",
       "x": 627.5,
       "y": 232,
       "crownHeight": 682,
@@ -15,10 +15,11 @@
         1168,
         1066
       ],
-      "requestedAngle": 0
+      "requestedAngle": 0,
+      "srcSmall": "optimized/ai-v1-frame-000-768.webp"
     },
     {
-      "src": "ai-v2/frame-015.png",
+      "src": "optimized/ai-v2-frame-015.webp",
       "x": 635.0,
       "y": 231,
       "crownHeight": 685,
@@ -28,10 +29,11 @@
         1191,
         1067
       ],
-      "requestedAngle": 15
+      "requestedAngle": 15,
+      "srcSmall": "optimized/ai-v2-frame-015-768.webp"
     },
     {
-      "src": "ai-v1/frame-030.png",
+      "src": "optimized/ai-v1-frame-030.webp",
       "x": 724.0,
       "y": 251,
       "crownHeight": 668,
@@ -41,10 +43,11 @@
         1208,
         1060
       ],
-      "requestedAngle": 30
+      "requestedAngle": 30,
+      "srcSmall": "optimized/ai-v1-frame-030-768.webp"
     },
     {
-      "src": "ai-v1/frame-060.png",
+      "src": "optimized/ai-v1-frame-060.webp",
       "x": 743.5,
       "y": 269,
       "crownHeight": 648,
@@ -54,10 +57,11 @@
         1215,
         1030
       ],
-      "requestedAngle": 60
+      "requestedAngle": 60,
+      "srcSmall": "optimized/ai-v1-frame-060-768.webp"
     },
     {
-      "src": "ai-v1/frame-075.png",
+      "src": "optimized/ai-v1-frame-075.webp",
       "x": 765.0,
       "y": 258,
       "crownHeight": 672,
@@ -67,10 +71,11 @@
         1226,
         1030
       ],
-      "requestedAngle": 65
+      "requestedAngle": 65,
+      "srcSmall": "optimized/ai-v1-frame-075-768.webp"
     },
     {
-      "src": "ai-v2/frame-075.png",
+      "src": "optimized/ai-v2-frame-075.webp",
       "x": 748.5,
       "y": 305,
       "crownHeight": 623,
@@ -80,10 +85,11 @@
         1214,
         952
       ],
-      "requestedAngle": 75
+      "requestedAngle": 75,
+      "srcSmall": "optimized/ai-v2-frame-075-768.webp"
     },
     {
-      "src": "ai-v1/frame-090.png",
+      "src": "optimized/ai-v1-frame-090.webp",
       "x": 745.5,
       "y": 305,
       "crownHeight": 623,
@@ -93,10 +99,11 @@
         1217,
         946
       ],
-      "requestedAngle": 90
+      "requestedAngle": 90,
+      "srcSmall": "optimized/ai-v1-frame-090-768.webp"
     },
     {
-      "src": "ai-v1/frame-105.png",
+      "src": "optimized/ai-v1-frame-105.webp",
       "x": 745.0,
       "y": 297,
       "crownHeight": 655,
@@ -106,10 +113,11 @@
         1222,
         959
       ],
-      "requestedAngle": 105
+      "requestedAngle": 105,
+      "srcSmall": "optimized/ai-v1-frame-105-768.webp"
     },
     {
-      "src": "ai-v1/frame-135.png",
+      "src": "optimized/ai-v1-frame-135.webp",
       "x": 728.5,
       "y": 302,
       "crownHeight": 672,
@@ -119,10 +127,11 @@
         1206,
         990
       ],
-      "requestedAngle": 135
+      "requestedAngle": 135,
+      "srcSmall": "optimized/ai-v1-frame-135-768.webp"
     },
     {
-      "src": "ai-v2/frame-150.png",
+      "src": "optimized/ai-v2-frame-150.webp",
       "x": 642.0,
       "y": 237,
       "crownHeight": 735,
@@ -132,10 +141,11 @@
         1156,
         984
       ],
-      "requestedAngle": 150
+      "requestedAngle": 150,
+      "srcSmall": "optimized/ai-v2-frame-150-768.webp"
     },
     {
-      "src": "ai-v2/frame-165.png",
+      "src": "optimized/ai-v2-frame-165.webp",
       "x": 629.5,
       "y": 239,
       "crownHeight": 735,
@@ -145,10 +155,11 @@
         1145,
         978
       ],
-      "requestedAngle": 165
+      "requestedAngle": 165,
+      "srcSmall": "optimized/ai-v2-frame-165-768.webp"
     },
     {
-      "src": "ai-v1/frame-180.png",
+      "src": "optimized/ai-v1-frame-180.webp",
       "x": 629.5,
       "y": 239,
       "crownHeight": 735,
@@ -158,10 +169,11 @@
         1150,
         978
       ],
-      "requestedAngle": 180
+      "requestedAngle": 180,
+      "srcSmall": "optimized/ai-v1-frame-180-768.webp"
     },
     {
-      "src": "ai-v2/frame-195.png",
+      "src": "optimized/ai-v2-frame-195.webp",
       "x": 622.0,
       "y": 237,
       "crownHeight": 737,
@@ -171,10 +183,11 @@
         1168,
         981
       ],
-      "requestedAngle": 195
+      "requestedAngle": 195,
+      "srcSmall": "optimized/ai-v2-frame-195-768.webp"
     },
     {
-      "src": "ai-v1/frame-195.png",
+      "src": "optimized/ai-v1-frame-195.webp",
       "x": 589.5,
       "y": 274,
       "crownHeight": 696,
@@ -184,10 +197,11 @@
         1217,
         980
       ],
-      "requestedAngle": 210
+      "requestedAngle": 210,
+      "srcSmall": "optimized/ai-v1-frame-195-768.webp"
     },
     {
-      "src": "ai-v1/frame-225.png",
+      "src": "optimized/ai-v1-frame-225.webp",
       "x": 552.0,
       "y": 279,
       "crownHeight": 695,
@@ -197,10 +211,11 @@
         1219,
         984
       ],
-      "requestedAngle": 225
+      "requestedAngle": 225,
+      "srcSmall": "optimized/ai-v1-frame-225-768.webp"
     },
     {
-      "src": "ai-v1/frame-240.png",
+      "src": "optimized/ai-v1-frame-240.webp",
       "x": 538.0,
       "y": 296,
       "crownHeight": 678,
@@ -210,10 +225,11 @@
         1216,
         980
       ],
-      "requestedAngle": 240
+      "requestedAngle": 240,
+      "srcSmall": "optimized/ai-v1-frame-240-768.webp"
     },
     {
-      "src": "ai-v1/frame-255.png",
+      "src": "optimized/ai-v1-frame-255.webp",
       "x": 518.5,
       "y": 306,
       "crownHeight": 664,
@@ -223,10 +239,11 @@
         1197,
         974
       ],
-      "requestedAngle": 255
+      "requestedAngle": 255,
+      "srcSmall": "optimized/ai-v1-frame-255-768.webp"
     },
     {
-      "src": "ai-v1/frame-270.png",
+      "src": "optimized/ai-v1-frame-270.webp",
       "x": 505.5,
       "y": 304,
       "crownHeight": 625,
@@ -236,10 +253,11 @@
         1232,
         951
       ],
-      "requestedAngle": 270
+      "requestedAngle": 270,
+      "srcSmall": "optimized/ai-v1-frame-270-768.webp"
     },
     {
-      "src": "ai-v1/frame-285.png",
+      "src": "optimized/ai-v1-frame-285.webp",
       "x": 517.0,
       "y": 295,
       "crownHeight": 641,
@@ -249,10 +267,11 @@
         1223,
         983
       ],
-      "requestedAngle": 285
+      "requestedAngle": 285,
+      "srcSmall": "optimized/ai-v1-frame-285-768.webp"
     },
     {
-      "src": "ai-v1/frame-300.png",
+      "src": "optimized/ai-v1-frame-300.webp",
       "x": 542.5,
       "y": 258,
       "crownHeight": 672,
@@ -262,10 +281,11 @@
         1238,
         1012
       ],
-      "requestedAngle": 300
+      "requestedAngle": 300,
+      "srcSmall": "optimized/ai-v1-frame-300-768.webp"
     },
     {
-      "src": "ai-v1/frame-330.png",
+      "src": "optimized/ai-v1-frame-330.webp",
       "x": 545.5,
       "y": 258,
       "crownHeight": 654,
@@ -275,10 +295,11 @@
         1232,
         1039
       ],
-      "requestedAngle": 315
+      "requestedAngle": 315,
+      "srcSmall": "optimized/ai-v1-frame-330-768.webp"
     },
     {
-      "src": "ai-v2/frame-330.png",
+      "src": "optimized/ai-v2-frame-330.webp",
       "x": 580.5,
       "y": 230,
       "crownHeight": 680,
@@ -288,10 +309,11 @@
         1225,
         1060
       ],
-      "requestedAngle": 330
+      "requestedAngle": 330,
+      "srcSmall": "optimized/ai-v2-frame-330-768.webp"
     },
     {
-      "src": "ai-v2/frame-345.png",
+      "src": "optimized/ai-v2-frame-345.webp",
       "x": 622.5,
       "y": 230,
       "crownHeight": 686,
@@ -301,9 +323,13 @@
         1211,
         1066
       ],
-      "requestedAngle": 345
+      "requestedAngle": 345,
+      "srcSmall": "optimized/ai-v2-frame-345-768.webp"
     }
   ],
-  "poster": "ai-v1/frame-000.png",
-  "note": "Curated and registered AI views. Remaining shape/branding drift is not a calibrated physical product model."
+  "poster": "optimized/ai-v1-frame-000.webp",
+  "note": "Curated and registered AI views. Remaining shape/branding drift is not a calibrated physical product model.",
+  "sourceWidth": 1254,
+  "sourceHeight": 1254,
+  "posterSmall": "optimized/ai-v1-frame-000-768.webp"
 }

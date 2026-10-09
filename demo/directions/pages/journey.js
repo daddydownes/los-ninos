@@ -8,7 +8,8 @@
   const error=document.querySelector('.view-error');
   const retry=document.querySelector('[data-view-retry]');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  let headerFrame=0, retryCount=0, requestId=0;
+  let headerFrame=0, retryCount=0, requestId=0, lastHeaderSurface;
+  const sectionLinks=[...header.querySelectorAll('nav [data-journey-link]')];
   function renderImage() {
     const loaded=image.complete&&image.naturalWidth>0;
     frame.classList.toggle('has-good-image',loaded);
@@ -54,8 +55,10 @@
   function setHeaderSurface() {
     headerFrame=0;
     const onPaper=worn.getBoundingClientRect().top<=header.getBoundingClientRect().bottom+1;
+    if(onPaper===lastHeaderSurface) return;
+    lastHeaderSurface=onPaper;
     header.classList.toggle('is-on-paper',onPaper);
-    header.querySelectorAll('nav [data-journey-link]').forEach(link=>{
+    sectionLinks.forEach(link=>{
       if(link.hash===(onPaper?'#worn':'#shop')) link.setAttribute('aria-current','location');
       else link.removeAttribute('aria-current');
     });
