@@ -117,6 +117,48 @@ test('opening reaches usable content and defers rotation downloads', async ({ pa
   await expect(quantity(page)).toHaveText('1');
 });
 
+test('the mobile opening keeps Add to bag visible and the photo section below the screen', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await ready(page, '/');
+  await page.evaluate(() => document.fonts.ready);
+  // Short viewports represent the space left by expanded browser controls.
+  // Native Safari toolbar glass and distinct svh/lvh need device verification.
+  for (const viewport of [
+    { width: 320, height: 500 },
+    { width: 375, height: 548 },
+    { width: 393, height: 600 },
+    { width: 430, height: 659 },
+    { width: 393, height: 852 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const layout = await page.evaluate(() => {
+      const button = document.querySelector('[data-add-to-bag]').getBoundingClientRect();
+      const header = document.querySelector('.journey-header');
+      const hero = document.querySelector('.hero');
+      return {
+        scroll: scrollY,
+        buttonTop: button.top,
+        buttonBottom: button.bottom,
+        headerBottom: header.getBoundingClientRect().bottom,
+        photosTop: document.querySelector('#worn').getBoundingClientRect().top,
+        headerBackground: getComputedStyle(header).backgroundColor,
+        heroBackground: getComputedStyle(hero).backgroundColor,
+        glowBackground: getComputedStyle(document.querySelector('.studio-glow')).backgroundImage,
+      };
+    });
+    expect(layout.scroll, 'Resizing the opening must not move the page').toBe(0);
+    expect(layout.buttonTop).toBeGreaterThan(layout.headerBottom);
+    expect(layout.buttonBottom, `Keep the buying action above the bottom of ${viewport.width}×${viewport.height}`).toBeLessThanOrEqual(viewport.height - 23);
+    expect(layout.photosTop, 'Keep the white photo section below the opening').toBeGreaterThanOrEqual(viewport.height - 1);
+    expect(layout.headerBackground).toBe(layout.heroBackground);
+    expect(layout.glowBackground).toBe('none');
+    await noHorizontalOverflow(page);
+  }
+  await page.getByRole('button', { name: 'Add to bag', exact: true }).click();
+  await expect(bag(page)).toBeVisible();
+  await expect(quantity(page)).toHaveText('1');
+});
+
 test('early stitching leaves the unstarted lower letters free of white dots', async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const start = new Date('2026-01-01T00:00:00Z');
