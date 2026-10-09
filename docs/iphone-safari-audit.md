@@ -89,18 +89,18 @@ cover iPhone SE (320px), iPhone 15 portrait/landscape, iPad Mini, desktop Safari
 iPhone Reduce Motion, Pixel 7, and desktop Chrome. These all use the installed
 engine versions; the profile names do not mean older iOS releases were tested.
 
-**Local full-suite result: all 104 checks passed with zero retries.**
+**Local full-suite result: all 112 checks passed with zero retries.**
 The iPad sizing fix also passed all eight targeted profiles and ten repeated
 iPad runs; pixel comparisons retain exact RGBA equality. The white-dot regression
 fails the original WebKit rendering (40 bright pixels below unstarted letters)
 and passes the fix (zero). The bag scroll assertion captures the position at
 the opening click, before the application handles it; the two-pixel tolerance
 is unchanged. All eight targeted bag profiles and nine repeated phone runs pass.
-The committed suite contains 104 checks (13 scenarios across eight profiles):
+The committed suite contains 112 checks (14 scenarios across eight profiles):
 entrance and scroll-listener cleanup, a rendered-pixel white-dot regression,
 live motion preference change, skip/Escape,
 blocked storage, photo/shop/history navigation, keyboard/touch-policy rotation,
-drag without momentum, bag limits/persistence, modal focus/scroll/history,
+bounded swipe momentum, drag without momentum, bag limits/persistence, modal focus/scroll/history,
 hero/photo failure retries, manifest/frame failure retries, and no JavaScript.
 It also fails on unexpected browser exceptions, console errors and HTTP errors.
 
@@ -109,9 +109,9 @@ failed reveal helper, reload, synthetic pagehide/pageshow and cleanup of complet
 animation work. Screenshots were inspected for small phone, landscape, tablet
 and desktop layouts. Synthetic lifecycle events are not a real bfcache/device
 suspension test. Mouse-driven rotation and CSS touch-action assertions are not
-physical iOS touch-physics tests. An additional Chromium protocol touch swipe
-scrolled the page 129px while retaining the same hat frame; native Safari touch
-physics remain unverified. A Chromium stress run with 4× CPU slowdown, 150ms
+physical iOS touch-physics tests. The initial release allowed native vertical panning inside the viewer. The
+follow-up gesture change below intentionally reserves that area for rotation;
+native Safari touch physics remain unverified. A Chromium stress run with 4× CPU slowdown, 150ms
 network latency and 500,000 bytes/second download bandwidth completed the intro,
 Add/Close bag and rotation without runtime errors; rotation was ready 6.6 seconds
 after scrolling to the viewer.
@@ -126,8 +126,8 @@ Motion stops the coast. The canvas uses `touch-action: pinch-zoom` from gesture
 start, so vertical finger drift cannot move the page. No page-wide scroll
 blocker is added.
 
-All 24 targeted swipe checks passed across the eight profiles. The expanded
-suite contains 112 checks. Native Chromium touch input checks diagonal and
+All 24 targeted swipe checks and the full 112-check suite passed across the
+eight profiles with no retries or skipped tests. Native Chromium touch input checks diagonal and
 vertical swipes inside the viewer, followed by scrolling outside it; Safari
 is covered by WebKit pointer tests and computed touch policy.
 
