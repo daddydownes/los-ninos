@@ -6,7 +6,7 @@
   const host = section.querySelector('[data-orbit-canvas]');
   const toolbar = section.querySelector('.orbit-toolbar');
   const status = section.querySelector('[data-orbit-status]');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const slider = section.querySelector('[data-orbit-slider]');
   const compact = matchMedia('(max-width: 700px), (pointer: coarse)');
   const sequenceURL = new URL(section.dataset.sequence, document.baseURI);
   let requested = false;
@@ -79,12 +79,11 @@
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d', {alpha: true});
       if (!ctx) throw new Error('Canvas unavailable');
-      canvas.tabIndex = 0;
       canvas.setAttribute('role', 'img');
-      canvas.setAttribute('aria-label', 'Interactive AI-rendered 360-degree hat');
+      canvas.setAttribute('aria-label', '360-degree hat preview');
       canvas.setAttribute('aria-describedby', 'orbit-instructions');
       host.append(canvas);
-      let position = 0, velocity = 0, drag = null, frame = 0, last = 0;
+      let position = 0, frame = 0;
       let visible = false, current = -1, sizeChanged = true;
       // Use fractional CSS dimensions on the first draw, just as the resize
       // observer does. clientHeight rounds iPad's fluid stage height and can
@@ -92,9 +91,6 @@
       const initialSize = stage.getBoundingClientRect();
       let width = initialSize.width, height = initialSize.height;
       const count = images.length;
-      // A quick flick carries at most about a fifth of a turn. Average recent
-      // movement so a tiny final pointer event cannot erase the swipe's momentum.
-      const maxVelocity = count * 1.25, friction = 6, velocityResponse = .045;
       const wrap = value => ((Math.round(value) % count) + count) % count;
       function draw() {
         const index = wrap(position);
@@ -135,30 +131,13 @@
       function wake() {
         if (!frame && visible && !document.hidden) frame = requestAnimationFrame(tick);
       }
-      function tick(now) {
+      function tick() {
         frame = 0;
         if (!visible || document.hidden) return;
         if (sizeChanged) resize();
-        const dt = Math.max(0, Math.min((now - (last || now)) / 1000, .04));
-        last = now;
-        if (!drag && !reduced.matches) {
-          const decay = Math.exp(-dt * friction);
-          position += velocity * (1 - decay) / friction;
-          velocity *= decay;
-        }
         draw();
-        if (!drag && !reduced.matches && Math.abs(velocity) > .05) wake();
-        else { if (!drag) velocity = 0; last = 0; }
-      }
-      function stop() {
-        velocity = 0;
-        last = 0;
       }
       function suspend() {
-        stop();
-        const pointer = drag?.id;
-        drag = null;
-        if (pointer !== undefined && canvas.hasPointerCapture(pointer)) canvas.releasePointerCapture(pointer);
         if (frame) cancelAnimationFrame(frame);
         frame = 0;
       }
@@ -171,67 +150,23 @@
         wake();
       });
       resizeObserver.observe(stage);
-      canvas.addEventListener('pointerdown', event => {
-        if (drag || event.button !== 0 || event.isPrimary === false) return;
-        stop();
-        drag = {id: event.pointerId, startX: event.clientX, x: event.clientX, time: event.timeStamp, active: false};
-      });
-      canvas.addEventListener('pointermove', event => {
-        if (!drag || drag.id !== event.pointerId) return;
-        if (!drag.active) {
-          const dx = Math.abs(event.clientX - drag.startX);
-          if (dx < 4) return;
-          // The canvas owns one-finger swipes from the start (touch-action).
-          // Ignore vertical drift; changing direction must not drag the page.
-          drag.active = true;
-          canvas.setPointerCapture(event.pointerId);
-          canvas.classList.add('pointer-focused');
-          canvas.focus({preventScroll: true});
-          section.classList.add('orbit-explored');
-        }
-        const change = (drag.x - event.clientX) / Math.max(width, 1) * count;
-        const dt = Math.max(.008, (event.timeStamp - drag.time) / 1000);
-        position += change;
-        const sampledVelocity = Math.max(-maxVelocity, Math.min(maxVelocity, change / dt));
-        if (sampledVelocity * velocity < 0) velocity = 0;
-        const blend = 1 - Math.exp(-dt / velocityResponse);
-        velocity = reduced.matches ? 0 : velocity + (sampledVelocity - velocity) * blend;
-        drag.x = event.clientX;
-        drag.time = event.timeStamp;
-        // Pointer events can arrive faster than the display refresh rate.
-        wake();
-      }, {passive: true});
-      function release(event) {
-        if (!drag || drag.id !== event.pointerId) return;
-        if (!drag.active || event.type !== 'pointerup' || event.timeStamp - drag.time > 100 || reduced.matches) stop();
-        drag = null;
-        last = performance.now();
+      // A native slider owns rotation. The large image stays an ordinary
+      // scrolling surface, so diagonal page swipes never enter a drag mode.
+      slider.max = String(count);
+      slider.value = '0';
+      function selectView() {
+        const value = Number(slider.value);
+        position = value % count;
+        const angle = value === count ? 360 : manifest.frames[position].requestedAngle ?? Math.round(position / count * 360);
+        slider.setAttribute('aria-valuetext', angle + ' degrees');
         wake();
       }
-      canvas.addEventListener('pointerup', release);
-      canvas.addEventListener('pointercancel', release);
-      canvas.addEventListener('lostpointercapture', release);
-      canvas.addEventListener('pointerleave', () => { if (drag && !drag.active) { drag = null; stop(); } });
-      canvas.addEventListener('keydown', event => {
-        canvas.classList.remove('pointer-focused');
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-          event.preventDefault();
-          section.classList.add('orbit-explored');
-          stop();
-          position += event.key === 'ArrowRight' ? -1 : 1;
-          wake();
-        } else if (event.key === 'Home') {
-          event.preventDefault();
-          stop();
-          position = 0;
-          wake();
-          status.textContent = 'Hat returned to the front.';
-        }
-      });
+      slider.addEventListener('input', selectView);
+      slider.disabled = false;
+      selectView();
       new IntersectionObserver(entries => {
         visible = entries[0].isIntersecting;
         section.classList.toggle('orbit-visible', visible && !document.hidden);
-        last = 0;
         if (!visible) suspend();
         else wake();
       }).observe(stage);
@@ -240,15 +175,12 @@
         if (document.hidden) suspend();
         else wake();
       });
-      reduced.addEventListener('change', () => {
-        if (reduced.matches) { stop(); wake(); }
-      });
       toolbar.hidden = false;
       section.querySelector('#orbit-instructions').hidden = false;
       resize();
       draw();
       section.classList.add('orbit-ready', 'photo-spin');
-      status.textContent = '360-degree AI hat preview ready. Drag left or right to explore.';
+      status.textContent = '360-degree hat preview ready. Use the slider to rotate.';
     } catch (error) {
       host.replaceChildren();
       toolbar.hidden = true;

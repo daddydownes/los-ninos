@@ -2,32 +2,24 @@
 .orbit-stage{position:relative;width:min(100%,900px);height:clamp(360px,52vw,570px);margin:auto;isolation:isolate}
 .orbit-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 500ms ease}
 .orbit-canvas{position:absolute;inset:0;opacity:0;transition:opacity 650ms ease}
-.orbit-canvas canvas{display:block;width:100%;height:100%;touch-action:pinch-zoom;cursor:grab;border-radius:24px;outline-offset:-6px}
-.orbit-canvas canvas:active{cursor:grabbing}.orbit-canvas canvas:focus-visible{outline:2px solid #34455a}
+.orbit-canvas canvas{display:block;width:100%;height:100%;touch-action:auto;cursor:default;border-radius:24px}
 .orbit-ready .orbit-canvas{opacity:1}.orbit-ready .orbit-poster{opacity:0;visibility:hidden}
-.orbit-toolbar{display:flex;align-items:center;justify-content:space-between;min-height:48px;max-width:780px;margin:0 auto;padding:0 10px;gap:20px}
-.orbit-hint{font-size:13px;letter-spacing:.01em;color:#5e666c}
-.orbit-actions{display:flex;gap:7px}.orbit-control{display:grid;place-items:center;width:44px;height:44px;border:1px solid #080f1925;border-radius:50%;transition:background 200ms ease,transform 250ms ease}
-.orbit-control svg{width:19px;height:19px}.orbit-control:hover{background:#080f1909;transform:translateY(-2px)}
-.orbit-play{display:none}[aria-pressed=true] .orbit-play{display:block}[aria-pressed=true] .orbit-pause{display:none}
+.orbit-toolbar{display:flex;flex-direction:column;align-items:center;width:min(100%,340px);margin:0 auto;padding:0 16px;gap:2px}
+.orbit-toolbar[hidden]{display:none}
+.orbit-hint{font-size:13px;letter-spacing:.01em;color:#47505a;text-align:center}
+.orbit-slider{display:block;appearance:none;-webkit-appearance:none;width:100%;height:48px;margin:0;padding:0;background:transparent;color:#080f19;cursor:ew-resize;touch-action:pan-y pinch-zoom;border:0;border-radius:4px}
+.orbit-slider:focus-visible{outline:2px solid #34455a;outline-offset:4px}
+.orbit-slider::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:#080f1940}
+.orbit-slider::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:28px;height:28px;margin-top:-12.5px;border:2px solid #eeece5;border-radius:50%;background:#080f19;box-shadow:0 0 0 1px #080f1933}
+.orbit-slider::-moz-range-track{height:3px;border-radius:3px;background:#080f1940}
+.orbit-slider::-moz-range-thumb{width:24px;height:24px;border:2px solid #eeece5;border-radius:50%;background:#080f19;box-shadow:0 0 0 1px #080f1933}
 .hat-orbit+.journey-ending{padding-top:clamp(42px,6vw,80px)}
-@media(max-width:700px){.hat-orbit{margin-top:76px}.orbit-stage{height:clamp(300px,90vw,430px);width:100%}.orbit-toolbar{padding:0}.orbit-hint{font-size:12px}}
-@media(prefers-reduced-motion:reduce){.orbit-poster,.orbit-canvas,.orbit-control{transition:none}}
+@media(max-width:700px){.hat-orbit{margin-top:76px}.orbit-stage{height:clamp(300px,90vw,430px);width:100%}.orbit-hint{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.orbit-poster,.orbit-canvas{transition:none}}
 
-.photo-spin .orbit-canvas canvas{touch-action:pinch-zoom}
-.photo-spin .orbit-play{display:block}.photo-spin .orbit-pause{display:none}.photo-spin.spin-playing .orbit-play{display:none}.photo-spin.spin-playing .orbit-pause{display:block}
 .spin-loading{position:absolute;z-index:2;bottom:20px;left:50%;transform:translateX(-50%);width:min(320px,calc(100% - 24px));display:grid;grid-template-columns:1fr auto;gap:13px 16px;padding:18px 20px;border-radius:16px;background:#eeece5f2;box-shadow:0 8px 35px #080f1910;color:#080f19;font-size:12px;line-height:1.4}
 .spin-loading-number{font-variant-numeric:tabular-nums;color:#5e666c}.spin-loading-track{grid-column:1/-1;height:2px;border-radius:2px;background:#080f191c;overflow:hidden}.spin-loading-track>span{display:block;width:100%;height:100%;background:#080f19;transform:scaleX(0);transform-origin:left;transition:transform 180ms ease}
-.orbit-canvas canvas.pointer-focused:focus-visible{outline:none}
-.photo-spin .orbit-toolbar{justify-content:center;min-height:32px}.photo-spin .orbit-hint{margin:0;text-align:center}
-.photo-spin .orbit-hint{display:flex;align-items:center;gap:9px;color:#47505a;font-size:13px}
-.orbit-gesture{width:64px;height:36px;flex:none;overflow:visible}
-.gesture-arrows{opacity:.45}
-.gesture-hand{animation:hat-drag-gesture 2.8s ease-in-out infinite;animation-play-state:paused}
-.orbit-ready.orbit-visible:not(.orbit-explored) .gesture-hand{animation-play-state:running}
-.orbit-explored .gesture-hand{animation:none}
-@keyframes hat-drag-gesture{0%,15%,100%{transform:translateX(0)}35%{transform:translateX(-7px)}65%{transform:translateX(7px)}85%{transform:translateX(0)}}
-@media(prefers-reduced-motion:reduce){.gesture-hand{animation:none}.spin-loading-track>span{transition:none}}
+@media(prefers-reduced-motion:reduce){.spin-loading-track>span{transition:none}}
 
 .orbit-retry{position:absolute;z-index:2;bottom:20px;left:50%;transform:translateX(-50%);min-height:44px;padding:10px 20px;border:1px solid #080f1940;border-radius:24px;background:#eeece5;color:#080f19;font:inherit;font-size:14px;cursor:pointer}
 .orbit-retry:focus-visible{outline:2px solid #34455a;outline-offset:3px}
