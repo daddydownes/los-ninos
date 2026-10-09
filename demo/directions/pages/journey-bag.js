@@ -8,6 +8,8 @@
   // Leave the completed button feedback readable before opening the drawer.
   const confirmationDuration = 1000;
   const closeDuration = 240;
+  // Draw decorative arrows instead of using a glyph that iOS can render as emoji.
+  const arrowIcon = '<svg class="journey-bag-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14"/></svg>';
 
   function install() {
     if (window.LosNinosBag) return;
@@ -55,7 +57,7 @@
         <div class="journey-bag-empty">
           <p>Your bag<br>is empty.</p>
           <span class="bag-empty-note">Start with the navy snapback.</span>
-          <button type="button" class="journey-bag-shop">Explore the snapback <span aria-hidden="true">↗</span></button>
+          <button type="button" class="journey-bag-shop">Explore the snapback ${arrowIcon}</button>
         </div>
         <div class="journey-bag-item" hidden>
           <img src="${thumbnail}" width="1254" height="1254" decoding="async" alt="Front concept render of the navy Los Niños snapback">
@@ -74,7 +76,7 @@
         <p class="journey-bag-limit" hidden>Maximum quantity: 10.</p>
         <p class="journey-bag-status" role="status" aria-live="polite" aria-atomic="true"></p>
       </div>
-      <div class="journey-bag-footer"><button type="button" class="journey-bag-continue">Continue exploring <span aria-hidden="true">↗</span></button></div>`;
+      <div class="journey-bag-footer"><button type="button" class="journey-bag-continue">Continue exploring ${arrowIcon}</button></div>`;
     document.body.append(dialog);
 
     // This live region is available during the brief confirmation before the dialog opens.
