@@ -1,0 +1,25 @@
+/* Selected motion: the white button, a gentle magnetic pull, and a sliding bag pocket. */
+.purchase-button-shell{width:100%;position:relative}
+.add-button--magnetic{--pull-x:0px;--pull-y:0px;--pointer-x:50%;--pointer-y:50%;border-radius:16px;min-height:64px;padding:12px 84px 12px 23px;transform:translate(var(--pull-x),var(--pull-y));transition:transform 500ms cubic-bezier(.2,.9,.25,1),box-shadow 450ms ease;box-shadow:0 3px 12px #0000000a;background:var(--journey-paper);color:var(--journey-ink)}
+.add-button--magnetic:before{display:none}
+.add-button--magnetic{user-select:none;-webkit-user-select:none}
+.purchase-glow{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(110px circle at var(--pointer-x) var(--pointer-y),#ffffffc9,transparent);opacity:0;transition:opacity 350ms ease}
+.add-button--magnetic [data-add-label]{position:relative;z-index:1;white-space:nowrap;transform:translate(calc(var(--pull-x)*.3),calc(var(--pull-y)*.3));transition:transform 550ms cubic-bezier(.22,1,.36,1)}
+.purchase-pocket{position:absolute;z-index:1;right:8px;top:8px;bottom:8px;width:46px;border-radius:11px;background:#dce0df;display:grid;place-items:center;overflow:hidden;transition:width 550ms cubic-bezier(.22,1,.36,1),background 350ms ease}
+.add-button--magnetic .add-symbol,.add-button--magnetic:hover .add-symbol{position:absolute;right:11px;width:24px;height:24px;display:grid;place-items:center;border:0;border-radius:0;font-size:22px;font-weight:300;background:transparent;color:var(--journey-ink);transform:none;transition:transform 350ms cubic-bezier(.22,1,.36,1),opacity 200ms ease}
+.purchase-bag-icon{position:absolute;right:18px;width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transform:translateY(18px);opacity:0;transition:transform 550ms cubic-bezier(.22,1,.36,1),opacity 200ms ease}
+.purchase-bag-handle{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 400ms ease 120ms}
+.add-button--magnetic:is(.is-pointing,:focus-visible){box-shadow:0 12px 25px #00000026}
+.add-button--magnetic:is(.is-pointing,:focus-visible) .purchase-glow{opacity:1}
+.add-button--magnetic:is(.is-pointing,:focus-visible) .purchase-pocket{width:66px;background:#d7dedc}
+.add-button--magnetic:is(.is-pointing,:focus-visible) .add-symbol{transform:translateY(-20px);opacity:0}
+.add-button--magnetic:is(.is-pointing,:focus-visible) .purchase-bag-icon{transform:translateY(0);opacity:1}
+.add-button--magnetic:is(.is-pointing,:focus-visible) .purchase-bag-handle{stroke-dashoffset:0}
+.add-button--magnetic:active{transform:translate(var(--pull-x),calc(var(--pull-y) + 1px)) scale(.988)}
+.add-button--magnetic[data-bag-pending]{transform:none;box-shadow:none}
+.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-pocket{width:66px}
+.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-icon{opacity:1;transform:translateY(0);transition-duration:180ms}
+.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-handle{stroke-dashoffset:0;transition:stroke-dashoffset 120ms ease}
+.add-button--magnetic:is(:active,[data-bag-pending]) .add-symbol{opacity:0;transform:translateY(-20px)}
+.add-button--magnetic[data-bag-pending] .add-symbol:before{content:none}
+@media(prefers-reduced-motion:reduce){.add-button--magnetic,.add-button--magnetic [data-add-label]{transform:none!important}.add-button--magnetic,.add-button--magnetic *{transition:none!important}}
