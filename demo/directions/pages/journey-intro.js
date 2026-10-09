@@ -105,10 +105,13 @@
     if(drawingOpacity>0) {
       runs.forEach(run => {
         const p=stitchProgress(run,ms);
+        // A fully offset round-capped dash still paints its endpoint in WebKit.
+        // Hide unstarted strokes so future letters do not leave white dots.
+        setStyle(run.path,'opacity',p>0 ? 1 : 0);
         setStyle(run.path,'stroke-dashoffset',1-p);
         setStyle(run.finish,'opacity',smooth((ms-run.end)/120));
         setStyle(run.satin,'stroke-dashoffset',1-p);
-        setStyle(run.satin,'opacity',.16*(1-smooth((ms-run.end)/180)));
+        setStyle(run.satin,'opacity',p>0 ? .16*(1-smooth((ms-run.end)/180)) : 0);
       });
       liveThread(ms);
     }

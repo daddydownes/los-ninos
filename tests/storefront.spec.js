@@ -103,6 +103,56 @@ test('opening reaches usable content and defers rotation downloads', async ({ pa
   await expect(quantity(page)).toHaveText('1');
 });
 
+test('early stitching leaves the unstarted lower letters free of white dots', async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const start = new Date('2026-01-01T00:00:00Z');
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(start);
+  await page.goto('/');
+  await page.evaluate(async () => {
+    await Promise.all([...document.querySelectorAll('.product-lockup img')].map(image => image.decode()));
+    await document.fonts.ready;
+  });
+  // Run the real animation clock through image preparation and the first letter.
+  // Later letters have not begun; their rounded stroke ends must remain invisible.
+  await page.clock.runFor(400);
+  await expect(page.locator('html')).toHaveClass(/intro-pending/);
+  const drawing = page.locator('.sewing-drawing');
+  await expect(drawing).toHaveCSS('opacity', '1');
+  const bounds = await drawing.boundingBox();
+  const region = (top, bottom) => ({
+    x: bounds.x + bounds.width * 380 / 1254,
+    y: bounds.y + bounds.height * top / 1254,
+    width: bounds.width * 505 / 1254,
+    height: bounds.height * (bottom - top) / 1254,
+  });
+  async function contrastingPixels(clip, name) {
+    const screenshot = await page.screenshot({ clip });
+    await testInfo.attach(name, { body: screenshot, contentType: 'image/png' });
+    return page.evaluate(async dataUrl => {
+      const image = new Image();
+      image.src = dataUrl;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const background = [pixels[0], pixels[1], pixels[2]];
+      let contrasting = 0;
+      for (let index = 0; index < pixels.length; index += 4) {
+        if (Math.max(...background.map((value, channel) => pixels[index + channel] - value)) > 8) contrasting++;
+      }
+      return contrasting;
+    }, `data:image/png;base64,${screenshot.toString('base64')}`);
+  }
+  const started = await contrastingPixels(region(485, 636), 'started-upper-stitching');
+  const unstarted = await contrastingPixels(region(640, 813), 'unstarted-lower-letters');
+  expect(started, 'The opening should visibly stitch the upper lettering').toBeGreaterThan(10);
+  expect(unstarted, 'No bright stroke-cap dots should appear before the lower letters start').toBe(0);
+});
+
 test('changing Reduce Motion during the opening immediately unlocks the page', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -263,12 +313,22 @@ test('bag quantities, boundaries, removal and reload persistence work', async ({
 });
 
 test('bag traps focus and Back, Forward and Escape restore the scroll position', async ({ page }) => {
+  await page.addInitScript(() => {
+    // Browser scroll alignment may settle between the test's scroll command and
+    // the actual click. Observe the opening position before the app handles it,
+    // independently of the bag's history state or fixed-body offset.
+    window.addEventListener('click', event => {
+      if (event.target instanceof Element && event.target.closest('[data-bag-open]')) {
+        window.__bagScrollAtClick = window.scrollY;
+      }
+    }, { capture: true });
+  });
   await ready(page, '/#worn');
   await page.locator('.worn-pair').scrollIntoViewIfNeeded();
-  const scrollPosition = await page.evaluate(() => scrollY);
-  expect(scrollPosition).toBeGreaterThan(100);
   const opener = page.getByRole('button', { name: /^Open bag/ });
   await opener.click();
+  const scrollPosition = await page.evaluate(() => window.__bagScrollAtClick);
+  expect(scrollPosition).toBeGreaterThan(100);
   await expect(page.getByRole('button', { name: 'Close bag', exact: true })).toBeFocused();
   for (let index = 0; index < 6; index++) {
     await page.keyboard.press('Tab');

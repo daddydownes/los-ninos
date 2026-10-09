@@ -36,6 +36,11 @@ Baseline: `3c5a145f946eb6afb6fce4743d1948d89a04d188`.
    Retry rotation. Manifest/frame loads have a 15-second timeout. Both loading
    workers settle before retry becomes available.
 
+7. **White specks during the opening.** Round caps on fully offset SVG strokes
+   still painted eight tiny endpoints, including five below the future bottom
+   row of lettering. Unstarted mask and satin strokes are now hidden explicitly,
+   including the first CSS paint; active and completed lettering stay unchanged.
+
 ## Measured resource changes
 
 | Measurement | Before | After |
@@ -81,11 +86,16 @@ cover iPhone SE (320px), iPhone 15 portrait/landscape, iPad Mini, desktop Safari
 iPhone Reduce Motion, Pixel 7, and desktop Chrome. These all use the installed
 engine versions; the profile names do not mean older iOS releases were tested.
 
-**Local full-suite result: all 96 checks passed with zero retries.**
+**Local full-suite result: all 104 checks passed with zero retries.**
 The iPad sizing fix also passed all eight targeted profiles and ten repeated
-iPad runs; pixel comparisons retain exact RGBA equality.
-The committed suite contains 96 checks (12 scenarios across eight profiles):
-entrance and scroll-listener cleanup, live motion preference change, skip/Escape,
+iPad runs; pixel comparisons retain exact RGBA equality. The white-dot regression
+fails the original WebKit rendering (40 bright pixels below unstarted letters)
+and passes the fix (zero). The bag scroll assertion captures the position at
+the opening click, before the application handles it; the two-pixel tolerance
+is unchanged. All eight targeted bag profiles and nine repeated phone runs pass.
+The committed suite contains 104 checks (13 scenarios across eight profiles):
+entrance and scroll-listener cleanup, a rendered-pixel white-dot regression,
+live motion preference change, skip/Escape,
 blocked storage, photo/shop/history navigation, keyboard/touch-policy rotation,
 drag without momentum, bag limits/persistence, modal focus/scroll/history,
 hero/photo failure retries, manifest/frame failure retries, and no JavaScript.
