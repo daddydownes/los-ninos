@@ -430,31 +430,33 @@ test('a quick swipe adds a restrained coast while a held release stops the hat',
       await page.waitForTimeout(stepDelay);
       await page.mouse.move(startX - box.width * .28 * step / 8, y);
     }
-    // Observe the final dragged frame before release, without depending on how
-    // many pointer events happen to land in one display refresh.
-    await canvas.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
     if (hold) await page.waitForTimeout(hold);
-    const released = await readFrame();
+    // Release immediately: measuring through browser round trips here can turn
+    // a quick swipe into an intentional hold on a busy CI worker.
     await page.mouse.up();
-    return released;
   }
 
-  const slowRelease = await drag(110);
+  // Measure the same drag's actual displacement with an intentional held
+  // release. This gives a rendered baseline without delaying the fast release.
+  await drag(12, 180);
+  await canvas.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const dragged = await readFrame();
+  expect(dragged, 'The drag itself must rotate the hat').not.toBe(0);
+  await page.waitForTimeout(400);
+  expect(await readFrame(), 'Holding the hat still before lifting should cancel momentum').toBe(dragged);
+
+  await drag(110);
   await page.waitForTimeout(1_700);
-  const slowCoast = forwardDistance(slowRelease, await readFrame());
-  const fastRelease = await drag(12);
+  const slowCoast = forwardDistance(dragged, await readFrame());
+  await drag(12);
   await page.waitForTimeout(1_700);
   const settled = await readFrame();
-  const fastCoast = forwardDistance(fastRelease, settled);
+  const fastCoast = forwardDistance(dragged, settled);
   expect(fastCoast, 'A fast swipe should swivel farther than the same slow drag').toBeGreaterThan(slowCoast);
   expect(fastCoast, 'A quick release should visibly glide through several views').toBeGreaterThanOrEqual(2);
   expect(fastCoast, 'Momentum should stay below a third of a turn').toBeLessThan(frameCount / 3);
   await page.waitForTimeout(300);
   expect(await readFrame(), 'The hat should settle promptly instead of continuing to spin').toBe(settled);
-
-  const heldRelease = await drag(12, 180);
-  await page.waitForTimeout(400);
-  expect(await readFrame(), 'Holding the hat still before lifting should cancel momentum').toBe(heldRelease);
 });
 
 test('dragging rotates the image and Reduce Motion stops momentum after release', async ({ page }) => {
