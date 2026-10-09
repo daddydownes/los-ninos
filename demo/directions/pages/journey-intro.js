@@ -142,7 +142,6 @@
   }
 
   let frame=0, timeout, completed = false, startedAt = null;
-  let reloadReady = !window.lnReloadOpening;
   function cancel() {
     clearTimeout(timeout); cancelAnimationFrame(frame); frame=0;
   }
@@ -175,6 +174,7 @@
     if(reduced.matches || document.hidden || !hat.complete || !hat.naturalWidth) { finish(); return; }
     cancel();
     document.documentElement.classList.add('intro-pending');
+    if(window.lnReloadOpening) window.scrollTo({top:0,left:0,behavior:'instant'});
     hero.classList.remove('intro-complete'); setInterface(false); centreOpening(); draw(0);
     startedAt=performance.now();
     const tick = now => {
@@ -202,7 +202,7 @@
   hat.addEventListener('error',finish,{once:true});
   let preparing=false;
   async function ready() {
-    if(completed || !reloadReady || preparing) return;
+    if(completed || preparing) return;
     preparing=true;
     try {
       await Promise.all([
@@ -233,17 +233,7 @@
       ready();
     }
   }
-  if(window.lnReloadOpening) {
-    setInterface(false);
-    // Reload restoration can happen after deferred scripts. Begin on the first
-    // painted page frame, once the browser has finished restoring the old scroll.
-    window.addEventListener('pageshow',()=>requestAnimationFrame(()=>{
-      if(completed) return;
-      window.scrollTo({top:0,left:0,behavior:'instant'});
-      reloadReady=true;
-      startWhenReady();
-    }),{once:true});
-  } else {
-    startWhenReady();
-  }
+  // Reload scroll restoration is suppressed by the head bootstrap. Waiting for
+  // pageshow here would also wait for unrelated fonts and off-screen images.
+  startWhenReady();
 })();

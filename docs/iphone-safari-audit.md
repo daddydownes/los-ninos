@@ -89,14 +89,15 @@ cover iPhone SE (320px), iPhone 15 portrait/landscape, iPad Mini, desktop Safari
 iPhone Reduce Motion, Pixel 7, and desktop Chrome. These all use the installed
 engine versions; the profile names do not mean older iOS releases were tested.
 
-**Local full-suite result: all 112 checks passed with zero retries.**
+**Targeted verification: all 24 swipe checks and all 40 refresh/history checks passed.**
+The complete 136-check suite also runs in GitHub Actions.
 The iPad sizing fix also passed all eight targeted profiles and ten repeated
 iPad runs; pixel comparisons retain exact RGBA equality. The white-dot regression
 fails the original WebKit rendering (40 bright pixels below unstarted letters)
 and passes the fix (zero). The bag scroll assertion captures the position at
 the opening click, before the application handles it; the two-pixel tolerance
 is unchanged. All eight targeted bag profiles and nine repeated phone runs pass.
-The committed suite contains 112 checks (14 scenarios across eight profiles):
+The committed suite contains 136 checks (17 scenarios across eight profiles):
 entrance and scroll-listener cleanup, a rendered-pixel white-dot regression,
 live motion preference change, skip/Escape,
 blocked storage, photo/shop/history navigation, keyboard/touch-policy rotation,
@@ -126,10 +127,31 @@ Motion stops the coast. The canvas uses `touch-action: pinch-zoom` from gesture
 start, so vertical finger drift cannot move the page. No page-wide scroll
 blocker is added.
 
-All 24 targeted swipe checks and the full 112-check suite passed across the
-eight profiles with no retries or skipped tests. Native Chromium touch input checks diagonal and
+All 24 targeted swipe checks passed across the eight profiles. The expanded
+suite verifies the final rendered frame before checking reduced-motion stillness,
+so an already-queued draw is not mistaken for ongoing momentum. Native Chromium touch input checks diagonal and
 vertical swipes inside the viewer, followed by scrolling outside it; Safari
 is covered by WebKit pointer tests and computed touch policy.
+
+## Refresh from a scrolled page
+
+Refresh could restore the previous scroll position while the intro was blocking
+input, or skip the opening when an older browser exposed only legacy navigation
+timing. It also waited for the full page load on reload, allowing a slow font to
+consume the loading timeout before the animation started.
+
+Reload now suppresses automatic scroll restoration until the browser's load
+checkpoint, clears stale section/bag state, and starts the intro when its images
+are ready. The older navigation API is a fallback when the modern entry is
+missing. Late load completion restores normal history behavior without moving
+the visitor. Reduce Motion, initial deep links, Back/Forward and loading-failure
+escape paths retain their previous behavior.
+
+Regression cases refresh from shop, photos, the scrolled rotation viewer and an
+open bag; hold font requests through the entire intro; navigate while fonts are
+still pending; and check the legacy navigation path. They verify real stitching
+at scroll position zero and usable navigation afterward. The original failures
+were reproduced in WebKit/Chromium testing; no physical iPhone trace was captured.
 
 A physical iPhone was not attached and no iOS Simulator runtime was installed.
 Real-device follow-up should confirm sustained scroll/drag smoothness, Safari's
@@ -144,3 +166,7 @@ behaviour and older Safari versions remain unverified.
 - [WebKit: Designing Websites for iPhone X](https://webkit.org/blog/7929/designing-websites-for-iphone-x/) — viewport fitting and safe-area insets.
 - [Playwright device emulation](https://playwright.dev/docs/emulation) — what device profiles simulate.
 - [Playwright browser support](https://playwright.dev/docs/browsers#webkit) — WebKit testing versus branded Safari.
+
+- [W3C Pointer Events](https://www.w3.org/TR/pointerevents/latest/) — touch gesture policy must be established before the gesture.
+- [W3C Navigation Timing](https://www.w3.org/TR/navigation-timing-2/) — reload and history navigation types.
+- [HTML navigation and restoration](https://html.spec.whatwg.org/multipage/browsing-the-web.html) — browser scroll restoration lifecycle.

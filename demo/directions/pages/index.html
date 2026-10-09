@@ -11,11 +11,53 @@
   <link rel="preload" as="font" type="font/woff2" href="../../../assets/fonts/dm-sans-latin.woff2" crossorigin>
   <link rel="stylesheet" href="../../../assets/fonts/fonts.css">
   <script>
-    const openingNavigation = performance.getEntriesByType('navigation')[0]?.type;
+    let openingNavigation;
+    try { openingNavigation = performance.getEntriesByType?.('navigation')?.[0]?.type; } catch (_) {}
+    // Some Safari/WebView versions expose only the older navigation API.
+    if (!openingNavigation) {
+      const legacyNavigation = performance.navigation?.type;
+      openingNavigation = legacyNavigation === 1 ? 'reload' : legacyNavigation === 2 ? 'back_forward' : 'navigate';
+    }
     window.lnReloadOpening = openingNavigation === 'reload';
     window.lnHistoryOpening = openingNavigation === 'back_forward';
-    history.scrollRestoration = 'auto';
+    history.scrollRestoration = window.lnReloadOpening ? 'manual' : 'auto';
     if (window.lnReloadOpening) {
+      // Do not let Safari restore the old page position underneath the locked
+      // opening. Start the intro before load; restore normal history behavior
+      // only after both the intro and the browser's load checkpoint finish.
+      let openingFinished = false, openingShown = false, openingRestored = false;
+      const pinReloadOpening = function () {
+        // A browser may still target the fragment from the original request
+        // after replaceState removes it. Pin only while the intro owns input.
+        if (!openingFinished && document.documentElement.classList.contains('intro-pending') && (window.scrollX || window.scrollY)) {
+          window.scrollTo({top:0,left:0,behavior:'instant'});
+        }
+      };
+      const restoreOpeningScroll = function () {
+        if (openingRestored) return;
+        openingRestored = true;
+        history.scrollRestoration = 'auto';
+        window.removeEventListener('scroll', pinReloadOpening);
+        window.removeEventListener('pagehide', restoreOpeningScroll);
+        document.removeEventListener('ln:intro-complete', openingComplete);
+      };
+      const maybeRestoreOpeningScroll = function () {
+        if (openingFinished && openingShown) requestAnimationFrame(restoreOpeningScroll);
+      };
+      const openingComplete = function () {
+        openingFinished = true;
+        window.removeEventListener('scroll', pinReloadOpening);
+        maybeRestoreOpeningScroll();
+      };
+      window.addEventListener('pageshow', function () {
+        requestAnimationFrame(function () {
+          openingShown = true;
+          maybeRestoreOpeningScroll();
+        });
+      }, {once:true});
+      window.addEventListener('scroll', pinReloadOpening, {passive:true});
+      window.addEventListener('pagehide', restoreOpeningScroll, {once:true});
+      document.addEventListener('ln:intro-complete', openingComplete, {once:true});
       try {
         const openingState = {...(history.state || {})};
         delete openingState.lnBag;
@@ -69,7 +111,7 @@
   <link rel="stylesheet" href="hat-orbit.css?v=20261009-swipe2">
   <script defer src="hat-spin.js?v=20261009-swipe2"></script>
   <script defer src="hat-reveal.js?v=20261009"></script>
-  <script defer src="journey-intro.js?v=20261009"></script>
+  <script defer src="journey-intro.js?v=20261009-refresh3"></script>
   <script defer src="journey.js?v=20261009"></script>
   <script defer src="journey-bag.js?v=20261009"></script>
 </head>

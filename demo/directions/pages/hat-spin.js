@@ -139,7 +139,7 @@
         frame = 0;
         if (!visible || document.hidden) return;
         if (sizeChanged) resize();
-        const dt = Math.min((now - (last || now)) / 1000, .04);
+        const dt = Math.max(0, Math.min((now - (last || now)) / 1000, .04));
         last = now;
         if (!drag && !reduced.matches) {
           const decay = Math.exp(-dt * friction);

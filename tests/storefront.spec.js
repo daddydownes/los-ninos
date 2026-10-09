@@ -65,6 +65,18 @@ async function waitForScroll(page, previous) {
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(previous + 20);
 }
 
+async function expectOpeningAtTop(page) {
+  await expect(page.locator('html')).toHaveClass(/intro-pending/);
+  await expect.poll(() => page.evaluate(() => Math.abs(scrollY)), { timeout: 3_000 }).toBeLessThanOrEqual(1);
+  await expect(page.locator('.sewing-drawing')).toHaveCSS('opacity', '1');
+  await expect.poll(() => page.locator('.sew-path').first().evaluate(path => parseFloat(getComputedStyle(path).strokeDashoffset)), {
+    message: 'The first letter must actually start stitching after refresh', timeout: 3_000,
+  }).toBeLessThan(.99);
+  // Check again after animation has begun, when native reload restoration used
+  // to move the page back down underneath the input-blocking opening.
+  expect(Math.abs(await page.evaluate(() => scrollY))).toBeLessThanOrEqual(1);
+}
+
 test('opening reaches usable content and defers rotation downloads', async ({ page }) => {
   await page.addInitScript(() => {
     const add = window.addEventListener, remove = window.removeEventListener;
@@ -194,6 +206,106 @@ test('Skip intro and Escape both bypass the opening and leave shopping usable', 
   }
 });
 
+test('refresh from shop, photos, rotation and an open bag replays the opening at the top', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  for (const start of ['shop', 'photos', 'rotation', 'bag']) {
+    await ready(page, start === 'photos' ? '/#worn' : '/#shop');
+    if (start === 'rotation') await spinReady(page);
+    if (start === 'bag') {
+      await page.getByRole('button', { name: /^Open bag/ }).click();
+      await expect(bag(page)).toBeVisible();
+    }
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expectOpeningAtTop(page);
+    expect(await page.evaluate(() => ({ hash: location.hash, bagOpen: Boolean(history.state?.lnBag) }))).toEqual({ hash: '', bagOpen: false });
+    await expect(bag(page)).not.toBeVisible();
+    await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
+    await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
+    await page.getByRole('link', { name: 'Photos', exact: true }).click();
+    await expect(page).toHaveURL(/#worn$/);
+    await waitForScroll(page, 0);
+    await expect(page.getByRole('heading', { name: 'Out in the world.' })).toBeFocused();
+  }
+});
+
+test('refresh plays and finishes the opening while font requests are still pending', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  let releaseFonts;
+  const fontsHeld = new Promise(resolve => { releaseFonts = resolve; });
+  const fontPattern = /\.woff2(?:\?|$)/;
+  let requests = 0;
+  const holdFont = async route => {
+    requests++;
+    await fontsHeld;
+    await route.continue();
+  };
+  await page.route(fontPattern, holdFont);
+  let scrollBeforeFontLoad;
+  try {
+    // Keep the fonts cold: a completed first navigation can populate WebKit's
+    // font cache and bypass interception on refresh.
+    await page.goto('/#shop', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect.poll(() => requests).toBeGreaterThan(0);
+    await expectOpeningAtTop(page);
+    await expect(page.locator('html')).not.toHaveClass(/intro-pending/, { timeout: 6_000 });
+    const completion = await page.evaluate(() => ({
+      elapsed: Number(document.querySelector('.hero').dataset.introElapsed),
+      fonts: document.fonts.status,
+      readyState: document.readyState,
+      scrollY,
+    }));
+    expect(completion.elapsed, 'The normal opening must play rather than hit its loading fallback').toBeGreaterThanOrEqual(3_900);
+    expect(completion.elapsed).toBeLessThan(6_000);
+    expect(completion.fonts, 'The font requests are deliberately unresolved').toBe('loading');
+    expect(completion.readyState, 'The opening must not depend on the window load/pageshow event').toBe('interactive');
+    expect(Math.abs(completion.scrollY)).toBeLessThanOrEqual(1);
+    await expect(page.getByRole('button', { name: 'Add to bag', exact: true })).toBeEnabled();
+    await page.getByRole('link', { name: 'Photos', exact: true }).click();
+    await expect(page).toHaveURL(/#worn$/);
+    await expect.poll(() => page.locator('#worn').evaluate(element => element.getBoundingClientRect().top)).toBeLessThan(150);
+    scrollBeforeFontLoad = await page.evaluate(() => scrollY);
+    expect(scrollBeforeFontLoad).toBeGreaterThan(100);
+  } finally {
+    releaseFonts();
+    await page.waitForLoadState('load');
+    await page.unroute(fontPattern, holdFont);
+  }
+  await page.waitForTimeout(150);
+  await expect(page).toHaveURL(/#worn$/);
+  expect(await page.evaluate(() => scrollY), 'Late load/pageshow must not jump the user back to the top after they start browsing').toBeGreaterThan(scrollBeforeFontLoad * .5);
+});
+
+test('legacy navigation timing distinguishes refresh from deep links and Back', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.addInitScript(() => {
+    const getEntriesByType = performance.getEntriesByType.bind(performance);
+    performance.getEntriesByType = type => type === 'navigation' ? [] : getEntriesByType(type);
+  });
+  await ready(page, '/#worn');
+  await expect(page).toHaveURL(/#worn$/);
+  expect(await page.locator('.hero').getAttribute('data-intro-elapsed'), 'A first photo deep link must still bypass the opening').toBe('0');
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  expect(await page.evaluate(() => performance.navigation.type)).toBe(1);
+  await expectOpeningAtTop(page);
+  await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
+  await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
+  await page.getByRole('link', { name: 'Photos', exact: true }).click();
+  await waitForScroll(page, 0);
+  await page.route('**/history-fixture', route => route.fulfill({
+    contentType: 'text/html', body: '<!doctype html><title>History test</title><p>Another page</p>',
+  }));
+  await page.goto('/history-fixture');
+  await page.goBack();
+  await expect(page).toHaveURL(/#worn$/);
+  await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
+  await waitForScroll(page, 0);
+  await page.getByRole('link', { name: 'Shop', exact: true }).click();
+  await expect(page).toHaveURL(/#shop$/);
+  await expect(page.getByRole('heading', { name: 'Los Niños snapback', exact: true })).toBeFocused();
+});
+
 test('shopping and navigation remain usable when browser storage is blocked', async ({ page }) => {
   await page.addInitScript(() => {
     const deny = () => { throw new DOMException('Storage is blocked', 'SecurityError'); };
@@ -218,6 +330,7 @@ test('shopping and navigation remain usable when browser storage is blocked', as
 
 test('photo and shop navigation retain readable layout and browser history', async ({ page }) => {
   await ready(page);
+  expect(await page.locator('.hero').getAttribute('data-intro-elapsed'), 'A direct shop link should bypass the opening').toBe('0');
   await page.getByRole('link', { name: 'Photos', exact: true }).click();
   await expect(page).toHaveURL(/#worn$/);
   await expect(page.getByRole('heading', { name: 'Out in the world.' })).toBeFocused();
@@ -233,8 +346,10 @@ test('photo and shop navigation retain readable layout and browser history', asy
   await expect(page.getByRole('heading', { name: 'Los Niños snapback', exact: true })).toBeFocused();
   await page.goBack();
   await expect(page).toHaveURL(/#worn$/);
+  await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
   await page.goForward();
   await expect(page).toHaveURL(/#shop$/);
+  await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
   await noHorizontalOverflow(page);
 });
 
@@ -350,6 +465,9 @@ test('dragging rotates the image and Reduce Motion stops momentum after release'
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * .28, box.y + box.height * .5, { steps: 8 });
   await page.mouse.up();
+  // Pointer updates are intentionally drawn on the next display frame. Wait
+  // for the final dragged view before checking that reduced motion stays still.
+  await canvas.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await expect.poll(() => canvasImage(canvas)).not.toBe(front);
   const released = await canvasImage(canvas);
   await page.waitForTimeout(250);
@@ -390,6 +508,8 @@ test('bag quantities, boundaries, removal and reload persistence work', async ({
   // A restored quantity should survive a document reload in the same tab.
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.reload();
+  await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
+  expect(await page.locator('.hero').getAttribute('data-intro-elapsed'), 'Reduced-motion refresh should show the completed hat without replaying').toBe('0');
   await page.getByRole('button', { name: 'Open bag, 10 items', exact: true }).click();
   await expect(quantity(page)).toHaveText('10');
   await page.getByRole('button', { name: 'Remove', exact: true }).click();
