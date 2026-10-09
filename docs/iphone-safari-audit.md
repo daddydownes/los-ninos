@@ -23,7 +23,8 @@ Baseline: `3c5a145f946eb6afb6fce4743d1948d89a04d188`.
    the page release the interface immediately.
 4. **Touch and motion preferences.** Rotation waits for horizontal intent before
    pointer capture, leaves vertical panning and pinch zoom to the browser, and
-   renders at most once per animation frame. Reduced Motion disables inertia,
+   renders at most once per animation frame. Initial canvas sizing preserves
+   fractional CSS dimensions, avoiding a one-pixel reallocation on iPad. Reduced Motion disables inertia,
    magnetic pointer effects and decorative transitions, including changes made
    while the page is open. Offscreen/background motion stops.
 5. **Bag and small-screen resilience.** Touch devices avoid backdrop blur and
@@ -80,7 +81,9 @@ cover iPhone SE (320px), iPhone 15 portrait/landscape, iPad Mini, desktop Safari
 iPhone Reduce Motion, Pixel 7, and desktop Chrome. These all use the installed
 engine versions; the profile names do not mean older iOS releases were tested.
 
-**Final result: all 96 checks passed with zero retries in 1.8 minutes.**
+**Local full-suite result: all 96 checks passed with zero retries.**
+The iPad sizing fix also passed all eight targeted profiles and ten repeated
+iPad runs; pixel comparisons retain exact RGBA equality.
 The committed suite contains 96 checks (12 scenarios across eight profiles):
 entrance and scroll-listener cleanup, live motion preference change, skip/Escape,
 blocked storage, photo/shop/history navigation, keyboard/touch-policy rotation,

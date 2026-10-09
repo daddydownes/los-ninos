@@ -86,7 +86,11 @@
       host.append(canvas);
       let position = 0, velocity = 0, drag = null, frame = 0, last = 0;
       let visible = false, current = -1, sizeChanged = true;
-      let width = stage.clientWidth, height = stage.clientHeight;
+      // Use fractional CSS dimensions on the first draw, just as the resize
+      // observer does. clientHeight rounds iPad's fluid stage height and can
+      // otherwise change the backing store by a pixel after the first frame.
+      const initialSize = stage.getBoundingClientRect();
+      let width = initialSize.width, height = initialSize.height;
       const count = images.length;
       const wrap = value => ((Math.round(value) % count) + count) % count;
       function draw() {

@@ -50,7 +50,15 @@ async function spinReady(page) {
 }
 
 async function canvasImage(canvas) {
-  return canvas.evaluate(element => element.toDataURL());
+  return canvas.evaluate(async element => {
+    // Compare every rendered pixel without embedding megabytes of PNG data in
+    // assertion reports. Dimensions remain part of the exact image identity.
+    const { width, height } = element;
+    const pixels = element.getContext('2d').getImageData(0, 0, width, height).data;
+    const digest = await crypto.subtle.digest('SHA-256', pixels);
+    const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    return `${width}×${height}:sha256:${hash}`;
+  });
 }
 
 async function waitForScroll(page, previous) {
