@@ -5,7 +5,8 @@
 .orbit-canvas canvas{display:block;width:100%;height:100%;touch-action:auto;cursor:default;border-radius:24px}
 .orbit-ready .orbit-canvas{opacity:1}.orbit-ready .orbit-poster{opacity:0;visibility:hidden}
 .orbit-toolbar{display:flex;flex-direction:column;align-items:center;width:min(100%,340px);margin:0 auto;padding:0 16px;gap:2px}
-.orbit-toolbar[hidden]{display:none}
+/* Reserve the controls' space while loading so links below cannot jump mid-tap. */
+.orbit-toolbar[hidden]{display:flex!important;visibility:hidden}
 .orbit-hint{font-size:13px;letter-spacing:.01em;color:#47505a;text-align:center}
 .orbit-slider{display:block;appearance:none;-webkit-appearance:none;width:100%;height:48px;margin:0;padding:0;background:transparent;color:#080f19;cursor:ew-resize;touch-action:pan-y pinch-zoom;border:0;border-radius:4px}
 .orbit-slider:focus-visible{outline:2px solid #34455a;outline-offset:4px}

@@ -1,6 +1,6 @@
 /* Selected motion: the white button, a gentle magnetic pull, and a sliding bag pocket. */
 .purchase-button-shell{width:100%;position:relative}
-.add-button--magnetic{--pull-x:0px;--pull-y:0px;--pointer-x:50%;--pointer-y:50%;border-radius:16px;min-height:64px;padding:12px 84px 12px 23px;transform:translate(var(--pull-x),var(--pull-y));transition:transform 500ms cubic-bezier(.2,.9,.25,1),box-shadow 450ms ease;box-shadow:0 3px 12px #0000000a;background:var(--journey-paper);color:var(--journey-ink)}
+.add-button--magnetic{--pull-x:0px;--pull-y:0px;--pointer-x:50%;--pointer-y:50%;border-radius:16px;min-height:64px;padding:12px 84px 12px 23px;transform:translate(var(--pull-x),var(--pull-y));transition:transform 500ms cubic-bezier(.2,.9,.25,1),box-shadow 450ms ease,background-color 300ms ease;box-shadow:0 3px 12px #0000000a;background:var(--journey-paper);color:var(--journey-ink)}
 .add-button--magnetic:before{display:none}
 .add-button--magnetic{user-select:none;-webkit-user-select:none}
 .purchase-glow{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(110px circle at var(--pointer-x) var(--pointer-y),#ffffffc9,transparent);opacity:0;transition:opacity 350ms ease}
@@ -16,13 +16,18 @@
 .add-button--magnetic:is(.is-pointing,:focus-visible) .purchase-bag-icon{transform:translateY(0);opacity:1}
 .add-button--magnetic:is(.is-pointing,:focus-visible) .purchase-bag-handle{stroke-dashoffset:0}
 .add-button--magnetic:active{transform:translate(var(--pull-x),calc(var(--pull-y) + 1px)) scale(.988)}
-.add-button--magnetic[data-bag-pending]{transform:none;box-shadow:none}
+.add-button--magnetic[data-bag-pending]{transform:none;box-shadow:none;background:#e4ebe6}
+.add-button--magnetic[data-bag-pending] [data-add-label]{animation:purchase-confirm-label 360ms cubic-bezier(.22,1,.36,1) both}
+.purchase-bag-check{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;transition:stroke-dashoffset 320ms ease 240ms,opacity 180ms ease}
+.add-button--magnetic[data-bag-pending] .purchase-bag-check{stroke-dashoffset:0;opacity:1}
+.add-button--magnetic[data-bag-pending] .purchase-pocket{background:#cbd9d1}
+@keyframes purchase-confirm-label{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .add-button--magnetic:is(:active,[data-bag-pending]) .purchase-pocket{width:66px}
-.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-icon{opacity:1;transform:translateY(0);transition-duration:180ms}
-.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-handle{stroke-dashoffset:0;transition:stroke-dashoffset 120ms ease}
+.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-icon{opacity:1;transform:translateY(0);transition-duration:450ms,240ms}
+.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-handle{stroke-dashoffset:0;transition:stroke-dashoffset 350ms ease 90ms}
 .add-button--magnetic:is(:active,[data-bag-pending]) .add-symbol{opacity:0;transform:translateY(-20px)}
 .add-button--magnetic[data-bag-pending] .add-symbol:before{content:none}
-/* Touch feedback should complete with the tap instead of leaving a half-second
-   width/transform animation running while Safari opens the bag. */
-@media(hover:none),(pointer:coarse){.purchase-glow{display:none}.add-button--magnetic{transition:box-shadow 150ms ease}.add-button--magnetic [data-add-label]{transform:none;transition:none}.purchase-pocket{transition:background 150ms ease}.purchase-bag-icon,.add-button--magnetic .add-symbol,.add-button--magnetic:hover .add-symbol{transition:opacity 120ms ease}.purchase-bag-handle,.add-button--magnetic:is(:active,[data-bag-pending]) .purchase-bag-handle{transition:none}}
-@media(prefers-reduced-motion:reduce){.add-button--magnetic,.add-button--magnetic [data-add-label]{transform:none!important}.add-button--magnetic,.add-button--magnetic *{transition:none!important}}
+/* Give a tap its own visible confirmation, without desktop hover tracking.
+   Only the small, absolutely positioned pocket changes width. */
+@media(hover:none),(pointer:coarse){.purchase-glow{display:none}.add-button--magnetic{transition:transform 220ms ease,box-shadow 250ms ease,background-color 300ms ease}.add-button--magnetic [data-add-label]{transform:none;transition:none}.purchase-pocket{transition:width 480ms cubic-bezier(.22,1,.36,1),background 300ms ease}.purchase-bag-icon{transition:transform 450ms cubic-bezier(.22,1,.36,1),opacity 240ms ease}.add-button--magnetic .add-symbol,.add-button--magnetic:hover .add-symbol{transition:transform 320ms cubic-bezier(.22,1,.36,1),opacity 220ms ease}}
+@media(prefers-reduced-motion:reduce){.add-button--magnetic,.add-button--magnetic [data-add-label]{transform:none!important}.add-button--magnetic,.add-button--magnetic *{animation:none!important;transition:none!important}}
