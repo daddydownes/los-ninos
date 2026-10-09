@@ -119,7 +119,9 @@ test('early stitching leaves the unstarted lower letters free of white dots', as
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const start = new Date('2026-01-01T00:00:00Z');
   await page.clock.install({ time: start });
-  await page.clock.pauseAt(start);
+  // The installed clock runs until paused; a later target avoids trying to
+  // rewind a few milliseconds when browser workers are busy starting up.
+  await page.clock.pauseAt(new Date(start.getTime() + 1_000));
   await page.goto('/');
   await page.evaluate(async () => {
     await Promise.all([...document.querySelectorAll('.product-lockup img')].map(image => image.decode()));
