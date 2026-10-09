@@ -92,6 +92,9 @@
       const initialSize = stage.getBoundingClientRect();
       let width = initialSize.width, height = initialSize.height;
       const count = images.length;
+      // A quick flick carries at most about a fifth of a turn. Average recent
+      // movement so a tiny final pointer event cannot erase the swipe's momentum.
+      const maxVelocity = count * 1.25, friction = 6, velocityResponse = .045;
       const wrap = value => ((Math.round(value) % count) + count) % count;
       function draw() {
         const index = wrap(position);
@@ -136,11 +139,12 @@
         frame = 0;
         if (!visible || document.hidden) return;
         if (sizeChanged) resize();
-        const dt = Math.min((now - (last || now)) / 1000, .04);
+        const dt = Math.max(0, Math.min((now - (last || now)) / 1000, .04));
         last = now;
         if (!drag && !reduced.matches) {
-          position += velocity * dt;
-          velocity *= Math.exp(-dt * 7);
+          const decay = Math.exp(-dt * friction);
+          position += velocity * (1 - decay) / friction;
+          velocity *= decay;
         }
         draw();
         if (!drag && !reduced.matches && Math.abs(velocity) > .05) wake();
@@ -170,17 +174,15 @@
       canvas.addEventListener('pointerdown', event => {
         if (drag || event.button !== 0 || event.isPrimary === false) return;
         stop();
-        drag = {id: event.pointerId, startX: event.clientX, startY: event.clientY, x: event.clientX, time: event.timeStamp, active: false};
+        drag = {id: event.pointerId, startX: event.clientX, x: event.clientX, time: event.timeStamp, active: false};
       });
       canvas.addEventListener('pointermove', event => {
         if (!drag || drag.id !== event.pointerId) return;
         if (!drag.active) {
           const dx = Math.abs(event.clientX - drag.startX);
-          const dy = Math.abs(event.clientY - drag.startY);
-          if (dy > dx && dy > 6) { drag = null; stop(); return; }
-          if (dx < 6 || dx <= dy) return;
-          // Do not capture a finger until it intends to rotate horizontally.
-          // Vertical swipes and pinch zoom remain native page gestures.
+          if (dx < 4) return;
+          // The canvas owns one-finger swipes from the start (touch-action).
+          // Ignore vertical drift; changing direction must not drag the page.
           drag.active = true;
           canvas.setPointerCapture(event.pointerId);
           canvas.classList.add('pointer-focused');
@@ -190,7 +192,10 @@
         const change = (drag.x - event.clientX) / Math.max(width, 1) * count;
         const dt = Math.max(.008, (event.timeStamp - drag.time) / 1000);
         position += change;
-        velocity = reduced.matches ? 0 : Math.max(-count * .65, Math.min(count * .65, change / dt));
+        const sampledVelocity = Math.max(-maxVelocity, Math.min(maxVelocity, change / dt));
+        if (sampledVelocity * velocity < 0) velocity = 0;
+        const blend = 1 - Math.exp(-dt / velocityResponse);
+        velocity = reduced.matches ? 0 : velocity + (sampledVelocity - velocity) * blend;
         drag.x = event.clientX;
         drag.time = event.timeStamp;
         // Pointer events can arrive faster than the display refresh rate.
@@ -200,7 +205,7 @@
         if (!drag || drag.id !== event.pointerId) return;
         if (!drag.active || event.type !== 'pointerup' || event.timeStamp - drag.time > 100 || reduced.matches) stop();
         drag = null;
-        last = 0;
+        last = performance.now();
         wake();
       }
       canvas.addEventListener('pointerup', release);
