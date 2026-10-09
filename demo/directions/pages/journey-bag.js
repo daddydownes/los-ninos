@@ -5,7 +5,8 @@
   const thumbnail = new URL('../../../assets/hat-front-logo-v1.webp', source).href;
   const storageKey = 'los-ninos-preview-bag-v1';
   const limit = 10;
-  const confirmationDuration = 320;
+  // Leave the completed button feedback readable before opening the drawer.
+  const confirmationDuration = 1000;
   const closeDuration = 240;
 
   function install() {
