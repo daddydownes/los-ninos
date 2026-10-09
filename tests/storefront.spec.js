@@ -24,6 +24,8 @@ const test = base.extend({
 
 const bag = page => page.getByRole('dialog', { name: 'Your bag.' });
 const quantity = page => bag(page).getByLabel('Quantity', { exact: true });
+const photosLink = page => page.getByRole('link', { name: /^Scroll to explore/ });
+const shopLink = page => page.getByRole('link', { name: /^Make it yours\./ });
 
 async function ready(page, path = '/#shop') {
   await page.goto(path);
@@ -173,7 +175,7 @@ test('changing Reduce Motion during the opening immediately unlocks the page', a
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('html')).not.toHaveClass(/intro-pending/, { timeout: 3_000 });
   await expect(page.locator('#hero-hat')).toHaveCSS('opacity', '1');
-  await page.getByRole('link', { name: 'Photos', exact: true }).click();
+  await photosLink(page).click();
   await expect(page).toHaveURL(/#worn$/);
   await expect(page.getByRole('heading', { name: 'Out in the world.' })).toBeFocused();
   await expect(page.locator('.worn-lead')).toHaveCSS('opacity', '1');
@@ -221,9 +223,11 @@ test('refresh from shop, photos, rotation and an open bag replays the opening at
     await expectOpeningAtTop(page);
     expect(await page.evaluate(() => ({ hash: location.hash, bagOpen: Boolean(history.state?.lnBag) }))).toEqual({ hash: '', bagOpen: false });
     await expect(bag(page)).not.toBeVisible();
-    await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
+    // The opening may finish while a busy browser returns the assertions above.
+    // Escape is harmless then; the dedicated Skip-button test covers its click.
+    await page.keyboard.press('Escape');
     await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
-    await page.getByRole('link', { name: 'Photos', exact: true }).click();
+    await photosLink(page).click();
     await expect(page).toHaveURL(/#worn$/);
     await waitForScroll(page, 0);
     await expect(page.getByRole('heading', { name: 'Out in the world.' })).toBeFocused();
@@ -264,7 +268,7 @@ test('refresh plays and finishes the opening while font requests are still pendi
     expect(completion.readyState, 'The opening must not depend on the window load/pageshow event').toBe('interactive');
     expect(Math.abs(completion.scrollY)).toBeLessThanOrEqual(1);
     await expect(page.getByRole('button', { name: 'Add to bag', exact: true })).toBeEnabled();
-    await page.getByRole('link', { name: 'Photos', exact: true }).click();
+    await photosLink(page).click();
     await expect(page).toHaveURL(/#worn$/);
     await expect.poll(() => page.locator('#worn').evaluate(element => element.getBoundingClientRect().top)).toBeLessThan(150);
     scrollBeforeFontLoad = await page.evaluate(() => scrollY);
@@ -291,9 +295,9 @@ test('legacy navigation timing distinguishes refresh from deep links and Back', 
   await page.reload({ waitUntil: 'domcontentloaded' });
   expect(await page.evaluate(() => performance.navigation.type)).toBe(1);
   await expectOpeningAtTop(page);
-  await page.getByRole('button', { name: 'Skip intro', exact: true }).click();
+  await page.keyboard.press('Escape');
   await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
-  await page.getByRole('link', { name: 'Photos', exact: true }).click();
+  await photosLink(page).click();
   await waitForScroll(page, 0);
   await page.route('**/history-fixture', route => route.fulfill({
     contentType: 'text/html', body: '<!doctype html><title>History test</title><p>Another page</p>',
@@ -303,7 +307,7 @@ test('legacy navigation timing distinguishes refresh from deep links and Back', 
   await expect(page).toHaveURL(/#worn$/);
   await expect(page.locator('html')).not.toHaveClass(/intro-pending/);
   await waitForScroll(page, 0);
-  await page.getByRole('link', { name: 'Shop', exact: true }).click();
+  await shopLink(page).click();
   await expect(page).toHaveURL(/#shop$/);
   await expect(page.getByRole('heading', { name: 'Los Niños snapback', exact: true })).toBeFocused();
 });
@@ -326,14 +330,21 @@ test('shopping and navigation remain usable when browser storage is blocked', as
   await page.getByRole('button', { name: 'Remove', exact: true }).click();
   await page.getByRole('button', { name: /Explore the snapback/ }).click();
   await expect(bag(page)).not.toBeVisible();
-  await page.getByRole('link', { name: 'Photos', exact: true }).click();
+  await photosLink(page).click();
   await expect(page).toHaveURL(/#worn$/);
 });
 
 test('photo and shop navigation retain readable layout and browser history', async ({ page }) => {
   await ready(page);
+  const header = page.locator('.journey-header');
+  await expect(header.getByRole('link')).toHaveCount(1);
+  await expect(header.getByRole('link', { name: 'Los Niños — back to top', exact: true })).toBeVisible();
+  await expect(header.getByRole('button')).toHaveCount(1);
+  await expect(header.getByRole('button', { name: /^Open bag/ })).toBeVisible();
+  await expect(header.getByRole('navigation')).toHaveCount(0);
+  await expect(header.getByRole('link', { name: /^(Shop|Photos)$/ })).toHaveCount(0);
   expect(await page.locator('.hero').getAttribute('data-intro-elapsed'), 'A direct shop link should bypass the opening').toBe('0');
-  await page.getByRole('link', { name: 'Photos', exact: true }).click();
+  await photosLink(page).click();
   await expect(page).toHaveURL(/#worn$/);
   await expect(page.getByRole('heading', { name: 'Out in the world.' })).toBeFocused();
   await expect.poll(() => page.locator('#worn').evaluate(element => Math.round(element.getBoundingClientRect().top))).toBeLessThan(150);
@@ -343,7 +354,7 @@ test('photo and shop navigation retain readable layout and browser history', asy
     await expect(photo).toHaveAttribute('alt', /\S.+/);
     await noHorizontalOverflow(page);
   }
-  await page.getByRole('link', { name: 'Shop', exact: true }).click();
+  await shopLink(page).click();
   await expect(page).toHaveURL(/#shop$/);
   await expect(page.getByRole('heading', { name: 'Los Niños snapback', exact: true })).toBeFocused();
   await page.goBack();
@@ -356,10 +367,35 @@ test('photo and shop navigation retain readable layout and browser history', asy
 });
 
 test('rotation slider provides one accessible control with keyboard and full-turn endpoints', async ({ page }) => {
-  await ready(page);
   const slider = page.getByRole('slider', { name: 'Rotate the hat', exact: true });
-  await expect(page.locator('[data-orbit-slider]')).not.toBeVisible();
-  const canvas = await spinReady(page);
+  let releaseManifest;
+  const manifestHeld = new Promise(resolve => { releaseManifest = resolve; });
+  const manifestPattern = '**/hat-spin/sequence.json*';
+  const holdManifest = async route => { await manifestHeld; await route.continue(); };
+  await page.route(manifestPattern, holdManifest);
+  const closingTop = () => shopLink(page).evaluate(element => {
+    // Layout offsets exclude the decorative entrance transform, isolating the
+    // row insertion that could move this link between pointer down and up.
+    let top = 0;
+    for (let node = element; node; node = node.offsetParent) top += node.offsetTop;
+    return top;
+  });
+  let canvas, beforeReady;
+  try {
+    await ready(page);
+    await expect(page.locator('[data-orbit-slider]')).not.toBeVisible();
+    await page.locator('[data-orbit-stage]').scrollIntoViewIfNeeded();
+    await expect(page.locator('[data-orbit-stage]')).toHaveAttribute('aria-busy', 'true');
+    await expect(page.locator('[data-orbit-slider]')).not.toBeVisible();
+    beforeReady = await closingTop();
+    releaseManifest();
+    canvas = await spinReady(page);
+    await expect(slider).toBeVisible();
+    expect(Math.abs(await closingTop() - beforeReady), 'Revealing the slider must not move the shop link under a click').toBeLessThanOrEqual(1);
+  } finally {
+    releaseManifest();
+    await page.unroute(manifestPattern, holdManifest);
+  }
   await expect(slider).toBeVisible();
   await expect(slider).toHaveAttribute('type', 'range');
   await expect(slider).toHaveAttribute('min', '0');
@@ -621,7 +657,7 @@ test('failed manifest and rotation images retain the poster and can be retried',
       await expect(page.getByRole('button', { name: 'Retry rotation', exact: true })).toHaveCount(0);
     });
   }
-  await page.getByRole('link', { name: 'Shop', exact: true }).click();
+  await shopLink(page).click();
   await page.getByRole('button', { name: 'Add to bag', exact: true }).click();
   await expect(quantity(page)).toHaveText('1');
 });
@@ -635,11 +671,14 @@ test.describe('without JavaScript', () => {
     await expect(page.locator('#hero-hat')).toHaveCSS('opacity', '1');
     await expect(page.locator('.noscript-note')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Add to bag', exact: true })).toHaveCount(0);
-    await page.getByRole('link', { name: 'Photos', exact: true }).click();
+    await photosLink(page).click();
     await expect(page).toHaveURL(/#worn$/);
     await expect(page.locator('.worn-lead img')).toBeVisible();
     await expect(page.locator('.worn-lead')).toHaveCSS('opacity', '1');
     await expect(page.locator('.orbit-poster')).toBeAttached();
+    await shopLink(page).click();
+    await expect(page).toHaveURL(/#shop$/);
+    await expect(page.getByRole('heading', { name: 'Los Niños snapback', exact: true })).toBeVisible();
     await noHorizontalOverflow(page);
   });
 });
