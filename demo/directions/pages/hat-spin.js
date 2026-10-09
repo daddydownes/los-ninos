@@ -81,10 +81,10 @@
       new ResizeObserver(resize).observe(stage);
       function stop(){velocity=0;}
       canvas.addEventListener('pointerdown',e=>{if(drag||e.button!==0)return;stop();drag={id:e.pointerId,x:e.clientX,time:e.timeStamp};canvas.setPointerCapture(e.pointerId);canvas.classList.add('pointer-focused');canvas.focus({preventScroll:true});});
-      canvas.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const change=(e.clientX-drag.x)/Math.max(stage.clientWidth,1)*count,dt=Math.max(.008,(e.timeStamp-drag.time)/1000);position+=change;if(Math.abs(change)>.06)section.classList.add('orbit-explored');velocity=Math.max(-count*.65,Math.min(count*.65,change/dt));drag={id:e.pointerId,x:e.clientX,time:e.timeStamp};draw();});
+      canvas.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const change=(drag.x-e.clientX)/Math.max(stage.clientWidth,1)*count,dt=Math.max(.008,(e.timeStamp-drag.time)/1000);position+=change;if(Math.abs(change)>.06)section.classList.add('orbit-explored');velocity=Math.max(-count*.65,Math.min(count*.65,change/dt));drag={id:e.pointerId,x:e.clientX,time:e.timeStamp};draw();});
       function release(e){if(!drag||drag.id!==e.pointerId)return;if(e.type!=='pointerup'||e.timeStamp-drag.time>100||reduced.matches)velocity=0;drag=null;last=0;wake();}
       canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);canvas.addEventListener('lostpointercapture',release);
-      canvas.addEventListener('keydown',e=>{canvas.classList.remove('pointer-focused');if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();section.classList.add('orbit-explored');stop();position+=e.key==='ArrowRight'?1:-1;draw();}else if(e.key==='Home'){e.preventDefault();stop();position=0;draw();status.textContent='Hat returned to the front.';}});
+      canvas.addEventListener('keydown',e=>{canvas.classList.remove('pointer-focused');if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();section.classList.add('orbit-explored');stop();position+=e.key==='ArrowRight'?-1:1;draw();}else if(e.key==='Home'){e.preventDefault();stop();position=0;draw();status.textContent='Hat returned to the front.';}});
       new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;section.classList.toggle('orbit-visible',visible);last=0;if(!visible){stop();drag=null;if(frame)cancelAnimationFrame(frame);frame=0;}else wake();}).observe(stage);
       document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();drag=null;if(frame)cancelAnimationFrame(frame);frame=0;}last=0;});
       reduced.addEventListener('change',()=>{if(reduced.matches)stop();});
@@ -99,10 +99,7 @@
     }finally{loading?.remove();stage.removeAttribute('aria-busy');}
   }
   // Keep the large rotation sequence out of the entrance's download/decode budget.
-  function scheduleLoad(){
-    if(document.documentElement.classList.contains('intro-pending')) document.addEventListener('ln:intro-complete',load,{once:true});
-    else load();
-  }
-  if(document.readyState==='complete')scheduleLoad();
-  else window.addEventListener('load',scheduleLoad,{once:true});
+  if(document.documentElement.classList.contains('intro-pending')) {
+    document.addEventListener('ln:intro-complete',load,{once:true});
+  } else load();
 })();
