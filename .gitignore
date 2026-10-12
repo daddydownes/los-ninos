@@ -71,3 +71,11 @@
 !/scripts/serve-test.py
 !/assets/hat-embroidery.webp
 !/scripts/bake-embroidery.cjs
+!/commerce/**
+!/scripts/commerce-local.mjs
+!/scripts/d1-sqlite.mjs
+!/wrangler.jsonc
+/.local/
+/.wrangler/
+/.dev.vars*
+/.env*

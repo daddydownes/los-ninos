@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080f19">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Your order — Los Niños</title>
+  <link rel="icon" href="/assets/brand-icon.svg">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="commerce.css">
+  <script type="module" src="order.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to your order</a>
+  <header class="site-header"><a class="brand" href="./" aria-label="Los Niños home"><span>LOS</span><span>NIÑOS</span></a><a class="header-link" href="./"><span class="arrow" aria-hidden="true">←</span> Back to the collection</a></header>
+  <main class="order-wrap" id="main">
+    <div id="order-loading" class="order-loading"><p class="eyebrow muted">Your order</p><h1>One moment.</h1><p class="muted">Loading your order details…</p></div>
+    <div class="notice notice-error" id="order-error" role="alert" hidden></div>
+    <div id="order-content" hidden>
+      <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label">Preview</span><p><strong>This is a test order.</strong> No payment is due and no email has been sent. Bank details below are placeholders.</p></div>
+      <div class="order-heading"><div class="order-meta"><span>Order <strong id="order-reference"></strong></span><span id="order-date"></span></div><span class="pill" id="order-status"></span><h1 id="order-title">Order received.<br>One more step.</h1><p class="intro-copy" id="order-intro"></p></div>
+      <div class="order-layout">
+        <section class="payment-panel" id="payment-panel" aria-labelledby="payment-heading">
+          <p class="eyebrow muted" id="payment-eyebrow">Pay by bank transfer</p><h2 id="payment-heading">Your payment details</h2><p class="payment-description" id="payment-description"></p>
+          <dl class="payment-amount"><dt>Amount to transfer</dt><dd><div><strong id="payment-total">To be set</strong><small>AUD · Australian dollars</small></div><button type="button" class="copy-button" id="copy-amount" disabled>Copy</button></dd></dl>
+          <dl class="bank-details">
+            <div class="bank-row"><dt>Account name</dt><dd><span class="bank-value" id="bank-name">To be confirmed</span><button type="button" class="copy-button" id="copy-name" disabled>Copy</button></dd></div>
+            <div class="bank-row"><dt>BSB</dt><dd><span class="bank-value" id="bank-bsb">To be confirmed</span><button type="button" class="copy-button" id="copy-bsb" disabled>Copy</button></dd></div>
+            <div class="bank-row"><dt>Account number</dt><dd><span class="bank-value" id="bank-account">To be confirmed</span><button type="button" class="copy-button" id="copy-account" disabled>Copy</button></dd></div>
+            <div class="bank-row reference"><dt>Payment reference</dt><dd><span class="bank-value" id="bank-reference"></span><button type="button" class="copy-button" id="copy-reference" disabled>Copy</button></dd><p class="bank-help" id="reference-help">Enter this in your banking app’s reference or description field so we can match your payment.</p></div>
+          </dl>
+          <div class="payment-next"><h3 id="payment-next-title">What happens next?</h3><p id="payment-next-copy">We’ll email you when we’ve confirmed your payment. We dispatch within 1–3 business days after payment is confirmed.</p></div>
+          <p class="sr-only" id="copy-message" role="status" aria-live="polite"></p>
+        </section>
+        <section class="state-panel" id="state-panel" aria-labelledby="state-heading" hidden><p class="eyebrow muted" id="state-eyebrow">Your order</p><h2 id="state-heading"></h2><p id="state-description"></p><div class="tracking-details" id="tracking-details" hidden><p class="eyebrow muted">Tracking number</p><p class="tracking-number" id="tracking-number"></p><p class="small muted">Use this number on the carrier’s tracking website. Tracking can take a little time to appear after dispatch.</p></div></section>
+        <aside class="order-aside">
+          <section class="panel" aria-labelledby="summary-heading"><h2 id="summary-heading">Order summary</h2><div class="compact-product"><img src="/assets/hat-front-logo-v1.webp" width="144" height="144" alt="Navy Los Niños snapback"><div><h3 id="product-name">Navy snapback</h3><p id="product-quantity"></p></div></div><dl class="summary-lines"><div class="summary-line"><dt>Hat subtotal</dt><dd id="subtotal">To be set</dd></div><div class="summary-line"><dt>Shipping</dt><dd id="shipping-cost">To be confirmed</dd></div></dl><div class="summary-total"><span>Total <small>AUD</small></span><strong id="order-total">To be set</strong></div></section>
+          <section class="panel" aria-labelledby="address-heading"><h2 id="address-heading">Shipping to</h2><p class="address-lines" id="shipping-address"></p><hr class="rule"><p class="small muted" id="customer-email"></p></section>
+        </aside>
+      </div>
+      <div class="order-help"><p id="order-help-copy">Need to change something? Reply to your order email and include your order reference. Keep this order link private—it contains your delivery details.</p><button class="button button-secondary button-small" id="refresh-order" type="button">Refresh order status</button></div>
+      <div class="notice" id="refresh-message" role="status" aria-live="polite"></div>
+    </div>
+    <noscript><p class="no-script">Please enable JavaScript to view your order details.</p></noscript>
+  </main>
+  <footer class="site-footer"><p>Los Niños · Con Sueños</p><p>Good things start with a dream.</p></footer>
+</body>
+</html>

@@ -1,5 +1,6 @@
 """Package the maintained storefront at the Pages root, including only used assets."""
 import json
+import argparse
 import re
 import shutil
 from pathlib import Path
@@ -35,7 +36,7 @@ def source_files():
     return sorted(files)
 
 
-def build():
+def build(commerce_enabled=False):
     files = source_files()
     OUTPUT.mkdir(exist_ok=True)
     expected = set()
@@ -47,9 +48,21 @@ def build():
             text = source.read_text(encoding='utf-8').replace('../../../assets/', 'assets/')
             if source.name == 'index.html':
                 text = text.replace('<head>', '<head>\n  <meta name="robots" content="noindex,nofollow">')
+                if commerce_enabled:
+                    text = text.replace('<head>', '<head>\n  <meta name="los-ninos-commerce" content="enabled">')
             destination.write_text(text, encoding='utf-8')
         else:
             shutil.copyfile(source, destination)
+    # Checkout/admin assets share the storefront origin so requests and auth
+    # stay same-origin. Runtime secrets and database files are never packaged.
+    commerce = ROOT / 'commerce/public'
+    if commerce.is_dir():
+        for source in sorted(commerce.rglob('*')):
+            if source.is_file() and source.suffix in {'.html', '.css', '.js'}:
+                destination = OUTPUT / source.relative_to(commerce)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, destination)
+                expected.add(destination)
     (OUTPUT / '.nojekyll').write_text('', encoding='utf-8')
     expected.add(OUTPUT / '.nojekyll')
     # Refuse stale output rather than accidentally publishing an unrelated file.
@@ -61,4 +74,6 @@ def build():
 
 
 if __name__ == '__main__':
-    build()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--commerce', action='store_true', help='Enable the Worker-backed checkout entry point')
+    build(parser.parse_args().commerce)

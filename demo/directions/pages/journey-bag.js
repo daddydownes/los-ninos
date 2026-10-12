@@ -4,7 +4,7 @@
   const source = document.currentScript?.src || location.href;
   const thumbnail = new URL('../../../assets/hat-front-logo-v1.webp', source).href;
   const storageKey = 'los-ninos-preview-bag-v1';
-  const limit = 10;
+  let limit = 10;
   // Leave the completed button feedback readable before opening the drawer.
   const confirmationDuration = 1000;
   const closeDuration = 240;
@@ -29,6 +29,7 @@
     let queuedOpen = null;
     let expectedCloseEvents = 0;
     let backdropPointer = null;
+    let checkoutCatalog = null;
 
     function loadQuantity() {
       try {
@@ -76,7 +77,11 @@
         <p class="journey-bag-limit" hidden>Maximum quantity: 10.</p>
         <p class="journey-bag-status" role="status" aria-live="polite" aria-atomic="true"></p>
       </div>
-      <div class="journey-bag-footer"><button type="button" class="journey-bag-continue">Continue exploring ${arrowIcon}</button></div>`;
+      <div class="journey-bag-footer">
+        <button type="button" class="journey-bag-shop journey-bag-checkout" hidden>Checkout ${arrowIcon}</button>
+        <p class="journey-bag-checkout-note" hidden></p>
+        <button type="button" class="journey-bag-continue">Continue exploring ${arrowIcon}</button>
+      </div>`;
     document.body.append(dialog);
 
     // This live region is available during the brief confirmation before the dialog opens.
@@ -96,6 +101,8 @@
     const status = dialog.querySelector('.journey-bag-status');
     const closeButton = dialog.querySelector('.journey-bag-close');
     const shopButton = dialog.querySelector('.journey-bag-shop');
+    const checkoutButton = dialog.querySelector('.journey-bag-checkout');
+    const checkoutNote = dialog.querySelector('.journey-bag-checkout-note');
 
     function isBagState(state) {
       const marker = state?.lnBag;
@@ -150,6 +157,14 @@
       minus.disabled = quantity <= 1;
       plus.disabled = quantity >= limit;
       limitNote.hidden = quantity < limit;
+      limitNote.textContent = `Maximum quantity: ${limit}.`;
+      checkoutButton.hidden = !checkoutCatalog || quantity === 0;
+      checkoutNote.hidden = checkoutButton.hidden;
+      if (checkoutCatalog) {
+        checkoutButton.disabled = !checkoutCatalog.acceptingOrders || quantity > checkoutCatalog.product.available;
+        checkoutButton.firstChild.textContent = checkoutCatalog.mode === 'preview' ? 'Preview checkout ' : 'Checkout ';
+        checkoutNote.textContent = !checkoutCatalog.acceptingOrders ? 'Checkout is not open yet.' : quantity > checkoutCatalog.product.available ? 'This quantity is not available.' : checkoutCatalog.mode === 'preview' ? 'Test orders only. No payments or emails.' : 'Pay by bank transfer after placing your order.';
+      }
       document.querySelectorAll('[data-bag-count]').forEach(slot => { slot.textContent = String(quantity); });
       document.querySelectorAll('[data-bag-open]').forEach(trigger => {
         trigger.setAttribute('aria-label', `Open bag, ${quantity} ${quantity === 1 ? 'item' : 'items'}`);
@@ -332,6 +347,12 @@
     });
     closeButton.addEventListener('click', () => close());
     dialog.querySelector('.journey-bag-continue').addEventListener('click', () => close());
+    checkoutButton.addEventListener('click', () => {
+      if (!quantity || checkoutButton.disabled) return;
+      const url = new URL('checkout.html', source);
+      url.searchParams.set('quantity', String(quantity));
+      close({ navigate: () => location.assign(url.href) });
+    });
     shopButton.addEventListener('click', () => close({ navigate: () => {
       if (window.LosNinosJourney?.navigateToShop) window.LosNinosJourney.navigateToShop();
       else location.hash = 'shop';
@@ -367,7 +388,7 @@
       saveQuantity();
       render();
       if (plus.disabled) minus.focus({ preventScroll: true });
-      announce(quantity === limit ? 'Quantity 10. Maximum quantity reached.' : `Quantity ${quantity}.`);
+      announce(quantity === limit ? `Quantity ${limit}. Maximum quantity reached.` : `Quantity ${quantity}.`);
     });
     dialog.querySelector('.journey-bag-remove').addEventListener('click', () => {
       quantity = 0;
@@ -387,7 +408,7 @@
       if (pendingAdd) return;
       if (quantity >= limit) {
         open(addTrigger);
-        announce('Maximum quantity: 10.');
+        announce(`Maximum quantity: ${limit}.`);
         return;
       }
       quantity += 1;
@@ -435,6 +456,16 @@
     cleanMalformedMarker();
     render();
     window.LosNinosBag = { open, close, render, getQuantity: () => quantity };
+    // The original static preview stays usable when no checkout API is hosted.
+    if (document.querySelector('meta[name="los-ninos-commerce"][content="enabled"]')) fetch(new URL('api/catalog', source), { credentials: 'same-origin' })
+      .then(response => response.ok ? response.json() : null)
+      .then(catalog => {
+        if (!catalog || !Number.isInteger(catalog.product?.maxQuantity) || !Number.isInteger(catalog.product?.available)) return;
+        checkoutCatalog = catalog;
+        limit = Math.max(1, Math.min(10, catalog.product.maxQuantity));
+        if (quantity > limit) { quantity = limit; saveQuantity(); announce(`The order limit is now ${limit}. Your bag has been updated.`); }
+        render();
+      }).catch(() => {});
     // Let the page finish its own initial section alignment before restoring an overlay.
     if (isBagState(history.state)) requestAnimationFrame(() => {
       if (isBagState(history.state) && phase === 'closed') displayBag(fallbackOpener(), true);

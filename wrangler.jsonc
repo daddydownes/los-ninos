@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "los-ninos-shop",
+  "main": "commerce/worker.mjs",
+  "compatibility_date": "2026-10-12",
+  "assets": {
+    "directory": "./_site",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "los-ninos-orders",
+    "database_id": "REPLACE_WITH_OWNER_DATABASE_ID"
+  }],
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": {
+    "STORE_MODE": "preview",
+    "LOCAL_PREVIEW": "false",
+    "PUBLIC_STORE_URL": "",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "OWNER_EMAILS": "",
+    "EMAIL_FROM": ""
+  },
+  "observability": { "enabled": false }
+}
