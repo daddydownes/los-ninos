@@ -10,7 +10,7 @@
   <link rel="icon" href="/assets/brand-icon.svg">
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="commerce.css">
-  <script type="module" src="checkout.js"></script>
+  <script type="module" src="checkout.js?v=2"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to checkout</a>
@@ -19,7 +19,7 @@
     <a class="header-link" href="./"><span class="arrow" aria-hidden="true">←</span> Back to the collection</a>
   </header>
   <main class="checkout-wrap" id="main">
-    <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label">Preview</span><p><strong>Test details only.</strong> No payment or emails. Product price and postage are still being finalised.</p></div>
+    <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label">Preview</span><p><strong>Test details only.</strong> No payment or emails. Postage is still being finalised.</p></div>
     <div class="notice notice-error" id="catalog-error" role="alert" hidden></div>
     <div class="checkout-intro"><p class="eyebrow muted">CON SUEÑOS · AUSTRALIA</p><h1>Make it yours.</h1><p id="checkout-intro-copy">Your details first. Then we’ll show you how to pay by bank transfer.</p></div>
     <div class="checkout-grid">
@@ -53,7 +53,7 @@
         <p class="eyebrow muted" id="summary-heading">Your order</p>
         <div class="summary-product"><img class="summary-product-image" src="/assets/hat-front-logo-v1.webp" alt="Navy Los Niños snapback with white embroidery" width="224" height="224"><div><h2 id="product-name">Navy snapback</h2><p class="product-caption">Navy · Adjustable fit</p><div class="quantity-field"><label for="quantity">Qty</label><div class="quantity-control"><button type="button" id="quantity-minus" aria-label="Decrease quantity" disabled>−</button><input id="quantity" name="quantity" form="checkout-form" type="number" min="1" max="10" value="1" inputmode="numeric" required aria-label="Hat quantity" disabled><button type="button" id="quantity-plus" aria-label="Increase quantity" disabled>+</button></div></div></div></div>
         <p id="stock-message" class="stock-message"></p>
-        <dl class="summary-lines"><div class="summary-line"><dt id="subtotal-label">Hat subtotal</dt><dd id="subtotal">To be set</dd></div><div class="summary-line"><dt>Shipping · Australia</dt><dd id="shipping-cost">To be confirmed</dd></div></dl>
+        <dl class="summary-lines"><div class="summary-line"><dt id="subtotal-label">Hat subtotal</dt><dd id="subtotal">To be set</dd></div><div class="summary-line"><dt>Shipping · Australia</dt><dd id="shipping-cost">To be determined</dd></div></dl>
         <div class="summary-total"><span>Total <small>AUD</small></span><strong id="total">To be set</strong></div>
         <div class="summary-notes"><p><strong><span class="summary-note-number">01</span> Place your order</strong>We’ll save your order and send your bank transfer instructions by email.</p><p><strong><span class="summary-note-number">02</span> Pay by bank transfer</strong>Use your order reference so we can match your payment.</p><p><strong><span class="summary-note-number">03</span> On its way</strong>We dispatch within 1–3 business days after payment is confirmed.</p></div>
       </aside>

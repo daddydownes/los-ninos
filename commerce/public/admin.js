@@ -2,7 +2,7 @@ const $ = (selector, parent = document) => parent.querySelector(selector);
 const state = { orders: [], selectedId: null, order: null, settings: null, listRequest: 0, detailRequest: 0, busy: false };
 const statuses = { awaiting_payment: 'Awaiting payment', paid: 'Paid — ready to pack', shipped: 'Shipped', cancelled: 'Cancelled' };
 const emailKinds = { awaiting_payment: 'Payment instructions', paid: 'Payment confirmation', shipped: 'Shipping confirmation', owner: 'Owner notification', owner_order: 'Owner notification' };
-const money = (cents) => cents === null || cents === undefined || !Number.isFinite(Number(cents)) ? 'To be set' : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(Number(cents) / 100);
+const money = (cents, placeholder = 'To be set') => cents === null || cents === undefined || !Number.isFinite(Number(cents)) ? placeholder : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(Number(cents) / 100);
 const date = (value) => { const parsed = new Date(value); return value && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Date unavailable'; };
 const element = (tag, className, content) => { const node = document.createElement(tag); if (className) node.className = className; if (content !== undefined) node.textContent = String(content); return node; };
 const notice = (message, isError = false) => { const node = $('#admin-message'); node.textContent = message; node.hidden = !message; node.classList.toggle('notice-error', isError); };
@@ -67,7 +67,7 @@ function renderOrderList() {
     const top = element('div', 'admin-order-card-top');
     top.append(element('strong', '', order.reference || order.id), pill(order.status));
     const bottom = element('div', 'admin-order-card-bottom');
-    bottom.append(element('span', '', date(order.createdAt)), element('strong', '', money(order.totalCents)));
+    bottom.append(element('span', '', date(order.createdAt)), element('strong', '', money(order.totalCents, 'Pending shipping')));
     card.append(top, element('p', 'admin-order-card-name', order.customer?.name || 'Customer'));
     if (order.preview) card.append(element('p', 'admin-order-card-preview', 'Preview order'));
     card.append(bottom);
@@ -108,7 +108,7 @@ function renderOrderDetail() {
   productDescription.append(element('p', '', order.productName || 'Navy snapback'), element('p', 'muted', `Quantity ${order.quantity} · ${money(order.unitPriceCents)} each`));
   product.append(productDescription); summary.append(product);
   const facts = element('dl', 'admin-facts');
-  facts.append(fact('Shipping', money(order.shippingCents)), fact('Total (AUD)', money(order.totalCents), true));
+  facts.append(fact('Shipping', money(order.shippingCents, 'To be determined')), fact('Total (AUD)', money(order.totalCents, typeof order.unitPriceCents === 'number' ? 'Pending shipping' : 'To be set'), true));
   summary.append(facts); panel.append(summary);
   const contact = section(''); contact.firstElementChild.remove();
   const columns = element('div', 'admin-contact-columns');

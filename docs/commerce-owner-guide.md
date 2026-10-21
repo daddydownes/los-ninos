@@ -6,8 +6,9 @@ You check the receiving bank account yourself, then confirm payment and dispatch
 through your private dashboard.
 
 This handover does not mean the shop is live. The domain, sending email, owner
-accounts, final price, postage, stock, and bank details still need to be confirmed
-and connected. The [setup guide](commerce-setup.md) covers those steps.
+accounts, postage, stock, and bank details still need to be confirmed
+and connected. The confirmed hat price is A$25 each, with shipping to be determined.
+The [setup guide](commerce-setup.md) covers those steps.
 
 ## Sign in
 
@@ -72,7 +73,7 @@ hat a second time when editing stock.
 
 | Setting | What to enter |
 | --- | --- |
-| Hat price (AUD) | The confirmed selling price, not a sample or planning price. |
+| Hat price (AUD) | A$25 per hat, as confirmed by the owner. |
 | Total stock on hand | Your physical hat count, including existing reservations. |
 | Maximum hats per order | Keep this at **1** until packed postage for larger orders is checked. |
 | Flat shipping per order (AUD) | The actual confirmed Australian shipping charge for the maximum allowed quantity. |
@@ -93,8 +94,8 @@ Store settings alone do not switch on live ordering.
 
 The domain and sender email are separate setup tasks. Confirm who owns the
 domain, its renewal, the Cloudflare account, the Resend account, and the sender
-address before launch. No live bank details or final selling price are supplied
-by this repository.
+address before launch. Live bank details are entered privately through the
+protected owner dashboard.
 
 ## Check customer emails
 

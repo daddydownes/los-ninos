@@ -45,8 +45,8 @@ function render(order) {
   text($('product-name'), order.productName || 'Navy snapback');
   text($('product-quantity'), `Navy · Quantity ${order.quantity}`);
   text($('subtotal'), money(typeof order.unitPriceCents === 'number' ? order.unitPriceCents * order.quantity : null));
-  text($('shipping-cost'), money(order.shippingCents, 'To be confirmed'));
-  text($('order-total'), money(order.totalCents));
+  text($('shipping-cost'), money(order.shippingCents, 'To be determined'));
+  text($('order-total'), money(order.totalCents, typeof order.unitPriceCents === 'number' ? 'Pending shipping' : 'To be set'));
   text($('shipping-address'), [order.customer?.name, formatAddress(order.shippingAddress)].filter(Boolean).join('\n'));
   text($('customer-email'), order.customer?.email);
   $('payment-panel').hidden = !awaiting;

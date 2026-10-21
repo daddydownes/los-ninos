@@ -64,11 +64,11 @@ async function ownerToken(env) {
   };
 }
 
-test('preview keeps amounts unknown, stock separate, and requires loopback opt-in', async t => {
+test('preview shows the confirmed hat price, keeps postage unknown and stock separate, and requires loopback opt-in', async t => {
   const env = await setup(t);
   const catalog = await call(env, '/api/catalog');
   assert.equal(catalog.data.acceptingOrders, true);
-  assert.equal(catalog.data.product.priceCents, null);
+  assert.equal(catalog.data.product.priceCents, 2500);
   assert.equal(catalog.data.product.maxQuantity, 1);
   assert.equal(catalog.data.shipping.feeCents, null);
   const remote = await call(env, '/api/orders', 'POST', checkout(), {}, 'https://preview.example.test');
@@ -76,6 +76,7 @@ test('preview keeps amounts unknown, stock separate, and requires loopback opt-i
   const result = await call(env, '/api/orders', 'POST', checkout());
   assert.equal(result.status, 201, JSON.stringify(result.data));
   assert.equal(result.data.order.totalCents, null);
+  assert.equal(result.data.order.unitPriceCents, 2500);
   assert.equal(result.data.order.preview, true);
   assert.deepEqual(result.data.order.bank, { accountName: '', bsb: '', accountNumber: '' });
   assert.deepEqual(result.data.order.emails.map(item => item.status), ['preview']);

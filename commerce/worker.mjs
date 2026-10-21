@@ -134,7 +134,7 @@ async function catalog(request, env) {
   const mode = env.STORE_MODE === 'live' ? 'live' : 'preview';
   const stock = await stmt(env, 'SELECT stock_on_hand, reserved FROM inventory WHERE mode=?', mode).first();
   return response({ mode, revision: config.revision, acceptingOrders: mode === 'live' ? missingSetup(config, env).length === 0 : isLocalPreview(request, env),
-    product: { ...PRODUCT, priceCents: mode === 'preview' ? null : config.productPriceCents,
+    product: { ...PRODUCT, priceCents: config.productPriceCents,
       available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
     shipping: { country: 'AU', feeCents: mode === 'preview' ? null : config.shippingCents },
     dispatchDays: '1–3 business days' });
@@ -215,7 +215,7 @@ async function placeOrder(request, env, ctx) {
   const token = await orderToken(env, id, body.idempotencyKey, local);
   const createdAt = nowISO();
   const reference = `LN-${id.replace(/-/g, '').slice(0, 12).toUpperCase()}`;
-  const snapshot = { productName: PRODUCT.name, unitPriceCents: preview ? null : config.productPriceCents,
+  const snapshot = { productName: PRODUCT.name, unitPriceCents: config.productPriceCents,
     shippingCents: preview ? null : config.shippingCents,
     totalCents: preview ? null : config.productPriceCents * body.quantity + config.shippingCents,
     customer: body.customer, shippingAddress: body.shippingAddress,
