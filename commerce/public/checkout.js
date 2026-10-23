@@ -137,20 +137,34 @@ form.addEventListener('submit', async (event) => {
     submitting = false;
     renderCatalog();
     announce($('checkout-message'), message, true);
-    $('checkout-message').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    $('checkout-message').scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
 });
 
-api('/api/catalog').then((result) => {
-  if (!result.product || !result.shipping) throw new Error('The shop is still being prepared. Please check back soon.');
-  catalog = result;
-  renderCatalog();
-}).catch((error) => {
-  $('catalog-error').hidden = false;
-  announce($('catalog-error'), error.message, true);
-  text(submitButton, 'Checkout unavailable');
-  text($('checkout-intro-copy'), 'The shop is still being prepared. You can return to the collection using the link above.');
-});
+let loadingCatalog = false;
+async function loadCatalog() {
+  if (loadingCatalog) return;
+  loadingCatalog = true;
+  $('catalog-error').hidden = true;
+  $('catalog-retry-wrap').hidden = true;
+  submitButton.disabled = true;
+  text(submitButton, 'Loading checkout…');
+  try {
+    const result = await api('/api/catalog');
+    if (!result.product || !result.shipping) throw new Error('The shop is still being prepared. Please check back soon.');
+    catalog = result;
+    renderCatalog();
+  } catch (error) {
+    $('catalog-error').hidden = false;
+    $('catalog-retry-wrap').hidden = false;
+    announce($('catalog-error'), error.message, true);
+    text(submitButton, 'Checkout unavailable');
+  } finally {
+    loadingCatalog = false;
+  }
+}
+$('catalog-retry').addEventListener('click', loadCatalog);
+loadCatalog();
 
 // Returning from confirmation must not leave a cached form in its saving state.
 window.addEventListener('pageshow', (event) => {

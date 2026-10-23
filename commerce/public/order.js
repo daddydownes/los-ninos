@@ -107,6 +107,11 @@ async function loadOrder(refresh = false) {
     return;
   }
   loading = true;
+  $('order-retry-wrap').hidden = true;
+  if (!currentOrder) {
+    $('order-error').hidden = true;
+    $('order-loading').hidden = false;
+  }
   $('refresh-order').disabled = true;
   try {
     const { order } = await api(`/api/orders/${encodeURIComponent(orderId)}`, { headers: { 'X-Order-Token': token } });
@@ -118,6 +123,7 @@ async function loadOrder(refresh = false) {
     if (currentOrder) announce($('refresh-message'), error.message, true);
     else {
       $('order-error').hidden = false;
+      $('order-retry-wrap').hidden = [401, 403, 404].includes(error.status);
       announce($('order-error'), error.status === 401 || error.status === 403 || error.status === 404 ? 'We couldn’t open this private order link. Open the order confirmation in the browser you used at checkout, or reply to your order email for help.' : error.message, true);
     }
   } finally {
@@ -128,4 +134,5 @@ async function loadOrder(refresh = false) {
 }
 
 $('refresh-order').addEventListener('click', () => loadOrder(true));
+$('order-retry').addEventListener('click', () => loadOrder());
 loadOrder();

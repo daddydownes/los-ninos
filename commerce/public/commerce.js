@@ -34,32 +34,50 @@ export function safeDate(iso) {
 }
 
 export async function api(path, options = {}) {
+  const { timeoutMs = 15000, signal, ...requestOptions } = options;
   const headers = new Headers(options.headers || {});
   headers.set('Accept', 'application/json');
   const method = (options.method || 'GET').toUpperCase();
   if (!['GET', 'HEAD'].includes(method)) headers.set('X-Requested-With', 'LosNinos');
   if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  let response;
+  // A mobile connection can stall after headers, too. Keep the deadline active
+  // until the JSON body is read, and leave mutation retries to the caller's key.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutError = () => new Error('The connection took too long. Please try again.');
+  const abort = () => controller.abort();
+  if (signal?.aborted) abort();
+  else signal?.addEventListener('abort', abort, { once: true });
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
   try {
-    response = await fetch(path, { ...options, headers, credentials: 'same-origin', cache: 'no-store' });
-  } catch (_) {
-    throw new Error('We couldn’t connect. Check your connection and try again.');
+    let response;
+    try {
+      response = await fetch(path, { ...requestOptions, headers, signal: controller.signal, credentials: 'same-origin', cache: 'no-store' });
+    } catch (_) {
+      throw timedOut ? timeoutError() : new Error('We couldn’t connect. Check your connection and try again.');
+    }
+    let result;
+    try { result = await response.json(); } catch (_) {
+      if (timedOut) throw timeoutError();
+      result = null;
+    }
+    if (!response.ok) {
+      const serverMessage = typeof result?.error === 'string' ? result.error : (result?.error?.message || result?.message);
+      const error = new Error(typeof serverMessage === 'string' ? serverMessage : response.status === 404
+        ? 'Ordering is not connected on this preview website yet. Please return when the shop opens.'
+        : response.status === 401 || response.status === 403
+          ? 'Your session is not authorised. Please sign in again using the owner’s private link.'
+          : 'Something went wrong. Please try again.');
+      error.status = response.status;
+      error.data = result;
+      throw error;
+    }
+    if (!result || typeof result !== 'object') throw new Error('Ordering is not connected on this preview website yet. Please return when the shop opens.');
+    return result;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', abort);
   }
-  let result;
-  try { result = await response.json(); } catch (_) { result = null; }
-  if (!response.ok) {
-    const serverMessage = typeof result?.error === 'string' ? result.error : (result?.error?.message || result?.message);
-    const error = new Error(typeof serverMessage === 'string' ? serverMessage : response.status === 404
-      ? 'Ordering is not connected on this preview website yet. Please return when the shop opens.'
-      : response.status === 401 || response.status === 403
-        ? 'Your session is not authorised. Please sign in again using the owner’s private link.'
-        : 'Something went wrong. Please try again.');
-    error.status = response.status;
-    error.data = result;
-    throw error;
-  }
-  if (!result || typeof result !== 'object') throw new Error('Ordering is not connected on this preview website yet. Please return when the shop opens.');
-  return result;
 }
 
 export async function copyValue(button, value, messageElement, label) {

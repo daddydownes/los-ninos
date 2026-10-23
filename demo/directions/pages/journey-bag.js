@@ -30,6 +30,9 @@
     let expectedCloseEvents = 0;
     let backdropPointer = null;
     let checkoutCatalog = null;
+    const commerceEnabled = Boolean(document.querySelector('meta[name="los-ninos-commerce"][content="enabled"]'));
+    let catalogPhase = commerceEnabled ? 'loading' : 'idle';
+    let catalogRequest = null;
 
     function loadQuantity() {
       try {
@@ -158,9 +161,17 @@
       plus.disabled = quantity >= limit;
       limitNote.hidden = quantity < limit;
       limitNote.textContent = `Maximum quantity: ${limit}.`;
-      checkoutButton.hidden = !checkoutCatalog || quantity === 0;
+      checkoutButton.hidden = !commerceEnabled || quantity === 0;
       checkoutNote.hidden = checkoutButton.hidden;
-      if (checkoutCatalog) {
+      if (catalogPhase === 'loading') {
+        checkoutButton.disabled = true;
+        checkoutButton.firstChild.textContent = 'Loading checkout… ';
+        checkoutNote.textContent = 'Checking availability.';
+      } else if (catalogPhase === 'error') {
+        checkoutButton.disabled = false;
+        checkoutButton.firstChild.textContent = 'Retry checkout ';
+        checkoutNote.textContent = 'Checkout could not load. Check your connection and try again.';
+      } else if (checkoutCatalog) {
         checkoutButton.disabled = !checkoutCatalog.acceptingOrders || quantity > checkoutCatalog.product.available;
         checkoutButton.firstChild.textContent = checkoutCatalog.mode === 'preview' ? 'Preview checkout ' : 'Checkout ';
         checkoutNote.textContent = !checkoutCatalog.acceptingOrders ? 'Checkout is not open yet.' : quantity > checkoutCatalog.product.available ? 'This quantity is not available.' : checkoutCatalog.mode === 'preview' ? 'Test orders only. No payments or emails.' : 'Pay by bank transfer after placing your order.';
@@ -243,6 +254,7 @@
       lockPage(position);
       dialog.classList.remove('journey-bag-closing');
       dialog.showModal();
+      if (catalogPhase === 'error') loadCatalog();
       phase = 'open';
       closeButton.focus({ preventScroll: true });
     }
@@ -349,6 +361,8 @@
     dialog.querySelector('.journey-bag-continue').addEventListener('click', () => close());
     checkoutButton.addEventListener('click', () => {
       if (!quantity || checkoutButton.disabled) return;
+      if (catalogPhase === 'error') { loadCatalog(); return; }
+      if (catalogPhase !== 'ready') return;
       const url = new URL('checkout.html', source);
       url.searchParams.set('quantity', String(quantity));
       close({ navigate: () => location.assign(url.href) });
@@ -439,6 +453,7 @@
       loadQuantity();
       render();
       if (!event.persisted) return;
+      if (catalogPhase === 'error') loadCatalog();
       if (isBagState(history.state)) {
         if (phase === 'closed') displayBag(fallbackOpener(), true);
       } else if (phase !== 'closed') {
@@ -456,16 +471,38 @@
     cleanMalformedMarker();
     render();
     window.LosNinosBag = { open, close, render, getQuantity: () => quantity };
-    // The original static preview stays usable when no checkout API is hosted.
-    if (document.querySelector('meta[name="los-ninos-commerce"][content="enabled"]')) fetch(new URL('api/catalog', source), { credentials: 'same-origin' })
-      .then(response => response.ok ? response.json() : null)
-      .then(catalog => {
-        if (!catalog || !Number.isInteger(catalog.product?.maxQuantity) || !Number.isInteger(catalog.product?.available)) return;
+    async function loadCatalog() {
+      if (!commerceEnabled || catalogRequest) return;
+      const controller = new AbortController();
+      catalogRequest = controller;
+      catalogPhase = 'loading';
+      render();
+      // A network switch or a request that never returns must not make checkout
+      // disappear for the rest of this visit. Cover the response body as well.
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(new URL('api/catalog', source), {
+          credentials: 'same-origin', signal: controller.signal, cache: 'no-store'
+        });
+        if (!response.ok) throw new Error('Checkout unavailable');
+        const catalog = await response.json();
+        if (!catalog || !Number.isInteger(catalog.product?.maxQuantity) || !Number.isInteger(catalog.product?.available)) throw new Error('Checkout unavailable');
         checkoutCatalog = catalog;
+        catalogPhase = 'ready';
         limit = Math.max(1, Math.min(10, catalog.product.maxQuantity));
         if (quantity > limit) { quantity = limit; saveQuantity(); announce(`The order limit is now ${limit}. Your bag has been updated.`); }
+      } catch (_) {
+        catalogPhase = 'error';
+      } finally {
+        clearTimeout(timeout);
+        catalogRequest = null;
         render();
-      }).catch(() => {});
+      }
+    }
+    // The original static preview stays usable when no checkout API is hosted.
+    // Retry only on a deliberate retry/reopen or a restored connection.
+    window.addEventListener('online', () => { if (catalogPhase === 'error') loadCatalog(); });
+    loadCatalog();
     // Let the page finish its own initial section alignment before restoring an overlay.
     if (isBagState(history.state)) requestAnimationFrame(() => {
       if (isBagState(history.state) && phase === 'closed') displayBag(fallbackOpener(), true);

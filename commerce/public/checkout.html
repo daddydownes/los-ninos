@@ -10,7 +10,7 @@
   <link rel="icon" href="/assets/brand-icon.svg">
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="commerce.css">
-  <script type="module" src="checkout.js?v=2"></script>
+  <script type="module" src="checkout.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to checkout</a>
@@ -21,6 +21,7 @@
   <main class="checkout-wrap" id="main">
     <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label">Preview</span><p><strong>Test details only.</strong> No payment or emails.</p></div>
     <div class="notice notice-error" id="catalog-error" role="alert" hidden></div>
+    <p id="catalog-retry-wrap" hidden><button class="button button-secondary" id="catalog-retry" type="button">Retry checkout</button></p>
     <div class="checkout-intro"><p class="eyebrow muted">CON SUEÑOS · AUSTRALIA</p><h1>Make it yours.</h1><p id="checkout-intro-copy">Your details first. Then we’ll show you how to pay by bank transfer.</p></div>
     <div class="checkout-grid">
       <form id="checkout-form">
