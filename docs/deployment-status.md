@@ -69,7 +69,7 @@ No real email, payment or fulfilment has been performed in this setup step.
 - 61 commerce tests pass, covering checkout, owner authentication, idempotency,
   inventory, cleanup races, exact test recipients, send retries and queue
   isolation. Provider calls are mocked in automated tests.
-- 18 targeted browser checks pass across desktop Chrome and a Pixel profile,
+- 20 targeted browser checks pass across desktop Chrome and a Pixel profile,
   using the installed Chromium 1234 binary. The local browser rehearsal also
   completed checkout, simulated payment and dispatch, then deleted only its
   disposable order and restored test availability from 8 back to 9.

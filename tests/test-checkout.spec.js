@@ -59,6 +59,28 @@ test('test URL cannot enable purchase without owner access or complete setup', a
   await expect(page.getByRole('link', { name: 'Owner dashboard' })).toBeVisible();
 });
 
+test('a deleted test stops the old form and a fresh checkout gets a new retry key', async ({ page }) => {
+  const attempts = [];
+  await page.route('**/api/admin/test-orders', route => {
+    attempts.push(route.request().postDataJSON());
+    return attempts.length === 1
+      ? route.fulfill({ status: 409, json: { error: 'Test order deleted.', code: 'test_order_deleted' } })
+      : route.fulfill({ status: 503, json: { error: 'Fresh test received.' } });
+  });
+  await readyTest(page);
+  await fillAddress(page);
+  await page.getByRole('button', { name: 'Place test order & send emails' }).click();
+  await expect(page.locator('#checkout-message')).toContainText('Return to the owner dashboard');
+  await expect(page.getByRole('button', { name: 'Test order deleted', exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => sessionStorage.getItem('ln-checkout-email-test-pending-v1'))).toBeNull();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Place test order & send emails' })).toBeEnabled();
+  await fillAddress(page);
+  await page.getByRole('button', { name: 'Place test order & send emails' }).click();
+  await expect.poll(() => attempts.length).toBe(2);
+  expect(attempts[1].idempotencyKey).not.toBe(attempts[0].idempotencyKey);
+});
+
 test('ordinary preview still uses the public checkout without email-test capabilities', async ({ page }) => {
   let ownerRequests = 0;
   await page.route('**/api/admin/**', route => { ownerRequests++; return route.fulfill({ status: 403, json: { error: 'Denied' } }); });

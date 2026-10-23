@@ -13,6 +13,7 @@ let submitting = false;
 let retry = null;
 let quantityWasAdjusted = false;
 let completed = false;
+let deletedCheckout = false;
 const pendingKey = testCheckout ? 'ln-checkout-email-test-pending-v1' : 'ln-checkout-pending-v1';
 $('test-dashboard-link').hidden = !testCheckout;
 
@@ -74,14 +75,15 @@ function renderCatalog() {
     text($('email-help'), 'Use a test email address. No email will be sent in this preview.');
     text($('checkout-fineprint'), 'This creates a preview order only. Do not enter real customer details or send a bank transfer.');
   }
-  const accepting = catalog.acceptingOrders === true;
+  const accepting = catalog.acceptingOrders === true && !deletedCheckout;
   form.setAttribute('aria-busy', String(submitting));
   form.querySelectorAll('input, select').forEach((input) => { input.disabled = submitting; });
   submitButton.disabled = !accepting || limit === 0 || submitting;
-  text(submitButton, submitting ? 'Saving your order…' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : testCheckout ? 'Place test order & send emails' : preview ? 'Create test order' : 'Place order — pay by bank transfer');
+  text(submitButton, submitting ? 'Saving your order…' : deletedCheckout ? 'Test order deleted' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : testCheckout ? 'Place test order & send emails' : preview ? 'Create test order' : 'Place order — pay by bank transfer');
   if (limit === 0) text($('stock-message'), 'This hat is currently sold out.');
   else text($('stock-message'), quantityWasAdjusted ? `Your quantity was adjusted to ${getQuantity()}. Up to ${limit} ${limit === 1 ? 'hat can' : 'hats can'} currently be ordered.` : `Up to ${limit} ${limit === 1 ? 'hat' : 'hats'} per order.`);
-  if (!accepting) announce($('checkout-message'), testCheckout ? `Finish the test setup in the owner dashboard. ${testSetupMissing.join('. ')}` : preview ? 'Preview ordering is not available in this environment yet.' : 'We’re getting the shop ready. Ordering will open once the final details are confirmed.');
+  if (deletedCheckout) announce($('checkout-message'), 'This test order was deleted. Start a fresh checkout to test again.');
+  else if (!accepting) announce($('checkout-message'), testCheckout ? `Finish the test setup in the owner dashboard. ${testSetupMissing.join('. ')}` : preview ? 'Preview ordering is not available in this environment yet.' : 'We’re getting the shop ready. Ordering will open once the final details are confirmed.');
   updateSummary();
 }
 
@@ -116,7 +118,7 @@ async function requestKey(payload) {
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (submitting || !catalog?.acceptingOrders || !form.reportValidity()) return;
+  if (submitting || deletedCheckout || !catalog?.acceptingOrders || !form.reportValidity()) return;
   const read = (id) => $(id).value.trim();
   const payload = {
     catalogRevision: catalog.revision,
@@ -143,7 +145,14 @@ form.addEventListener('submit', async (event) => {
     location.assign(destination.href);
   } catch (error) {
     let message = error.message || 'Your order could not be saved. Please try again.';
-    if (error.status === 409) {
+    if (error.data?.code === 'test_order_deleted') {
+      // Stop this old form, but let a fresh checkout choose a new key. Keeping
+      // the rejected key in storage would trap subsequent rehearsals in retries.
+      deletedCheckout = true;
+      retry = null;
+      try { sessionStorage.removeItem(pendingKey); } catch (_) {}
+      message = testCheckout ? 'This test order was deleted. Return to the owner dashboard and choose Test purchase to start again.' : 'This test order was deleted. Open a fresh checkout to test again.';
+    } else if (error.status === 409) {
       if (error.data?.code === 'catalog_changed') {
         retry = null;
         try { sessionStorage.removeItem(pendingKey); } catch (_) {}
@@ -193,6 +202,6 @@ window.addEventListener('pageshow', (event) => {
   if (event.persisted && catalog) {
     submitting = false;
     renderCatalog();
-    if (completed) announce($('checkout-message'), 'Your previous order was received. Submitting the same details again will reopen that order.');
+    if (completed && !deletedCheckout) announce($('checkout-message'), 'Your previous order was received. Submitting the same details again will reopen that order.');
   }
 });
