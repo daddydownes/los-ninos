@@ -4,6 +4,7 @@ const $ = (id) => document.getElementById(id);
 const form = $('checkout-form');
 const quantityInput = $('quantity');
 const submitButton = $('submit-order');
+const reviewButton = $('review-order');
 const checkoutParams = new URLSearchParams(location.search);
 const testCheckout = checkoutParams.get('test') === '1';
 let testRecipient = null;
@@ -14,6 +15,7 @@ let retry = null;
 let quantityWasAdjusted = false;
 let completed = false;
 let deletedCheckout = false;
+let reviewedSignature = null;
 const pendingKey = testCheckout ? 'ln-checkout-email-test-pending-v1' : 'ln-checkout-pending-v1';
 $('test-dashboard-link').hidden = !testCheckout;
 
@@ -40,16 +42,51 @@ function getQuantity() {
   return Number.isInteger(value) && value >= 1 ? value : 1;
 }
 
+function checkoutPayload() {
+  const read = (id) => $(id).value.trim();
+  return {
+    catalogRevision: catalog.revision,
+    quantity: getQuantity(),
+    shippingQuoteCents: shippingForQuantity(getQuantity()),
+    customer: { name: read('customer-name'), email: read('customer-email'), phone: read('customer-phone') },
+    shippingAddress: { line1: read('address-line1'), line2: read('address-line2'), suburb: read('address-suburb'), state: read('address-state'), postcode: read('address-postcode'), country: 'AU' },
+  };
+}
+
+function shippingForQuantity(quantity) {
+  const shipping = catalog.shipping;
+  return Number.isInteger(shipping.tierFromQuantity) && Number.isInteger(shipping.tierFeeCents) && quantity >= shipping.tierFromQuantity
+    ? shipping.tierFeeCents : shipping.feeCents;
+}
+
+function invalidateReview() {
+  const wasReviewed = reviewedSignature !== null;
+  reviewedSignature = null;
+  if (catalog) updateSummary();
+  if (wasReviewed) announce($('checkout-message'), 'Your details changed. Review shipping and your total again before placing the order.');
+}
+
 function updateSummary() {
   if (!catalog) return;
   const quantity = getQuantity();
   const unit = catalog.product.priceCents;
-  const shipping = catalog.shipping.feeCents;
+  const shipping = shippingForQuantity(quantity);
+  const reviewed = reviewedSignature !== null;
+  const ready = catalog.acceptingOrders === true && !deletedCheckout && quantityLimit() > 0 && !submitting;
   text(document.querySelector('.product-caption'), typeof unit === 'number' ? `${money(unit)} each · Adjustable fit` : 'Adjustable fit');
   text($('subtotal-label'), quantity === 1 ? 'Hat subtotal' : `Hat subtotal · ${quantity} hats`);
   text($('subtotal'), money(typeof unit === 'number' ? unit * quantity : null));
-  text($('shipping-cost'), shipping === 0 ? 'Free' : money(shipping, 'To be determined'));
-  text($('total'), money(typeof unit === 'number' && typeof shipping === 'number' ? unit * quantity + shipping : null, typeof unit === 'number' ? 'Pending shipping' : 'To be set'));
+  text($('shipping-cost'), reviewed ? shipping === 0 ? 'Free' : money(shipping, 'To be determined') : 'Shown after delivery details');
+  text($('total-label'), reviewed ? 'Total' : 'Subtotal');
+  text($('total'), money(typeof unit === 'number' && (!reviewed || typeof shipping === 'number') ? unit * quantity + (reviewed ? shipping : 0) : null, typeof unit === 'number' ? 'Pending shipping' : 'To be set'));
+  text($('summary-heading'), reviewed ? 'Review your order' : 'Your order');
+  $('shipping-basis').hidden = !reviewed;
+  $('shipping-review-note').hidden = reviewed;
+  $('review-actions').hidden = !reviewed;
+  reviewButton.hidden = reviewed;
+  reviewButton.disabled = !ready;
+  submitButton.disabled = !ready || !reviewed;
+  $('edit-details').disabled = submitting;
   $('quantity-minus').disabled = submitting || quantity <= 1;
   $('quantity-plus').disabled = submitting || quantity >= quantityLimit();
   quantityInput.disabled = submitting || quantityLimit() === 0;
@@ -79,8 +116,8 @@ function renderCatalog() {
   const accepting = catalog.acceptingOrders === true && !deletedCheckout;
   form.setAttribute('aria-busy', String(submitting));
   form.querySelectorAll('input, select').forEach((input) => { input.disabled = submitting; });
-  submitButton.disabled = !accepting || limit === 0 || submitting;
   text(submitButton, submitting ? 'Saving your order…' : deletedCheckout ? 'Test order deleted' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : testCheckout ? 'Place test order & send emails' : preview ? 'Create test order' : 'Place order — pay by bank transfer');
+  text(reviewButton, deletedCheckout ? 'Test order deleted' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : 'Review order');
   if (limit === 0) text($('stock-message'), 'This hat is currently sold out.');
   else text($('stock-message'), quantityWasAdjusted ? `Your quantity was adjusted to ${getQuantity()}. Up to ${limit} ${limit === 1 ? 'hat can' : 'hats can'} currently be ordered.` : `Up to ${limit} ${limit === 1 ? 'hat' : 'hats'} per order.`);
   if (deletedCheckout) announce($('checkout-message'), 'This test order was deleted. Start a fresh checkout to test again.');
@@ -93,16 +130,22 @@ quantityInput.value = Number.isInteger(initialQuantity) && initialQuantity > 0 ?
 
 $('quantity-minus').addEventListener('click', () => {
   quantityInput.value = Math.max(1, getQuantity() - 1);
-  updateSummary();
+  invalidateReview();
 });
 $('quantity-plus').addEventListener('click', () => {
   quantityInput.value = Math.min(quantityLimit(), getQuantity() + 1);
-  updateSummary();
+  invalidateReview();
 });
-quantityInput.addEventListener('input', updateSummary);
+quantityInput.addEventListener('input', invalidateReview);
 quantityInput.addEventListener('change', () => {
   quantityInput.value = Math.min(Math.max(1, getQuantity()), Math.max(1, quantityLimit()));
-  updateSummary();
+  invalidateReview();
+});
+form.addEventListener('input', invalidateReview);
+form.addEventListener('change', invalidateReview);
+$('edit-details').addEventListener('click', () => {
+  invalidateReview();
+  $('address-line1').focus();
 });
 
 async function requestKey(payload) {
@@ -120,15 +163,22 @@ async function requestKey(payload) {
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (submitting || deletedCheckout || !catalog?.acceptingOrders || !form.reportValidity()) return;
-  const read = (id) => $(id).value.trim();
-  const payload = {
-    catalogRevision: catalog.revision,
-    quantity: getQuantity(),
-    customer: { name: read('customer-name'), email: read('customer-email'), phone: read('customer-phone') },
-    shippingAddress: { line1: read('address-line1'), line2: read('address-line2'), suburb: read('address-suburb'), state: read('address-state'), postcode: read('address-postcode'), country: 'AU' },
-  };
+  const payload = checkoutPayload();
   if (!payload.customer.name || !payload.shippingAddress.line1 || !payload.shippingAddress.suburb) {
     announce($('checkout-message'), 'Please complete your name and shipping address.', true);
+    return;
+  }
+  const signature = JSON.stringify(payload);
+  if (reviewedSignature !== signature) {
+    if (!Number.isSafeInteger(catalog.product.priceCents) || !Number.isSafeInteger(shippingForQuantity(payload.quantity))) {
+      announce($('checkout-message'), 'The price or shipping charge is not ready yet. Please try again later.', true);
+      return;
+    }
+    reviewedSignature = signature;
+    renderCatalog();
+    announce($('checkout-message'), 'Your shipping and full total are ready to review. No order has been placed yet.');
+    $('summary-heading').focus({ preventScroll: true });
+    $('order-summary').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     return;
   }
   submitting = true;
@@ -154,6 +204,7 @@ form.addEventListener('submit', async (event) => {
       try { sessionStorage.removeItem(pendingKey); } catch (_) {}
       message = testCheckout ? 'This test order was deleted. Return to the owner dashboard and choose Test purchase to start again.' : 'This test order was deleted. Open a fresh checkout to test again.';
     } else if (error.status === 409) {
+      reviewedSignature = null;
       if (error.data?.code === 'catalog_changed') {
         retry = null;
         try { sessionStorage.removeItem(pendingKey); } catch (_) {}
@@ -180,7 +231,9 @@ async function loadCatalog() {
   $('catalog-error').hidden = true;
   $('catalog-retry-wrap').hidden = true;
   submitButton.disabled = true;
-  text(submitButton, 'Loading checkout…');
+  reviewButton.disabled = true;
+  reviewedSignature = null;
+  text(reviewButton, 'Loading checkout…');
   try {
     const result = await fetchCatalog();
     if (!result.product || !result.shipping) throw new Error('The shop is still being prepared. Please check back soon.');
@@ -190,7 +243,7 @@ async function loadCatalog() {
     $('catalog-error').hidden = false;
     $('catalog-retry-wrap').hidden = false;
     announce($('catalog-error'), testCheckout && [401, 403].includes(error.status) ? 'Sign in to the owner dashboard, then choose Test purchase to open this checkout.' : error.message, true);
-    text(submitButton, 'Checkout unavailable');
+    text(reviewButton, 'Checkout unavailable');
   } finally {
     loadingCatalog = false;
   }

@@ -282,6 +282,8 @@ function populateSettings(settings) {
   const set = (name, value) => { form.elements.namedItem(name).value = value ?? ''; };
   set('productPrice', settings.productPriceCents == null ? '' : (settings.productPriceCents / 100).toFixed(2)); set('stockOnHand', settings.stockOnHand); set('maxQuantity', settings.maxQuantity ?? 1);
   set('shipping', settings.shippingCents == null ? '' : (settings.shippingCents / 100).toFixed(2)); form.elements.shippingConfirmed.checked = Boolean(settings.shippingConfirmed);
+  set('shippingTierFromQuantity', settings.shippingTierFromQuantity);
+  set('shippingTier', settings.shippingTierCents == null ? '' : (settings.shippingTierCents / 100).toFixed(2));
   set('accountName', settings.bank?.accountName); set('bsb', settings.bank?.bsb); set('accountNumber', settings.bank?.accountNumber); set('ownerEmail', settings.ownerEmail); set('supportEmail', settings.supportEmail);
   const stockHelp = $('#setting-stock').nextElementSibling;
   stockHelp.textContent = settings.stockOnHand == null ? 'Include hats reserved for unpaid and paid orders. Leave blank until counted.' : `Includes ${settings.reserved ?? 0} reserved hats. ${settings.available ?? settings.stockOnHand} currently available for new orders.`;
@@ -312,6 +314,11 @@ $('#settings-form').addEventListener('submit', async (event) => {
   try {
     const values = new FormData(form);
     const settings = { productPriceCents: amountToCents(values.get('productPrice')), stockOnHand: values.get('stockOnHand').trim() === '' ? null : Number(values.get('stockOnHand')), maxQuantity: Number(values.get('maxQuantity')), shippingCents: amountToCents(values.get('shipping')), shippingConfirmed: values.has('shippingConfirmed'), bank: { accountName: values.get('accountName').trim(), bsb: values.get('bsb').replace(/\D/g, ''), accountNumber: values.get('accountNumber').replace(/\s/g, '') }, ownerEmail: values.get('ownerEmail').trim(), supportEmail: values.get('supportEmail').trim(), revision: state.settings?.revision };
+    const tierQuantity = values.get('shippingTierFromQuantity').trim();
+    const tierFee = values.get('shippingTier').trim();
+    if (Boolean(tierQuantity) !== Boolean(tierFee)) throw new Error('Enter both the shipping tier quantity and charge, or leave both blank.');
+    settings.shippingTierFromQuantity = tierQuantity === '' ? null : Number(tierQuantity);
+    settings.shippingTierCents = amountToCents(tierFee);
     if (settings.shippingConfirmed && settings.shippingCents == null) throw new Error('Enter a shipping charge before confirming it.');
     state.busy = true; $('#save-settings').disabled = true; notice('Saving store settings…');
     const result = await api('/api/admin/settings', { method: 'PUT', body: settings }); populateSettings(result.settings || settings); showMissingSetup(result.missingSetup); notice('Settings saved. Existing orders keep their original price and payment instructions.');

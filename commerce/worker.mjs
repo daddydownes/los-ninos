@@ -111,11 +111,33 @@ function validPublicURL(value) {
   catch { return false; }
 }
 
+function shippingTier(config) {
+  const hasQuantity = Object.hasOwn(config, 'shippingTierFromQuantity');
+  const hasFee = Object.hasOwn(config, 'shippingTierCents');
+  const fromQuantity = config.shippingTierFromQuantity ?? null;
+  const feeCents = config.shippingTierCents ?? null;
+  const disabled = fromQuantity === null && feeCents === null;
+  return { fromQuantity, feeCents, valid: hasQuantity === hasFee && (disabled || (Number.isSafeInteger(fromQuantity) && fromQuantity >= 2 && fromQuantity <= 10
+    && Number.isSafeInteger(feeCents) && feeCents >= 0 && feeCents <= 100000)) };
+}
+
+function publicShipping(config) {
+  const tier = shippingTier(config);
+  return { country: 'AU', feeCents: config.shippingCents, tierFromQuantity: tier.fromQuantity, tierFeeCents: tier.feeCents };
+}
+
+function orderShippingCents(config, quantity) {
+  const tier = shippingTier(config);
+  if (!tier.valid) fail(503, 'The shop is updating its delivery charges. Please try again later.', 'setup_incomplete');
+  return tier.fromQuantity !== null && quantity >= tier.fromQuantity ? tier.feeCents : config.shippingCents;
+}
+
 export function missingSetup(config, env) {
   const missing = [];
   if (!Number.isSafeInteger(config.productPriceCents) || config.productPriceCents <= 0) missing.push('Set the hat price');
   if (!Number.isSafeInteger(config.stockOnHand) || config.stockOnHand < 0) missing.push('Count and set available stock');
   if (!Number.isSafeInteger(config.shippingCents) || config.shippingCents < 0 || config.shippingConfirmed !== true) missing.push('Confirm packed postage and shipping charge');
+  if (!shippingTier(config).valid) missing.push('Correct the shipping quantity tier and its charge');
   if (!config.bank?.accountName?.trim() || /[\[\]]|placeholder|to be|example/i.test(config.bank.accountName) ||
       !/^\d{6}$/.test((config.bank.bsb || '').replace(/[- ]/g, '')) || !/^\d{5,12}$/.test(config.bank.accountNumber || '')) missing.push('Confirm the account name, BSB and account number');
   if (!validAddressEmail(config.ownerEmail)) missing.push('Set the owner notification email');
@@ -160,10 +182,10 @@ async function catalog(request, env) {
   const config = await settings(env);
   const mode = env.STORE_MODE === 'live' ? 'live' : 'preview';
   const stock = await stmt(env, 'SELECT stock_on_hand, reserved FROM inventory WHERE mode=?', mode).first();
-  return response({ mode, revision: config.revision, acceptingOrders: mode === 'live' ? missingSetup(config, env).length === 0 : previewCheckoutAllowed(request, env),
+  return response({ mode, revision: config.revision, acceptingOrders: shippingTier(config).valid && (mode === 'live' ? missingSetup(config, env).length === 0 : previewCheckoutAllowed(request, env)),
     product: { ...PRODUCT, priceCents: config.productPriceCents,
       available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
-    shipping: { country: 'AU', feeCents: config.shippingCents },
+    shipping: publicShipping(config),
     dispatchDays: '1–3 business days' });
 }
 
@@ -173,7 +195,7 @@ async function testCheckoutCatalog(request, env) {
   const stock = await stmt(env, 'SELECT stock_on_hand, reserved FROM inventory WHERE mode=?', 'preview').first();
   return response({ catalog: { mode: 'preview', revision: config.revision, acceptingOrders: readiness.enabled,
     product: { ...PRODUCT, priceCents: config.productPriceCents, available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
-    shipping: { country: 'AU', feeCents: config.shippingCents }, dispatchDays: '1–3 business days' },
+    shipping: publicShipping(config), dispatchDays: '1–3 business days' },
     recipient: readiness.recipient, missingSetup: readiness.missingSetup });
 }
 
@@ -194,7 +216,7 @@ function validateCheckout(body, config) {
   if (!STATES.has(shippingAddress.state) || !/^\d{4}$/.test(shippingAddress.postcode) || input.country !== 'AU') {
     fail(400, 'Please enter an Australian shipping address.', 'invalid_input');
   }
-  return { idempotencyKey, catalogRevision, quantity, customer, shippingAddress };
+  return { idempotencyKey, catalogRevision, quantity, customer, shippingAddress, shippingQuoteCents: body.shippingQuoteCents };
 }
 
 function baseOrder(row) {
@@ -240,6 +262,7 @@ async function placeOrder(request, env, ctx, testDelivery = false) {
   const config = await settings(env);
   const local = isLocalPreview(request, env);
   const preview = env.STORE_MODE !== 'live';
+  if (!shippingTier(config).valid) fail(503, 'The shop is updating its delivery charges. Please try again later.', 'setup_incomplete');
   if (testDelivery) {
     if (new URL(request.url).protocol !== 'https:' || !testCheckoutSetup(config, env).enabled) fail(503, 'Complete the owner-only test email setup before testing a purchase.', 'setup_incomplete');
   } else if (preview ? !previewCheckoutAllowed(request, env) : missingSetup(config, env).length) fail(503, 'The shop is being prepared. Ordering will open soon.', 'setup_incomplete');
@@ -254,15 +277,25 @@ async function placeOrder(request, env, ctx, testDelivery = false) {
   if (deleted) fail(409, 'This test order was deleted. Start a new checkout to test again.', 'test_order_deleted');
   if (body.catalogRevision !== config.revision) fail(409, 'Price or delivery options changed. Please review your order again.', 'catalog_changed');
   if (body.quantity > config.maxQuantity) fail(400, 'Please review the quantity in your bag.', 'invalid_input');
+  const shippingCents = orderShippingCents(config, body.quantity);
+  // A tab running the previous flat-rate checkout can fetch a new catalog but
+  // still display the base fee. Require acknowledgement of any different tier
+  // charge before saving, while allowing already-saved retries above to recover.
+  if (body.shippingQuoteCents === undefined && shippingCents !== config.shippingCents) {
+    fail(409, 'Refresh this page to load the current shipping charge before placing your order.', 'checkout_update_required');
+  }
+  if (body.shippingQuoteCents !== undefined && (!Number.isSafeInteger(body.shippingQuoteCents) || body.shippingQuoteCents !== shippingCents)) {
+    fail(409, 'The shipping charge changed. Please review your order total and try again.', 'catalog_changed');
+  }
   await limited(env, `order:${request.headers.get('cf-connecting-ip') || 'local'}`, 6, 600);
   const id = crypto.randomUUID();
   const token = await orderToken(env, id, body.idempotencyKey, local);
   const createdAt = nowISO();
   const reference = `LN-${id.replace(/-/g, '').slice(0, 12).toUpperCase()}`;
   const snapshot = { productName: PRODUCT.name, unitPriceCents: config.productPriceCents,
-    shippingCents: config.shippingCents,
-    totalCents: Number.isSafeInteger(config.productPriceCents) && Number.isSafeInteger(config.shippingCents)
-      ? config.productPriceCents * body.quantity + config.shippingCents : null,
+    shippingCents,
+    totalCents: Number.isSafeInteger(config.productPriceCents) && Number.isSafeInteger(shippingCents)
+      ? config.productPriceCents * body.quantity + shippingCents : null,
     customer: body.customer, shippingAddress: body.shippingAddress,
     bank: preview && !testDelivery ? { accountName: '', bsb: '', accountNumber: '' } : { ...config.bank },
     ...(testDelivery ? { testDelivery: true, testEmailRecipient: testEmailRecipient(env) } : {}) };
@@ -384,7 +417,7 @@ async function deleteTestOrder(request, env, id) {
   return response({ ok: true, deletedId: id });
 }
 
-function validateSettings(body) {
+function validateSettings(body, previous = {}) {
   const bank = body.bank || {};
   const accountName = text(bank.accountName ?? '', 'Account name', { max: 150 });
   const bsb = text(bank.bsb ?? '', 'BSB', { max: 8 }).replace(/[- ]/g, '');
@@ -392,19 +425,27 @@ function validateSettings(body) {
   if (bsb && !/^\d{6}$/.test(bsb)) fail(400, 'The BSB must contain six digits.', 'invalid_input');
   if (accountNumber && !/^\d{5,12}$/.test(accountNumber)) fail(400, 'Please check the account number, keeping any leading zeros.', 'invalid_input');
   if (typeof body.shippingConfirmed !== 'boolean') fail(400, 'Please confirm whether postage has been checked.', 'invalid_input');
+  const hasTierQuantity = Object.hasOwn(body, 'shippingTierFromQuantity');
+  const hasTierFee = Object.hasOwn(body, 'shippingTierCents');
+  if (hasTierQuantity !== hasTierFee) fail(400, 'Supply both the shipping tier quantity and charge, or clear both.', 'invalid_input');
+  // Older settings forms omit both tier fields. Preserve the stored pair rather
+  // than silently reverting a configured shop to flat shipping.
+  const tier = shippingTier(hasTierQuantity ? body : previous);
+  if (!tier.valid) fail(400, 'Set a shipping tier of 2–10 hats and a valid charge, or clear both fields.', 'invalid_input');
   return { productPriceCents: integer(body.productPriceCents, 'Hat price', 1, 1000000, true),
     stockOnHand: integer(body.stockOnHand, 'Stock count', 0, 100000, true),
     maxQuantity: integer(body.maxQuantity, 'Maximum quantity', 1, 10),
     shippingCents: integer(body.shippingCents, 'Shipping charge', 0, 100000, true), shippingConfirmed: body.shippingConfirmed,
+    shippingTierFromQuantity: tier.fromQuantity, shippingTierCents: tier.feeCents,
     bank: { accountName, bsb, accountNumber }, ownerEmail: email(body.ownerEmail, 'Owner email', true),
     supportEmail: email(body.supportEmail, 'Customer reply email', true) };
 }
 
 async function updateSettings(request, env, actor) {
   const body = await readJSON(request);
-  const config = validateSettings(body);
   const previous = await settings(env);
   if (body.revision !== previous.revision) fail(409, 'Settings or stock changed. Refresh before saving.', 'settings_changed');
+  const config = validateSettings(body, previous);
   if (config.stockOnHand === null && previous.stockOnHand !== null) fail(400, 'Use a stock count of zero to pause sales.', 'invalid_input');
   if (config.stockOnHand !== null && config.stockOnHand < previous.reserved) fail(409, `Stock cannot be lower than the ${previous.reserved} hats reserved for open orders.`, 'reserved_stock');
   const nextRevision = previous.revision + 1;

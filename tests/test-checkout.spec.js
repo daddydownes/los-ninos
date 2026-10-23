@@ -4,13 +4,13 @@ const recipient = 'tester@example.com';
 const catalog = {
   mode: 'preview', revision: 7, acceptingOrders: true,
   product: { id: 'navy-snapback', name: 'Navy snapback', priceCents: 3000, available: 100, maxQuantity: 10 },
-  shipping: { country: 'AU', feeCents: 2000 },
+  shipping: { country: 'AU', feeCents: 2000, tierFromQuantity: 4, tierFeeCents: 2500 },
 };
 
 async function readyTest(page) {
   await page.route('**/api/admin/test-checkout', route => route.fulfill({ json: { catalog, recipient, missingSetup: [] } }));
   await page.goto('/checkout.html?test=1');
-  await expect(page.getByRole('button', { name: 'Place test order & send emails' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Review order', exact: true })).toBeEnabled();
 }
 
 async function fillAddress(page) {
@@ -33,8 +33,10 @@ test('owner email test uses the approved inbox and retains its key after a faile
   await expect(page.getByLabel('Email address')).toHaveValue(recipient);
   await expect(page.getByLabel('Email address')).toHaveAttribute('readonly', '');
   await expect(page.locator('#preview-copy')).toContainText('No payment or shipment');
-  await expect(page.locator('#total')).toContainText('50.00');
+  await expect(page.locator('#total')).toContainText('30.00');
   await fillAddress(page);
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
+  await expect(page.locator('#total')).toContainText('50.00');
   await page.getByRole('button', { name: 'Place test order & send emails' }).click();
   await expect(page.locator('#checkout-message')).toContainText('Temporary test service failure');
   await page.getByRole('button', { name: 'Place test order & send emails' }).click();
@@ -69,13 +71,15 @@ test('a deleted test stops the old form and a fresh checkout gets a new retry ke
   });
   await readyTest(page);
   await fillAddress(page);
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
   await page.getByRole('button', { name: 'Place test order & send emails' }).click();
   await expect(page.locator('#checkout-message')).toContainText('Return to the owner dashboard');
   await expect(page.getByRole('button', { name: 'Test order deleted', exact: true })).toBeDisabled();
   expect(await page.evaluate(() => sessionStorage.getItem('ln-checkout-email-test-pending-v1'))).toBeNull();
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Place test order & send emails' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Review order', exact: true })).toBeEnabled();
   await fillAddress(page);
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
   await page.getByRole('button', { name: 'Place test order & send emails' }).click();
   await expect.poll(() => attempts.length).toBe(2);
   expect(attempts[1].idempotencyKey).not.toBe(attempts[0].idempotencyKey);
@@ -86,26 +90,49 @@ test('ordinary preview still uses the public checkout without email-test capabil
   await page.route('**/api/admin/**', route => { ownerRequests++; return route.fulfill({ status: 403, json: { error: 'Denied' } }); });
   await page.route('**/api/catalog', route => route.fulfill({ json: catalog }));
   await page.goto('/checkout.html');
-  await expect(page.getByRole('button', { name: 'Create test order', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Review order', exact: true })).toBeEnabled();
+  await expect(page.locator('#submit-order')).toBeHidden();
   await expect(page.getByLabel('Email address')).toBeEditable();
   await expect(page.locator('#email-help')).toContainText('No email will be sent');
   expect(ownerRequests).toBe(0);
 });
 
-test('checkout discloses flat shipping before details and keeps it fixed for three hats', async ({ page }) => {
+test('checkout reviews shipping after details, with the higher tier at four hats and no premature order', async ({ page }) => {
+  let submitted = 0;
+  let lastOrder;
+  await page.route('**/api/orders', route => { submitted++; lastOrder = route.request().postDataJSON(); return route.fulfill({ status: 503, json: { error: 'Test submission received.' } }); });
   await page.route('**/api/catalog', route => route.fulfill({ json: catalog }));
   await page.goto('/checkout.html');
-  await expect(page.locator('#shipping-cost')).toHaveText('$20.00');
   await expect(page.locator('#subtotal')).toHaveText('$30.00');
-  await expect(page.locator('#total')).toHaveText('$50.00');
+  await expect(page.locator('#total')).toHaveText('$30.00');
+  await expect(page.locator('#submit-order')).toBeHidden();
   await expect(page.getByLabel('Street address', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
-  await expect(page.locator('#total')).toHaveText('$80.00');
   await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
   await expect(page.getByLabel('Hat quantity')).toHaveValue('3');
   await expect(page.locator('#subtotal')).toHaveText('$90.00');
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
+  await expect(page.locator('#submit-order')).toBeHidden();
+  expect(submitted).toBe(0);
+  await fillAddress(page);
+  await page.getByLabel('Email address').fill(recipient);
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
   await expect(page.locator('#shipping-cost')).toHaveText('$20.00');
   await expect(page.locator('#total')).toHaveText('$110.00');
+  await expect(page.locator('#submit-order')).toBeVisible();
+  expect(submitted).toBe(0);
+  await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
+  await expect(page.locator('#submit-order')).toBeHidden();
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
+  await expect(page.locator('#shipping-cost')).toHaveText('$25.00');
+  await expect(page.locator('#total')).toHaveText('$145.00');
+  await expect(page.locator('#submit-order')).toBeInViewport();
+  await page.screenshot({ path: test.info().outputPath('four-hat-shipping-review.png') });
+  expect(submitted).toBe(0);
+  await page.getByRole('button', { name: 'Create test order', exact: true }).click();
+  await expect.poll(() => submitted).toBe(1);
+  expect(lastOrder.quantity).toBe(4);
+  expect(lastOrder.shippingQuoteCents).toBe(2500);
 });
 
 test('email-test receipt displays configured details while clearly forbidding payment', async ({ page }) => {

@@ -244,3 +244,33 @@ test('preview delivery cannot mutate live queued mail and does not release an ac
   assert.ok(liveRows.every(row => row.status === 'queued'));
   assert.equal(sent.length, 1);
 });
+
+test('quantity-tier quotes match both catalogs, receipts and delivered test email snapshots', async t => {
+  const { env, call, checkout, sent } = await setup(t);
+  const tierConfig = { ...config, productPriceCents: 3000, maxQuantity: 10, shippingCents: 2000,
+    shippingTierFromQuantity: 4, shippingTierCents: 2500 };
+  await env.DB.prepare('UPDATE settings SET value=?').bind(JSON.stringify(tierConfig)).run();
+  const publicCatalog = await call('/api/catalog', 'GET', undefined, false);
+  const testCatalog = await call('/api/admin/test-checkout');
+  assert.deepEqual(testCatalog.data.catalog.shipping, publicCatalog.data.shipping);
+  assert.deepEqual(publicCatalog.data.shipping, { country: 'AU', feeCents: 2000, tierFromQuantity: 4, tierFeeCents: 2500 });
+  const three = await call('/api/admin/test-orders', 'POST', checkout({ quantity: 3, shippingQuoteCents: 2000 }));
+  const fourBody = checkout({ quantity: 4, shippingQuoteCents: 2500 });
+  const four = await call('/api/admin/test-orders', 'POST', fourBody);
+  assert.equal(three.status, 201); assert.equal(four.status, 201);
+  assert.equal(three.data.order.totalCents, 11000);
+  assert.equal(four.data.order.shippingCents, 2500);
+  assert.equal(four.data.order.totalCents, 14500);
+  await env.DB.prepare('UPDATE settings SET value=?,revision=revision+1')
+    .bind(JSON.stringify({ ...tierConfig, shippingTierCents: 3000 })).run();
+  const recovered = await call('/api/admin/test-orders', 'POST', fourBody);
+  assert.equal(recovered.status, 200);
+  assert.equal(recovered.data.order.shippingCents, 2500);
+  assert.equal(recovered.data.order.totalCents, 14500);
+  await processOutbox(env);
+  assert.equal(sent.length, 4);
+  const fourMessages = sent.filter(({ payload }) => payload.subject.includes(four.data.order.reference));
+  assert.equal(fourMessages.length, 2);
+  assert.ok(fourMessages.every(({ payload }) => payload.text.includes('Shipping: $25.00 AUD') && payload.text.includes('Total: $145.00 AUD')));
+  assert.ok(sent.every(({ payload }) => payload.to.length === 1 && payload.to[0] === recipient));
+});

@@ -106,27 +106,24 @@
     const shopButton = dialog.querySelector('.journey-bag-shop');
     const checkoutButton = dialog.querySelector('.journey-bag-checkout');
     const checkoutNote = dialog.querySelector('.journey-bag-checkout-note');
-    const bagTotals = document.createElement('dl');
-    bagTotals.className = 'journey-bag-totals';
+    const bagTotals = document.createElement('div');
+    bagTotals.className = 'journey-bag-pricing';
     bagTotals.hidden = true;
-    bagTotals.innerHTML = '<div><dt>Hat subtotal</dt><dd data-bag-subtotal></dd></div><div><dt>Shipping · Australia <small>Flat per order</small></dt><dd data-bag-shipping></dd></div><div class="journey-bag-total"><dt>Total <small>AUD</small></dt><dd data-bag-total></dd></div>';
+    bagTotals.innerHTML = '<dl class="journey-bag-totals"><div><dt>Subtotal <small>AUD</small></dt><dd data-bag-subtotal></dd></div></dl><p class="journey-bag-shipping-note">Shipping added at checkout</p>';
     dialog.querySelector('.journey-bag-footer').prepend(bagTotals);
     const formatMoney = value => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(value / 100);
 
     function renderPrices() {
       const unit = checkoutCatalog?.product?.priceCents;
-      const shipping = checkoutCatalog?.shipping?.feeCents;
-      const hasPrice = Number.isInteger(unit) && Number.isInteger(shipping);
+      const hasPrice = Number.isInteger(unit);
       bagTotals.hidden = !commerceEnabled || quantity === 0 || !hasPrice || catalogPhase !== 'ready';
       if (!bagTotals.hidden) {
         bagTotals.querySelector('[data-bag-subtotal]').textContent = formatMoney(unit * quantity);
-        bagTotals.querySelector('[data-bag-shipping]').textContent = shipping === 0 ? 'Free' : formatMoney(shipping);
-        bagTotals.querySelector('[data-bag-total]').textContent = formatMoney(unit * quantity + shipping);
       }
       if (commerceEnabled) document.querySelectorAll('[data-product-price]').forEach(slot => {
-        slot.textContent = catalogPhase === 'loading' ? 'Checking price and shipping…'
-          : catalogPhase === 'ready' && hasPrice ? `A${formatMoney(unit)} each + ${shipping === 0 ? 'free Australian shipping' : `A${formatMoney(shipping)} shipping per order`}`
-          : 'Price and shipping currently unavailable';
+        slot.textContent = catalogPhase === 'loading' ? 'Checking price…'
+          : catalogPhase === 'ready' && hasPrice ? `A${formatMoney(unit)} each`
+          : 'Price currently unavailable';
       });
     }
 

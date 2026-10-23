@@ -24,8 +24,11 @@ or runtime secrets are committed to Git.
 ## Purchase rehearsal
 
 Public browsing and ordinary preview checkout are enabled. The configured price
-is A$30 per hat plus A$20 flat Australian shipping per order, with up to ten hats
-per order. Three hats total A$110. Packed carrier postage has not yet been tested.
+is A$30 per hat plus A$20 shipping for one to three hats, or A$25 for four or
+more, with up to ten hats per order. Three hats total A$110; four total A$145.
+The bag shows an item subtotal and a shipping-at-checkout note. Shipping and the
+full order total appear after the delivery-details step, before final submission.
+Packed carrier postage has not yet been tested.
 Live inventory is 100; preview inventory is separate. A previous preview order
 reserves one test hat.
 
@@ -68,11 +71,12 @@ No real email, payment or fulfilment has been performed in this setup step.
 
 ## Verification
 
-- 61 commerce tests pass, covering checkout, owner authentication, idempotency,
+- 68 commerce tests pass, covering checkout, quantity shipping tiers, owner authentication, idempotency,
   inventory, cleanup races, exact test recipients, send retries and queue
   isolation. Provider calls are mocked in automated tests.
-- 20 targeted browser checks pass across desktop Chrome and a Pixel profile,
-  using the installed Chromium 1234 binary. The local browser rehearsal also
+- 28 targeted browser checks pass across desktop Chrome and a Pixel profile,
+  using the installed Chromium 1234 binary. They cover the separate shipping
+  review, the three-to-four-hat boundary, retry handling and test cleanup. The local browser rehearsal also
   completed checkout, simulated payment and dispatch, then deleted only its
   disposable order and restored test availability from 8 back to 9.
 - Prior broader regression checks passed across eight Safari/Chrome profiles.

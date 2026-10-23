@@ -64,13 +64,15 @@ async function ownerToken(env) {
   };
 }
 
-test('preview shows AUD 30 plus flat shipping, keeps bank details private and stock separate, and requires loopback opt-in', async t => {
+test('preview shows AUD 30 plus base shipping, keeps bank details private and stock separate, and requires loopback opt-in', async t => {
   const env = await setup(t);
   const catalog = await call(env, '/api/catalog');
   assert.equal(catalog.data.acceptingOrders, true);
   assert.equal(catalog.data.product.priceCents, 3000);
   assert.equal(catalog.data.product.maxQuantity, 10);
   assert.equal(catalog.data.shipping.feeCents, 2000);
+  assert.equal(catalog.data.shipping.tierFromQuantity, 4);
+  assert.equal(catalog.data.shipping.tierFeeCents, 2500);
   const remote = await call(env, '/api/orders', 'POST', checkout(), {}, 'https://preview.example.test');
   assert.equal(remote.status, 503);
   const result = await call(env, '/api/orders', 'POST', checkout());
@@ -98,6 +100,98 @@ test('shipping is charged once for one, two and three hats and retained on each 
     assert.equal(receipt.data.order.totalCents, totalCents);
   }
   assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 6);
+});
+
+test('the server charges the full quantity-tier fee at four hats and ignores client totals', async t => {
+  const env = await setup(t);
+  await env.DB.prepare("UPDATE inventory SET stock_on_hand=100 WHERE mode='preview'").run();
+  for (const [quantity, shippingQuoteCents, totalCents] of [[3, 2000, 11000], [4, 2500, 14500], [10, 2500, 32500]]) {
+    const result = await call(env, '/api/orders', 'POST', checkout(undefined, {
+      quantity, shippingQuoteCents, shippingCents: 0, shippingTierCents: 0, totalCents: 1,
+    }));
+    assert.equal(result.status, 201, JSON.stringify(result.data));
+    assert.equal(result.data.order.shippingCents, shippingQuoteCents);
+    assert.equal(result.data.order.totalCents, totalCents);
+  }
+});
+
+test('stale flat-rate checkout clients must refresh before accepting a different tier fee', async t => {
+  const env = await setup(t);
+  const stale = await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 4 }));
+  assert.equal(stale.status, 409);
+  assert.equal(stale.data.code, 'checkout_update_required');
+  for (const shippingQuoteCents of [2000, 0, '2500', null]) {
+    const mismatch = await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 4, shippingQuoteCents }));
+    assert.equal(mismatch.status, 409);
+    assert.equal(mismatch.data.code, 'catalog_changed');
+  }
+  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n, 0);
+  assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 0);
+  const body = checkout(undefined, { quantity: 4, shippingQuoteCents: 2500 });
+  const placed = await call(env, '/api/orders', 'POST', body);
+  assert.equal(placed.status, 201);
+  const { shippingQuoteCents: _ignored, ...oldRetry } = body;
+  const recovered = await call(env, '/api/orders', 'POST', oldRetry);
+  assert.equal(recovered.status, 200);
+  assert.equal(recovered.data.order.id, placed.data.order.id);
+  assert.equal(recovered.data.order.totalCents, 14500);
+});
+
+test('legacy settings without tier fields remain flat and owner saves preserve or explicitly clear tiers', async t => {
+  const env = await setup(t);
+  await env.DB.prepare("UPDATE settings SET value=json_remove(value,'$.shippingTierFromQuantity','$.shippingTierCents')").run();
+  const flat = (await call(env, '/api/catalog')).data.shipping;
+  assert.deepEqual(flat, { country: 'AU', feeCents: 2000, tierFromQuantity: null, tierFeeCents: null });
+  const oldCheckout = await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 4 }));
+  assert.equal(oldCheckout.status, 201);
+  assert.equal(oldCheckout.data.order.shippingCents, 2000);
+  await configure(env, { maxQuantity: 10, shippingTierFromQuantity: 4, shippingTierCents: 2500 });
+  const savedByOldForm = await configure(env, { maxQuantity: 10, productPriceCents: 3000 });
+  assert.equal(savedByOldForm.shippingTierFromQuantity, 4);
+  assert.equal(savedByOldForm.shippingTierCents, 2500);
+  const cleared = await configure(env, { maxQuantity: 10, shippingTierFromQuantity: null, shippingTierCents: null });
+  assert.equal(cleared.shippingTierFromQuantity, null);
+  assert.equal(cleared.shippingTierCents, null);
+  assert.equal((await call(env, '/api/catalog')).data.shipping.tierFromQuantity, null);
+  const zeroTier = await configure(env, { maxQuantity: 10, shippingTierFromQuantity: 4, shippingTierCents: 0 });
+  assert.equal(zeroTier.shippingTierCents, 0);
+  const freeShipping = await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 4, shippingQuoteCents: 0 }));
+  assert.equal(freeShipping.status, 201);
+  assert.equal(freeShipping.data.order.shippingCents, 0);
+});
+
+test('owner settings reject partial and malformed shipping tiers without changing stored settings', async t => {
+  const env = await setup(t);
+  const before = await env.DB.prepare('SELECT value,revision FROM settings').first();
+  for (const tier of [
+    { shippingTierFromQuantity: 4 }, { shippingTierCents: 2500 }, { shippingTierFromQuantity: null },
+    { shippingTierFromQuantity: 4, shippingTierCents: null }, { shippingTierFromQuantity: null, shippingTierCents: 2500 },
+    { shippingTierFromQuantity: 1, shippingTierCents: 2500 }, { shippingTierFromQuantity: 11, shippingTierCents: 2500 },
+    { shippingTierFromQuantity: 4.5, shippingTierCents: 2500 }, { shippingTierFromQuantity: '4', shippingTierCents: 2500 },
+    { shippingTierFromQuantity: 4, shippingTierCents: -1 }, { shippingTierFromQuantity: 4, shippingTierCents: 100001 },
+    { shippingTierFromQuantity: 4, shippingTierCents: 2500.5 }, { shippingTierFromQuantity: 4, shippingTierCents: '2500' },
+  ]) {
+    const result = await call(env, '/api/admin/settings', 'PUT', { ...complete, ...tier });
+    assert.equal(result.status, 400, JSON.stringify(tier));
+  }
+  assert.deepEqual(await env.DB.prepare('SELECT value,revision FROM settings').first(), before);
+});
+
+test('malformed stored tiers close ordering even in preview instead of silently charging the base rate', async t => {
+  const env = await setup(t);
+  await env.DB.prepare("UPDATE settings SET value=json_remove(value,'$.shippingTierCents')").run();
+  assert.equal((await call(env, '/api/catalog')).data.acceptingOrders, false);
+  const rejected = await call(env, '/api/orders', 'POST', checkout());
+  assert.equal(rejected.status, 503);
+  assert.equal(rejected.data.code, 'setup_incomplete');
+  const admin = await call(env, '/api/admin/settings');
+  assert.ok(admin.data.missingSetup.includes('Correct the shipping quantity tier and its charge'));
+  const oldForm = await call(env, '/api/admin/settings', 'PUT', { ...complete });
+  assert.equal(oldForm.status, 400);
+  await env.DB.prepare("UPDATE settings SET value=json_set(value,'$.shippingTierFromQuantity',NULL)").run();
+  assert.equal((await call(env, '/api/catalog')).data.acceptingOrders, false);
+  assert.equal((await call(env, '/api/orders', 'POST', checkout())).status, 503);
+  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n, 0);
 });
 
 test('all mutations reject cross-origin, missing CSRF header and oversized input', async t => {

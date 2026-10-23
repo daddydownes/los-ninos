@@ -7,8 +7,8 @@ through your private dashboard.
 
 This handover does not mean the shop is live. The domain, sending email, owner
 accounts, stock, and bank details still need to be connected.
-The hat price is A$30 each, plus A$20 flat Australian shipping per order.
-Three hats cost A$90 plus A$20 shipping: A$110 total.
+The hat price is A$30 each. Australian shipping is A$20 per order for one to
+three hats and A$25 for four or more. Three hats total A$110; four total A$145.
 The [setup guide](commerce-setup.md) covers those steps.
 
 ## Sign in
@@ -76,18 +76,25 @@ hat a second time when editing stock.
 | --- | --- |
 | Hat price (AUD) | A$30 per hat, as requested by the owner. |
 | Total stock on hand | Your physical hat count, including existing reservations. |
-| Maximum hats per order | Currently **10**. The same shipping charge applies to the whole order. |
-| Flat shipping per order (AUD) | A$20 per order, regardless of hat quantity. |
+| Maximum hats per order | Currently **10**. Shipping is charged once per order. |
+| Base shipping per order (AUD) | A$20 for one to three hats. |
+| Higher shipping tier starts at | **4** hats. |
+| Higher tier shipping per order (AUD) | A$25 for four or more hats. |
 | Postage confirmation | Tick only after checking the packed size, weight, and coverage of the chosen charge. |
 | Bank details | The verified receiving account name, six-digit BSB, and account number. Check each digit before launch. |
 | Owner notification email | The inbox that receives new-order notifications. |
 | Customer reply email | A monitored inbox where customers can ask for help. |
 
-The A$20 shipping charge is the customer's flat order charge, not a verified
-carrier quote. Packed postage has not yet been tested; check the parcel size,
-weight and coverage before live launch. This version does not offer international
-shipping or calculate postcode-specific rates. Price and shipping are shown on
-the product, in the bag and at checkout before address entry.
+These are customer shipping charges based on hat quantity, not a live carrier
+quote or measured parcel weight. Both rates were set by the owner; they do not
+automatically change when a carrier changes its rates.
+Packed postage has not yet been tested, including whether the maximum order fits
+this tier. Check parcel size and weight before live launch. This version does not
+offer international shipping or calculate postcode-specific rates.
+
+The product and bag state that shipping is added at checkout. After entering
+delivery details, the customer reviews shipping and the full total before placing
+the order. The bag amount is an item subtotal, never presented as the final total.
 
 Save your changes. New orders use the new price, postage, and bank instructions;
 existing orders keep the details they were placed with. If you change bank

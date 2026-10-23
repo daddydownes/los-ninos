@@ -24,8 +24,10 @@ details. It never grants owner access. Local loopback preview also accepts test
 orders without login.
 An authenticated owner can separately enable the purchase rehearsal described
 below to send clearly marked test emails to one approved inbox.
-The hat price defaults to A$30 with A$20 flat Australian shipping per order
-(`productPriceCents=3000`, `shippingCents=2000`). Three hats total A$110.
+The hat price defaults to A$30 with A$20 Australian shipping for one to three hats
+(`productPriceCents=3000`, `shippingCents=2000`). The four-or-more tier is A$25
+(`shippingTierFromQuantity=4`, `shippingTierCents=2500`). Three hats total A$110;
+four total A$145. Shipping is charged once per order.
 Stock is initially unset, bank/email fields are blank, and the maximum order
 quantity is ten. The requested shipping charge is not a verified carrier quote;
 check packed postage before live launch.
@@ -201,8 +203,10 @@ as tightly as those operations permit.
 Use **Store settings** in the protected dashboard to enter the final price, stock,
 shipping, bank details, owner notification inbox, and customer reply inbox. Do not
 put real bank details or customer data in repository fixtures. The current
-`maxQuantity=10` allows multiple hats with one flat shipping charge. Verify packed
-postage for the maximum allowed parcel before live launch.
+`maxQuantity=10` allows multiple hats, with a higher shipping fee starting at four.
+Verify packed postage for the maximum allowed parcel before live launch. The
+configured quantity tiers do not measure parcel weight or call Australia Post's
+API. Existing orders retain their original shipping snapshot.
 
 ## Hosted checks and launch
 
