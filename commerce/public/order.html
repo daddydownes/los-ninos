@@ -10,7 +10,7 @@
   <link rel="icon" href="/assets/brand-icon.svg">
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="commerce.css">
-  <script type="module" src="order.js?v=3"></script>
+  <script type="module" src="order.js?v=4"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to your order</a>
@@ -20,7 +20,8 @@
     <div class="notice notice-error" id="order-error" role="alert" hidden></div>
     <p id="order-retry-wrap" hidden><button class="button button-secondary" id="order-retry" type="button">Retry loading order</button></p>
     <div id="order-content" hidden>
-      <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label">Preview</span><p><strong>This is a test order.</strong> No payment is due and no email has been sent. Bank details below are placeholders.</p></div>
+      <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label">Preview</span><p id="preview-copy"><strong>This is a test order.</strong> No payment is due and no email has been sent. Bank details below are placeholders.</p></div>
+      <p id="test-dashboard-link" hidden><a class="header-link" href="admin.html">← Owner dashboard</a></p>
       <div class="order-heading"><div class="order-meta"><span>Order <strong id="order-reference"></strong></span><span id="order-date"></span></div><span class="pill" id="order-status"></span><h1 id="order-title">Order received.<br>One more step.</h1><p class="intro-copy" id="order-intro"></p></div>
       <div class="order-layout">
         <section class="payment-panel" id="payment-panel" aria-labelledby="payment-heading">

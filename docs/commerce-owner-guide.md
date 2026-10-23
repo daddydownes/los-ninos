@@ -122,6 +122,35 @@ message may already have arrived, so a manual resend can create a duplicate.
 Avoid repeatedly pressing the button. For an order awaiting payment, its bank
 instructions also appear on the customer's confirmation page.
 
+## Clear test orders
+
+When the email service and approved test inbox are configured, **Test purchase**
+at the top of the dashboard opens the actual checkout in private test mode.
+The dashboard shows which inbox receives the test messages. Both the customer
+and owner notification go only to that inbox, and the messages are labelled as
+tests. No payment or parcel is required. The test reserves preview stock, not
+live stock. Public preview checkout remains email-free.
+
+Open the saved email test order to simulate confirming payment and shipping.
+Those actions send the corresponding messages to the same test inbox. Check the
+actual inbox and its spam folder; a queued or accepted message is not proof that
+it arrived.
+
+After checking a preview order, open it and find **Test cleanup** below its
+history. Choose **Delete test order**, tick the confirmation, then choose
+**Delete this test order**. This permanently removes that test order and its
+saved history and email records. Any reserved test hats are released; hats used
+by a simulated shipment return to test stock. Real orders and live stock are
+unchanged. Emails already delivered cannot be removed from inboxes.
+
+This action is available only for preview orders. Live customer orders cannot
+be deleted through this control. If a test email is still sending or the order
+has changed, refresh the order and wait for sending to finish before deleting.
+
+If the connection drops while deleting, refresh the list to check whether the
+order was removed before trying again. The dashboard never repeats a deletion
+request automatically.
+
 ## Exports and backups
 
 **Export orders** downloads a CSV containing customer contact and delivery

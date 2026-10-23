@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="./commerce.css">
     <link rel="stylesheet" href="./admin.css">
-    <script type="module" src="./admin.js?v=2"></script>
+    <script type="module" src="./admin.js?v=3"></script>
   </head>
   <body class="admin-page">
     <a class="admin-skip" href="#admin-main">Skip to orders</a>
@@ -23,7 +23,7 @@
       <div id="preview-notice" class="notice admin-preview" hidden><strong>Local preview</strong><span>These are test orders. No customer emails or payments are sent. This preview has no owner sign-in.</span></div>
       <div class="admin-title-row">
         <div><p class="eyebrow">LOS NIÑOS / THE EVERYDAY DETAILS</p><h1>Your orders.</h1><p class="muted">Check the transfer. Pack the hat. Send it on its way.</p></div>
-        <a class="button button-secondary button-small" id="export-orders" href="/api/admin/export" download>Export orders</a>
+        <div class="admin-title-actions"><button class="button button-small" id="test-purchase" type="button" aria-describedby="test-purchase-help" disabled>Test purchase</button><p class="admin-test-help" id="test-purchase-help">Checking test email setup…</p><a class="button button-secondary button-small" id="export-orders" href="/api/admin/export" download>Export orders</a></div>
       </div>
       <nav class="admin-nav" aria-label="Owner workspace">
         <button class="admin-nav-button" id="orders-tab" type="button" aria-current="page" aria-controls="orders-view">Orders</button>

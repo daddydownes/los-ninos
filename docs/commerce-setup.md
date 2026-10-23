@@ -22,6 +22,8 @@ characters is configured. That explicit test mode allows HTTPS checkout without
 customer login, uses separate preview inventory and sends no email or real bank
 details. It never grants owner access. Local loopback preview also accepts test
 orders without login.
+An authenticated owner can separately enable the purchase rehearsal described
+below to send clearly marked test emails to one approved inbox.
 The confirmed hat price defaults to A$50 with free Australian shipping
 (`shippingCents=0`, `shippingConfirmed=true`). Stock is initially unset,
 bank/email fields are blank, and the maximum order quantity defaults to one.
@@ -167,6 +169,8 @@ orders. Never assume a dashboard-only setting survives deployment.
 | `ASSETS` | Built `_site` binding; keep Worker-first routing enabled. |
 | `STORE_MODE` | `preview` during setup; `live` only for the controlled live test or approved launch. |
 | `HOSTED_TEST_CHECKOUT` | `true` to permit HTTPS test checkout in preview mode with a private order-token secret; `false` to close hosted preview submissions. Does not bypass owner login or live launch checks. |
+| `TEST_EMAILS_ENABLED` | Explicit `true` permits owner-created email tests while the store remains in `preview`; default `false`. Public preview checkout still never sends mail. |
+| `TEST_EMAIL_TO` | One approved test inbox, stored privately in the deployment. All email-test recipients and replies are restricted to this exact address. |
 | `LOCAL_PREVIEW` | `false` for every hosted environment. |
 | `PUBLIC_STORE_URL` | Final HTTPS origin, with no path, credentials, query, or fragment. |
 | `ACCESS_TEAM_DOMAIN` | Full HTTPS Cloudflare Access team origin. |
@@ -198,6 +202,33 @@ put real bank details or customer data in repository fixtures. Keep
 `maxQuantity=1` until postage for the maximum allowed parcel has been verified.
 
 ## Hosted checks and launch
+
+### Owner-only purchase rehearsal
+
+After Access and the verified email sender are configured, keep `STORE_MODE=preview`
+and set `TEST_EMAILS_ENABLED=true` with the authorized `TEST_EMAIL_TO` inbox.
+Open **Test purchase** from the owner dashboard. The ordinary checkout form is
+used, but both its bootstrap and submission require owner authentication. Its
+email address is fixed to the approved inbox. The order stays in preview
+inventory and shows a test label; no bank transfer or real shipment is required.
+
+This path sends payment-instruction and owner-notification test emails only to
+the approved inbox. Simulating payment and dispatch in the dashboard exercises
+the other messages. Recipients and Reply-To are checked again when sending;
+public preview submissions cannot enable email delivery. Provider acceptance is
+not proof of inbox delivery—confirm receipt with the authorized tester.
+
+Use **Delete test order** after testing to remove its order details and queued
+mail and restore test stock. Sent emails cannot be withdrawn from inboxes. Live
+orders cannot be deleted this way. A non-reversible hash of the retry key remains
+so a delayed checkout retry cannot recreate a deleted test. Before upgrading an
+existing database, take a private backup and apply
+`commerce/migrations/0001-test-order-cleanup.sql` before deploying this code.
+
+Set `TEST_EMAILS_ENABLED=false` when the rehearsal is finished. Enabling live
+ordering remains a separate launch step.
+
+### Live launch verification
 
 Local preview does not validate production email or Access. Use a separate
 staging Worker/database and owner-only hostname for hosted checks, with the same

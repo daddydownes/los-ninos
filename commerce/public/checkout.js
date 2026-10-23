@@ -4,12 +4,26 @@ const $ = (id) => document.getElementById(id);
 const form = $('checkout-form');
 const quantityInput = $('quantity');
 const submitButton = $('submit-order');
+const checkoutParams = new URLSearchParams(location.search);
+const testCheckout = checkoutParams.get('test') === '1';
+let testRecipient = null;
+let testSetupMissing = [];
 let catalog;
 let submitting = false;
 let retry = null;
 let quantityWasAdjusted = false;
 let completed = false;
-const pendingKey = 'ln-checkout-pending-v1';
+const pendingKey = testCheckout ? 'ln-checkout-email-test-pending-v1' : 'ln-checkout-pending-v1';
+$('test-dashboard-link').hidden = !testCheckout;
+
+async function fetchCatalog() {
+  if (!testCheckout) return api('/api/catalog');
+  const result = await api('/api/admin/test-checkout');
+  testRecipient = typeof result.recipient === 'string' ? result.recipient : null;
+  testSetupMissing = Array.isArray(result.missingSetup) ? result.missingSetup : [];
+  if (!result.catalog || result.catalog.mode !== 'preview') throw new Error('The owner test checkout is not available. Open it from the dashboard.');
+  return result.catalog;
+}
 
 // Keep the same key after network errors or reloads without storing the address.
 try { retry = JSON.parse(sessionStorage.getItem(pendingKey) || 'null'); } catch (_) {}
@@ -47,7 +61,15 @@ function renderCatalog() {
   if (getQuantity() > limit && limit > 0) quantityWasAdjusted = true;
   quantityInput.value = Math.min(Math.max(1, getQuantity()), Math.max(1, limit));
   $('preview-banner').hidden = !preview;
-  if (preview) {
+  if (testCheckout) {
+    text($('preview-label'), 'Email test');
+    text($('preview-copy'), 'This is a test purchase. No payment or shipment is required.');
+    text($('checkout-intro-copy'), 'Try the complete purchase flow. Test emails go only to the approved test inbox.');
+    text($('email-help'), testRecipient ? `All test emails, including owner notifications, go to ${testRecipient}.` : 'The approved test inbox will appear when setup is ready.');
+    text($('checkout-fineprint'), 'Creates a removable test order with separate test stock. Do not send a bank transfer.');
+    $('customer-email').readOnly = true;
+    $('customer-email').value = testRecipient || '';
+  } else if (preview) {
     text($('checkout-intro-copy'), 'Try the checkout with test details. No money will be taken and no emails will be sent.');
     text($('email-help'), 'Use a test email address. No email will be sent in this preview.');
     text($('checkout-fineprint'), 'This creates a preview order only. Do not enter real customer details or send a bank transfer.');
@@ -56,14 +78,14 @@ function renderCatalog() {
   form.setAttribute('aria-busy', String(submitting));
   form.querySelectorAll('input, select').forEach((input) => { input.disabled = submitting; });
   submitButton.disabled = !accepting || limit === 0 || submitting;
-  text(submitButton, submitting ? 'Saving your order…' : !accepting ? 'Orders are not open yet' : limit === 0 ? 'Sold out' : preview ? 'Create test order' : 'Place order — pay by bank transfer');
+  text(submitButton, submitting ? 'Saving your order…' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : testCheckout ? 'Place test order & send emails' : preview ? 'Create test order' : 'Place order — pay by bank transfer');
   if (limit === 0) text($('stock-message'), 'This hat is currently sold out.');
   else text($('stock-message'), quantityWasAdjusted ? `Your quantity was adjusted to ${getQuantity()}. Up to ${limit} ${limit === 1 ? 'hat can' : 'hats can'} currently be ordered.` : `Up to ${limit} ${limit === 1 ? 'hat' : 'hats'} per order.`);
-  if (!accepting) announce($('checkout-message'), preview ? 'Preview ordering is not available in this environment yet.' : 'We’re getting the shop ready. Ordering will open once the final details are confirmed.');
+  if (!accepting) announce($('checkout-message'), testCheckout ? `Finish the test setup in the owner dashboard. ${testSetupMissing.join('. ')}` : preview ? 'Preview ordering is not available in this environment yet.' : 'We’re getting the shop ready. Ordering will open once the final details are confirmed.');
   updateSummary();
 }
 
-const initialQuantity = Number(new URLSearchParams(location.search).get('quantity'));
+const initialQuantity = Number(checkoutParams.get('quantity'));
 quantityInput.value = Number.isInteger(initialQuantity) && initialQuantity > 0 ? Math.min(initialQuantity, 10) : 1;
 
 $('quantity-minus').addEventListener('click', () => {
@@ -111,7 +133,7 @@ form.addEventListener('submit', async (event) => {
   announce($('checkout-message'), 'Saving your order…');
   try {
     const idempotencyKey = await requestKey(payload);
-    const { order, token } = await api('/api/orders', { method: 'POST', body: JSON.stringify({ ...payload, idempotencyKey }) });
+    const { order, token } = await api(testCheckout ? '/api/admin/test-orders' : '/api/orders', { method: 'POST', body: JSON.stringify({ ...payload, idempotencyKey }) });
     if (!order?.id || typeof token !== 'string') throw new Error('Your order response was incomplete. Please try again; the same request will be used to avoid a duplicate.');
     try { sessionStorage.setItem(`ln-order-token:${order.id}`, token); sessionStorage.removeItem(pendingKey); } catch (_) {}
     completed = true;
@@ -127,7 +149,7 @@ form.addEventListener('submit', async (event) => {
         try { sessionStorage.removeItem(pendingKey); } catch (_) {}
       }
       try {
-        catalog = await api('/api/catalog');
+        catalog = await fetchCatalog();
         if (error.data?.code === 'catalog_changed') message = 'Price or delivery options changed. Please review your order again before submitting.';
       } catch (_) {
         catalog.acceptingOrders = false;
@@ -150,14 +172,14 @@ async function loadCatalog() {
   submitButton.disabled = true;
   text(submitButton, 'Loading checkout…');
   try {
-    const result = await api('/api/catalog');
+    const result = await fetchCatalog();
     if (!result.product || !result.shipping) throw new Error('The shop is still being prepared. Please check back soon.');
     catalog = result;
     renderCatalog();
   } catch (error) {
     $('catalog-error').hidden = false;
     $('catalog-retry-wrap').hidden = false;
-    announce($('catalog-error'), error.message, true);
+    announce($('catalog-error'), testCheckout && [401, 403].includes(error.status) ? 'Sign in to the owner dashboard, then choose Test purchase to open this checkout.' : error.message, true);
     text(submitButton, 'Checkout unavailable');
   } finally {
     loadingCatalog = false;

@@ -24,6 +24,7 @@
   "vars": {
     "STORE_MODE": "preview",
     "HOSTED_TEST_CHECKOUT": "true",
+    "TEST_EMAILS_ENABLED": "false",
     "LOCAL_PREVIEW": "false",
     "PUBLIC_STORE_URL": "https://losninos.com.au",
     "ACCESS_TEAM_DOMAIN": "",

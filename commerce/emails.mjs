@@ -45,7 +45,8 @@ function supportAddress(value) {
 function viewOrder(kind, order) {
   if (!order || typeof order !== 'object') throw new TypeError('An order is required');
   const preview = order.preview === true;
-  if (!preview) {
+  const testDelivery = preview && order.testDelivery === true;
+  if (!preview || testDelivery) {
     if (kind === 'awaiting_payment' && order.status !== 'awaiting_payment') throw new Error('Payment instructions require an awaiting_payment order');
     if (kind === 'paid' && !['paid', 'shipped'].includes(order.status)) throw new Error('Payment confirmation requires an owner-confirmed paid order');
     if (kind === 'shipped' && order.status !== 'shipped') throw new Error('Dispatch confirmation requires a shipped order');
@@ -55,7 +56,7 @@ function viewOrder(kind, order) {
   if (!Number.isSafeInteger(quantity) || quantity < 1) throw new TypeError('order.quantity must be a positive integer');
   const productName = requiredText(order.productName, 'order.productName');
   let unitPrice = '[PRICE AUD]', itemTotal = '[ITEM TOTAL AUD]', shipping = '[SHIPPING AUD]', total = '[TOTAL AUD]';
-  if (!preview) {
+  if (!preview || testDelivery) {
     unitPrice = money(order.unitPriceCents, 'order.unitPriceCents');
     itemTotal = money(order.unitPriceCents * quantity, 'order item total');
     shipping = money(order.shippingCents, 'order.shippingCents');
@@ -64,7 +65,7 @@ function viewOrder(kind, order) {
   } else if (quantity === 1) {
     itemTotal = unitPrice;
   }
-  const bank = preview
+  const bank = preview && !testDelivery
     ? { accountName: '[ACCOUNT NAME]', bsb: '[BSB]', accountNumber: '[ACCOUNT NUMBER]' }
     : kind === 'awaiting_payment'
       ? {
@@ -77,12 +78,12 @@ function viewOrder(kind, order) {
   const address = order.shippingAddress ?? {};
   const addressLines = [customer.name, scalar(address.line1), scalar(address.line2), [scalar(address.suburb), scalar(address.state), scalar(address.postcode)].filter(Boolean).join(' '), address.country === 'AU' ? 'Australia' : scalar(address.country)].filter(Boolean);
   const trackingNumber = kind === 'shipped'
-    ? preview ? '[TRACKING NUMBER]' : requiredText(order.trackingNumber, 'order.trackingNumber')
+    ? preview && !testDelivery ? '[TRACKING NUMBER]' : requiredText(order.trackingNumber, 'order.trackingNumber')
     : '';
   // Never accept a tracking URL from an order. Only the number is interpolated,
   // encoded as a single path component on the fixed Australia Post origin.
-  const trackingUrl = kind === 'shipped' && !preview ? `https://auspost.com.au/mypost/track/details/${encodeURIComponent(trackingNumber)}` : null;
-  return { preview, reference, quantity, productName, unitPrice, itemTotal, shipping, total, bank, customer, addressLines, trackingNumber, trackingUrl };
+  const trackingUrl = kind === 'shipped' && (!preview || testDelivery) ? `https://auspost.com.au/mypost/track/details/${encodeURIComponent(trackingNumber)}` : null;
+  return { preview, testDelivery, reference, quantity, productName, unitPrice, itemTotal, shipping, total, bank, customer, addressLines, trackingNumber, trackingUrl };
 }
 
 function wording(kind, view) {
@@ -113,7 +114,7 @@ function wording(kind, view) {
     introduction = 'A customer has placed an order and has been given bank transfer instructions. Payment is still awaiting confirmation.';
     next = 'Check the receiving bank account and match the amount and payment reference before marking the order paid. After confirming payment, dispatch within 1–3 business days and add Australia Post tracking in the dashboard.';
   }
-  const subject = `${view.preview ? 'PREVIEW — no payment required — ' : ''}Los Niños ${view.reference} — ${subjects[kind]}`.replace(/[\r\n]/g, ' ').slice(0, 240);
+  const subject = `${view.testDelivery ? '[TEST] ' : view.preview ? 'PREVIEW — no payment required — ' : ''}Los Niños ${view.reference} — ${subjects[kind]}`.replace(/[\r\n]/g, ' ').slice(0, 240);
   return { title: titles[kind], state: states[kind], subject, introduction, next };
 }
 
@@ -146,7 +147,7 @@ function paymentPanel(kind, view) {
     rows += panelRow('Payment reference', view.reference, { large: true, line: true });
     if (kind === 'awaiting_payment') {
       bottom = view.preview
-        ? `<p style="margin:0;color:#353a40;font-size:13px;line-height:1.6;">These are placeholders. Do not send money for this preview.</p>`
+        ? `<p style="margin:0;color:#353a40;font-size:13px;line-height:1.6;">${view.testDelivery ? 'Configured bank details are shown for review only. Do not send money for this test.' : 'These are placeholders. Do not send money for this preview.'}</p>`
         : `<p style="margin:0;color:#353a40;font-size:13px;line-height:1.6;">Enter <strong>${escapeHtml(view.reference)}</strong> in the reference or description field so we can match your transfer to your order.</p>`;
     }
   }
@@ -159,7 +160,7 @@ function summary(view) {
 
 function htmlEmail(kind, view, copy, config) {
   const supportEmail = supportAddress(config.supportEmail);
-  const adminUrl = kind === 'owner_order' && !view.preview ? ownerDashboardUrl(config.publicUrl) : null;
+  const adminUrl = kind === 'owner_order' && (!view.preview || view.testDelivery) ? ownerDashboardUrl(config.publicUrl) : null;
   const preview = view.preview ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="${CREAM}" style="background-color:${CREAM};"><tr><td class="side-padding" style="padding:20px 42px;color:${NAVY};"><p style="margin:0 0 7px;font-size:15px;line-height:1.5;font-weight:700;">PREVIEW — no payment required</p><p style="margin:0;font-size:13px;line-height:1.6;">Sample email only. No payment is requested and no parcel will be sent from this preview.</p></td></tr></table>` : '';
   const contact = kind === 'owner_order' ? `<h2 style="margin:27px 0 10px;color:${CREAM};font-size:13px;line-height:1.5;">Customer contact</h2>${paragraph([view.customer.name, view.customer.email, view.customer.phone].filter(Boolean).join(' · '), 'overflow-wrap:anywhere;word-break:break-word;')}${adminUrl ? button(adminUrl, 'Open order dashboard') : ''}` : '';
   const footer = kind === 'owner_order' ? 'Manage payment and shipping in the private order dashboard. This notification does not confirm that funds have arrived.' : 'Need to correct your address or ask a question? Reply to this email and we’ll help.';
@@ -194,7 +195,7 @@ function textEmail(kind, view, copy, config) {
   if (view.preview) lines.push('', 'PREVIEW — no payment required', 'Sample email only. No payment is requested and no parcel will be sent from this preview.');
   lines.push('', `Order ${view.reference}`, copy.title, view.preview ? `Sample status: ${copy.state}` : copy.state, '', copy.introduction, '');
   if (kind === 'awaiting_payment') {
-    lines.push(view.preview ? 'SAMPLE BANK TRANSFER DETAILS' : 'BANK TRANSFER DETAILS', `Amount to transfer: ${view.total}`, `Account name: ${view.bank.accountName}`, `BSB: ${view.bank.bsb}`, `Account number: ${view.bank.accountNumber}`, `Payment reference: ${view.reference}`, '', view.preview ? 'These are placeholders. Do not send money for this preview.' : `Enter ${view.reference} in the reference or description field so we can match your transfer to your order.`);
+    lines.push(view.preview ? 'SAMPLE BANK TRANSFER DETAILS' : 'BANK TRANSFER DETAILS', `Amount to transfer: ${view.total}`, `Account name: ${view.bank.accountName}`, `BSB: ${view.bank.bsb}`, `Account number: ${view.bank.accountNumber}`, `Payment reference: ${view.reference}`, '', view.preview ? view.testDelivery ? 'Configured bank details are shown for review only. Do not send money for this test.' : 'These are placeholders. Do not send money for this preview.' : `Enter ${view.reference} in the reference or description field so we can match your transfer to your order.`);
   } else if (kind === 'paid') {
     lines.push(view.preview ? 'SAMPLE PAYMENT RECEIVED' : 'PAYMENT RECEIVED', `Amount received: ${view.total}`, `Payment reference: ${view.reference}`);
   } else if (kind === 'shipped') {
@@ -206,7 +207,7 @@ function textEmail(kind, view, copy, config) {
   lines.push('', kind === 'owner_order' ? 'OWNER ACTION' : 'WHAT HAPPENS NEXT', copy.next);
   if (kind === 'owner_order') {
     lines.push('', 'CUSTOMER CONTACT', ...[view.customer.name, view.customer.email, view.customer.phone].filter(Boolean));
-    const url = !view.preview && ownerDashboardUrl(config.publicUrl);
+    const url = (!view.preview || view.testDelivery) && ownerDashboardUrl(config.publicUrl);
     if (url) lines.push(`Open order dashboard: ${url}`);
   }
   lines.push('', 'YOUR ORDER', `${view.productName} × ${view.quantity}`, `Unit price: ${view.unitPrice}`, `Items: ${view.itemTotal}`, `Shipping: ${view.shipping}`, `Total: ${view.total}`, '', 'DELIVERY ADDRESS', ...view.addressLines, '', kind === 'owner_order' ? 'Manage payment and shipping in the private order dashboard. This notification does not confirm that funds have arrived.' : 'Need to correct your address or ask a question? Reply to this email and we’ll help.');

@@ -1,5 +1,5 @@
 const $ = (selector, parent = document) => parent.querySelector(selector);
-const state = { orders: [], selectedId: null, order: null, settings: null, listRequest: 0, detailRequest: 0, busy: false };
+const state = { orders: [], selectedId: null, order: null, settings: null, testCheckout: null, listRequest: 0, detailRequest: 0, busy: false };
 const statuses = { awaiting_payment: 'Awaiting payment', paid: 'Paid — ready to pack', shipped: 'Shipped', cancelled: 'Cancelled' };
 const emailKinds = { awaiting_payment: 'Payment instructions', paid: 'Payment confirmation', shipped: 'Shipping confirmation', owner: 'Owner notification', owner_order: 'Owner notification' };
 const money = (cents, placeholder = 'To be set') => cents === null || cents === undefined || !Number.isFinite(Number(cents)) ? placeholder : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(Number(cents) / 100);
@@ -12,18 +12,28 @@ async function api(path, options = {}) {
   const headers = { Accept: 'application/json', ...options.headers };
   if (!['GET', 'HEAD'].includes(method)) headers['X-Requested-With'] = 'LosNinos';
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  let response;
-  try { response = await fetch(path, { ...options, method, credentials: 'same-origin', cache: 'no-store', headers, body: options.body === undefined ? undefined : JSON.stringify(options.body) }); }
-  catch { throw new Error('We could not connect. Check your connection and try again.'); }
-  const isJson = (response.headers.get('content-type') || '').includes('application/json');
-  const data = isJson ? await response.json() : null;
-  if (!response.ok || !isJson) {
-    if (response.status === 401 || response.status === 403) throw new Error('Your owner session has expired or you do not have access. Sign in with the approved owner email and try again.');
-    if (!isJson) throw new Error('The order dashboard is not connected here. Open the configured owner dashboard to manage orders.');
-    const message = typeof data?.error === 'string' ? data.error : data?.error?.message || data?.message;
-    throw new Error(message || 'We could not complete that action. Please try again.');
+  const controller = new AbortController();
+  const deadline = setTimeout(() => controller.abort(), 15_000);
+  try {
+    let response, data, isJson;
+    try {
+      response = await fetch(path, { ...options, method, credentials: 'same-origin', cache: 'no-store', headers, signal: controller.signal, body: options.body === undefined ? undefined : JSON.stringify(options.body) });
+      isJson = (response.headers.get('content-type') || '').includes('application/json');
+      data = isJson ? await response.json() : null;
+    } catch {
+      throw new Error(controller.signal.aborted ? 'The connection took too long. Refresh the order to check its latest status before trying again.' : 'We could not connect. Check your connection and try again.');
+    }
+    if (!response.ok || !isJson) {
+      const message = response.status === 401 || response.status === 403
+        ? 'Your owner session has expired or you do not have access. Sign in with the approved owner email and try again.'
+        : !isJson ? 'The order dashboard is not connected here. Open the configured owner dashboard to manage orders.'
+        : typeof data?.error === 'string' ? data.error : data?.error?.message || data?.message || 'We could not complete that action. Please try again.';
+      const error = new Error(message); error.status = response.status; throw error;
+    }
+    return data;
+  } finally {
+    clearTimeout(deadline);
   }
-  return data;
 }
 
 function pill(status) { return element('span', `pill admin-pill-${Object.hasOwn(statuses, status) ? status : 'cancelled'}`, statuses[status] || status || 'Unknown status'); }
@@ -45,11 +55,13 @@ async function loadOrders({ quiet = false } = {}) {
     if (request !== state.listRequest) return;
     state.orders = Array.isArray(result.orders) ? result.orders : [];
     renderOrderList();
+    return true;
   } catch (error) {
     if (request !== state.listRequest) return;
     notice(error.message, true);
     $('#order-list').replaceChildren(element('p', 'admin-empty muted', 'Orders could not be loaded. Your existing orders have not changed.'));
     $('#order-count').textContent = '';
+    return false;
   } finally { if (request === state.listRequest) $('#order-list-region').setAttribute('aria-busy', 'false'); }
 }
 
@@ -69,7 +81,7 @@ function renderOrderList() {
     const bottom = element('div', 'admin-order-card-bottom');
     bottom.append(element('span', '', date(order.createdAt)), element('strong', '', money(order.totalCents, 'Pending shipping')));
     card.append(top, element('p', 'admin-order-card-name', order.customer?.name || 'Customer'));
-    if (order.preview) card.append(element('p', 'admin-order-card-preview', 'Preview order'));
+    if (order.preview) card.append(element('p', 'admin-order-card-preview', order.testDelivery ? 'Email test order' : 'Preview order'));
     card.append(bottom);
     list.append(card);
   }
@@ -101,7 +113,7 @@ function renderOrderDetail() {
   const heading = element('div');
   heading.append(element('h2', '', order.reference || order.id), element('p', 'muted', `Received ${date(order.createdAt)}`));
   top.append(heading, pill(order.status)); panel.append(top);
-  if (order.preview) panel.append(element('p', 'admin-small muted', 'Preview order — no customer payment is requested.'));
+  if (order.preview) panel.append(element('p', 'admin-small muted', order.testDelivery ? `Email test order — no payment is required. Test emails go to ${order.testEmailRecipient || 'the configured test inbox'}.` : 'Preview order — no customer payment is requested.'));
   const summary = section('The order');
   const product = element('div', 'admin-product-line');
   const productDescription = element('div');
@@ -138,9 +150,9 @@ function renderOrderDetail() {
     const emailActions = element('div', 'admin-action-buttons');
     const preview = element('a', 'button button-secondary button-small', 'Preview customer email');
     preview.href = `/api/admin/email-preview/${encodeURIComponent(order.status)}?orderId=${encodeURIComponent(order.id)}`; preview.target = '_blank'; preview.rel = 'noopener';
-    emailActions.append(preview, button(order.preview ? 'Test email retry' : `Resend ${emailKinds[order.status].toLowerCase()}`, () => resendEmail(order))); emails.append(emailActions);
+    emailActions.append(preview, button(order.preview ? order.testDelivery ? 'Resend test email' : 'Test email retry' : `Resend ${emailKinds[order.status].toLowerCase()}`, () => resendEmail(order))); emails.append(emailActions);
   }
-  emails.append(element('p', 'admin-small muted', order.preview ? 'Preview emails are saved for testing only. No emails are sent.' : 'Sent means the email service accepted it. Delivery to an inbox can take longer.'));
+  emails.append(element('p', 'admin-small muted', order.preview && !order.testDelivery ? 'Preview emails are saved for testing only. No emails are sent.' : 'Sent means the email service accepted it. Delivery to an inbox can take longer.'));
   panel.append(emails);
   const history = section('Order history'); const timeline = element('ol', 'admin-history');
   for (const item of Array.isArray(order.history) ? order.history : []) {
@@ -150,6 +162,52 @@ function renderOrderDetail() {
   }
   if (!timeline.childElementCount) timeline.append(element('li', 'muted', `Order received ${date(order.createdAt)}`));
   history.append(timeline); panel.append(history);
+  if (order.preview) {
+    const cleanup = section('Test cleanup');
+    cleanup.append(element('p', 'admin-small muted', 'Finished testing? Remove this test order and restore any test stock it used.'));
+    cleanup.append(button('Delete test order', () => showDeleteTestOrder(order), 'button button-secondary button-small admin-danger-button'));
+    const slot = element('div'); slot.id = 'test-cleanup-action'; cleanup.append(slot); panel.append(cleanup);
+  }
+}
+
+function showDeleteTestOrder(order) {
+  if (state.busy || !order.preview || state.selectedId !== order.id) return;
+  const slot = $('#test-cleanup-action');
+  const form = element('form', 'admin-action-form');
+  const title = element('h4', '', `Delete ${order.reference}?`); title.id = 'delete-test-title';
+  form.setAttribute('aria-labelledby', title.id);
+  form.append(title, element('p', '', 'This permanently removes this test order, its saved history and email records. Any test stock it used is restored. Emails already delivered stay in their inboxes.'));
+  const confirmed = checkbox('I am finished testing this order and want to delete it.', 'deleteConfirmed'); form.append(confirmed.wrap);
+  const buttons = element('div', 'admin-action-buttons');
+  const submit = element('button', 'button button-secondary button-small admin-danger-button', 'Delete this test order'); submit.type = 'submit';
+  buttons.append(submit, button('Keep order', () => { slot.replaceChildren(); $('#order-detail').focus({ preventScroll: true }); })); form.append(buttons);
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (state.busy || !form.reportValidity()) return;
+    state.busy = true; form.setAttribute('aria-busy', 'true'); [...form.elements].forEach(node => { node.disabled = true; }); submit.textContent = 'Deleting…'; notice('');
+    let removed = false;
+    try {
+      await api(`/api/admin/orders/${encodeURIComponent(order.id)}`, { method: 'DELETE', body: { updatedAt: order.updatedAt } });
+      removed = true;
+    } catch (error) {
+      if (error.status === 404) removed = true;
+      else notice(error.message, true);
+    }
+    if (removed) {
+      // Invalidate earlier reads so they cannot restore a deleted card or detail.
+      state.listRequest++; state.detailRequest++; state.selectedId = null; state.order = null;
+      state.orders = state.orders.filter(item => item.id !== order.id); renderOrderList();
+      const panel = $('#order-detail'); panel.replaceChildren();
+      const empty = element('div', 'admin-detail-empty'); empty.append(element('h2', '', 'Test order removed.'), element('p', 'muted', 'Choose another order to continue.')); panel.append(empty);
+      const refreshed = await loadOrders({ quiet: true });
+      notice(refreshed ? 'Test order deleted. Its test stock has been restored where needed.' : 'Test order deleted, but the list could not be refreshed. Use Refresh to load the remaining orders.', !refreshed);
+      $('#refresh-orders').focus({ preventScroll: true });
+    } else {
+      form.removeAttribute('aria-busy'); [...form.elements].forEach(node => { node.disabled = false; }); submit.textContent = 'Delete this test order';
+    }
+    state.busy = false;
+  });
+  slot.replaceChildren(form); confirmed.input.focus({ preventScroll: true });
 }
 
 function showAction(status) {
@@ -161,11 +219,11 @@ function showAction(status) {
     ? { paid: 'Test payment confirmation', shipped: 'Test the shipping step', cancelled: 'Cancel this test order?' }
     : { paid: 'Has the money arrived?', shipped: 'Ready to send?', cancelled: 'Cancel this order?' };
   form.append(element('h4', '', titles[status]));
-  if (status === 'paid') form.append(element('p', '', order.preview ? 'This simulates confirming a payment. Do not make a bank transfer. No customer email will be sent.' : `Check your bank account for ${money(order.totalCents)} with reference ${order.reference}. A customer screenshot alone does not confirm payment.`));
-  if (status === 'shipped') { form.append(element('p', '', order.preview ? 'Use a test tracking number to try the shipping step. No parcel or customer email will be sent.' : 'The customer will receive a shipping confirmation with this tracking number.')); const tracking = field(order.preview ? 'Test tracking number' : 'Tracking number', 'trackingNumber'); tracking.input.required = true; tracking.input.maxLength = 100; form.append(tracking.wrap); }
+  if (status === 'paid') form.append(element('p', '', order.preview ? `This simulates confirming a payment. Do not make a bank transfer. ${order.testDelivery ? 'A payment-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : `Check your bank account for ${money(order.totalCents)} with reference ${order.reference}. A customer screenshot alone does not confirm payment.`));
+  if (status === 'shipped') { form.append(element('p', '', order.preview ? `Use a test tracking number to try the shipping step. No parcel is sent. ${order.testDelivery ? 'A shipping-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : 'The customer will receive a shipping confirmation with this tracking number.')); const tracking = field(order.preview ? 'Test tracking number' : 'Tracking number', 'trackingNumber'); tracking.input.required = true; tracking.input.maxLength = 100; form.append(tracking.wrap); }
   if (status === 'cancelled') form.append(element('p', '', order.preview ? 'This cancels the test order and releases its reserved preview stock. No customer email will be sent.' : 'This cancels the unpaid order and releases its reserved stock. Check the bank account first in case a transfer has arrived.'));
   const note = field(status === 'cancelled' ? 'Reason or note' : 'Internal note (optional)', 'note', 'textarea'); note.input.maxLength = 2000; if (status === 'cancelled') note.input.required = true; form.append(note.wrap);
-  const confirmed = checkbox(order.preview ? 'I understand this is a test and no customer email will be sent.' : status === 'paid' ? 'I have checked the bank account and the full payment has arrived.' : status === 'shipped' ? 'I have handed this parcel over for delivery.' : 'I have checked this order and want to cancel it.', 'confirmed'); form.append(confirmed.wrap);
+  const confirmed = checkbox(order.preview ? order.testDelivery && status !== 'cancelled' ? 'I understand this is a simulation and an email will go to the test inbox.' : 'I understand this is a test and no customer email will be sent.' : status === 'paid' ? 'I have checked the bank account and the full payment has arrived.' : status === 'shipped' ? 'I have handed this parcel over for delivery.' : 'I have checked this order and want to cancel it.', 'confirmed'); form.append(confirmed.wrap);
   const submitLabel = order.preview ? (status === 'paid' ? 'Confirm test payment' : status === 'shipped' ? 'Confirm test shipment' : 'Cancel test order') : (status === 'paid' ? 'Mark paid & send confirmation' : status === 'shipped' ? 'Mark shipped & email tracking' : 'Confirm cancellation');
   const buttons = element('div', 'admin-action-buttons'); const submit = element('button', 'button button-small', submitLabel); submit.type = 'submit'; buttons.append(submit, button('Back', () => { slot.replaceChildren(); $('#order-detail').focus({ preventScroll: true }); })); form.append(buttons);
   form.addEventListener('submit', async (event) => {
@@ -177,7 +235,7 @@ function showAction(status) {
     try {
       const result = await api(`/api/admin/orders/${encodeURIComponent(order.id)}/status`, { method: 'POST', body });
       state.order = result.order; renderOrderDetail(); await loadOrders({ quiet: true });
-      notice(order.preview ? 'Preview order updated. No email sent.' : status === 'cancelled' ? 'Order cancelled. Reserved stock has been released.' : status === 'paid' ? 'Payment confirmed. The customer confirmation has been queued.' : 'Order marked as shipped. The tracking email has been queued.');
+      notice(order.preview ? order.testDelivery && status !== 'cancelled' ? 'Test order updated. Its confirmation email has been queued for the test inbox.' : 'Preview order updated. No email sent.' : status === 'cancelled' ? 'Order cancelled. Reserved stock has been released.' : status === 'paid' ? 'Payment confirmed. The customer confirmation has been queued.' : 'Order marked as shipped. The tracking email has been queued.');
       $('#order-detail').focus({ preventScroll: true });
     } catch (error) { notice(error.message, true); [...form.elements].forEach((node) => { node.disabled = false; }); }
     finally { state.busy = false; }
@@ -190,7 +248,7 @@ async function resendEmail(order) {
   state.busy = true; notice(order.preview ? 'Testing the email retry…' : 'Queueing the customer email…');
   try {
     await api(`/api/admin/orders/${encodeURIComponent(order.id)}/resend`, { method: 'POST', body: { kind: order.status } });
-    const message = order.preview ? 'Email retry recorded for this preview order. No email sent.' : 'The customer email has been queued again.';
+    const message = order.preview ? order.testDelivery ? 'The email has been queued again for the test inbox.' : 'Email retry recorded for this preview order. No email sent.' : 'The customer email has been queued again.';
     try {
       const result = await api(`/api/admin/orders/${encodeURIComponent(order.id)}`);
       if (state.selectedId === order.id) { state.order = result.order; renderOrderDetail(); }
@@ -207,6 +265,15 @@ function showMissingSetup(missing) {
   if (!items.length) { node.append(element('strong', '', 'Store details are complete.'), element('div', 'admin-small', 'Live checkout still requires the owner account, email service and launch configuration to be ready.')); }
   else { node.append(element('strong', '', 'Still needed before launch')); const list = element('ul', 'admin-setup-list'); for (const item of items) list.append(element('li', '', typeof item === 'string' ? item : item.label || item.message || item.key || 'Setup step incomplete')); node.append(list); }
   node.hidden = false;
+}
+
+function showTestCheckout(config) {
+  state.testCheckout = config || null;
+  const button = $('#test-purchase');
+  button.disabled = !config?.enabled;
+  $('#test-purchase-help').textContent = config?.enabled
+    ? `A test purchase sends emails only to ${config.recipient || 'the configured test inbox'}. No payment is needed.`
+    : 'Test purchases with email will be available once the test inbox and sender are connected.';
 }
 
 function populateSettings(settings) {
@@ -226,7 +293,7 @@ async function loadSettings() {
   $('#settings-form').hidden = true;
   $('#settings-setup').hidden = true;
   notice('Loading current store settings…');
-  try { const result = await api('/api/admin/settings'); populateSettings(result.settings); showMissingSetup(result.missingSetup); notice(''); }
+  try { const result = await api('/api/admin/settings'); populateSettings(result.settings); showMissingSetup(result.missingSetup); showTestCheckout(result.testCheckout); notice(''); }
   catch (error) { notice(error.message, true); }
   finally { state.busy = false; }
 }
@@ -254,6 +321,7 @@ $('#settings-form').addEventListener('submit', async (event) => {
 
 $('#orders-tab').addEventListener('click', () => switchView('orders'));
 $('#settings-tab').addEventListener('click', () => switchView('settings'));
+$('#test-purchase').addEventListener('click', () => { if (!state.busy && state.testCheckout?.enabled) location.assign('/checkout.html?test=1'); });
 $('#refresh-orders').addEventListener('click', () => { if (!state.busy) loadOrders(); });
 $('#order-status').addEventListener('change', () => loadOrders());
 let searchTimer;
@@ -262,7 +330,10 @@ api('/api/catalog').then((catalog) => {
   const preview = $('#preview-notice'); preview.hidden = catalog.mode !== 'preview';
   if (!['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
     $('strong', preview).textContent = 'Setup mode';
-    $('span', preview).textContent = 'Live checkout is not enabled. Preview orders are tests and do not send customer emails.';
+    $('span', preview).textContent = 'Live checkout is not enabled. Public preview orders do not send emails. Use Test purchase for the private email test.';
   }
 }).catch(() => {});
+api('/api/admin/settings').then(result => showTestCheckout(result.testCheckout)).catch(() => {
+  $('#test-purchase-help').textContent = 'Test setup could not be checked. Open Store settings to try again.';
+});
 loadOrders();

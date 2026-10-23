@@ -33,6 +33,18 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE INDEX IF NOT EXISTS orders_created ON orders (created_at DESC);
 CREATE INDEX IF NOT EXISTS orders_status ON orders (status, created_at DESC);
 
+-- Retain no customer data, only the retry guard for a deleted test checkout.
+CREATE TABLE IF NOT EXISTS deleted_test_orders (
+  idempotency_hash TEXT PRIMARY KEY,
+  deleted_at TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS orders_reject_deleted_test BEFORE INSERT ON orders
+WHEN NEW.mode='preview' AND EXISTS (
+  SELECT 1 FROM deleted_test_orders WHERE idempotency_hash=NEW.idempotency_hash
+) BEGIN
+  SELECT RAISE(ABORT, 'test_order_deleted');
+END;
+
 CREATE TRIGGER IF NOT EXISTS orders_require_stock BEFORE INSERT ON orders BEGIN
   SELECT CASE WHEN NOT EXISTS (
     SELECT 1 FROM inventory WHERE mode = NEW.mode AND stock_on_hand - reserved >= NEW.quantity

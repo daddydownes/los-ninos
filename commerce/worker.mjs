@@ -129,6 +129,24 @@ export function missingSetup(config, env) {
   return missing;
 }
 
+function testEmailRecipient(env) {
+  if (env.STORE_MODE !== 'preview' || env.LOCAL_PREVIEW === 'true' || env.TEST_EMAILS_ENABLED !== 'true') return null;
+  const recipient = String(env.TEST_EMAIL_TO || '').trim().toLowerCase();
+  return validAddressEmail(recipient) ? recipient : null;
+}
+
+function testCheckoutSetup(config, env) {
+  const recipient = testEmailRecipient(env);
+  const missing = missingSetup(config, { ...env, STORE_MODE: 'live', LAUNCH_CONFIRMED: 'true' });
+  if (!recipient) missing.unshift('Configure the approved test inbox and enable owner-only test emails');
+  return { enabled: missing.length === 0, recipient, missingSetup: missing };
+}
+
+function canSendOrderEmail(env, order) {
+  if (!order.preview) return env.STORE_MODE === 'live';
+  return order.testDelivery === true && !!testEmailRecipient(env) && order.testEmailRecipient === testEmailRecipient(env);
+}
+
 function previewCheckoutAllowed(request, env) {
   if (isLocalPreview(request, env)) return true;
   // Hosted tests use separate preview inventory and never queue real email or
@@ -147,6 +165,16 @@ async function catalog(request, env) {
       available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
     shipping: { country: 'AU', feeCents: config.shippingCents },
     dispatchDays: '1–3 business days' });
+}
+
+async function testCheckoutCatalog(request, env) {
+  const config = await settings(env);
+  const readiness = testCheckoutSetup(config, env);
+  const stock = await stmt(env, 'SELECT stock_on_hand, reserved FROM inventory WHERE mode=?', 'preview').first();
+  return response({ catalog: { mode: 'preview', revision: config.revision, acceptingOrders: readiness.enabled,
+    product: { ...PRODUCT, priceCents: config.productPriceCents, available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
+    shipping: { country: 'AU', feeCents: config.shippingCents }, dispatchDays: '1–3 business days' },
+    recipient: readiness.recipient, missingSetup: readiness.missingSetup });
 }
 
 function validateCheckout(body, config) {
@@ -180,7 +208,8 @@ async function presentOrder(env, row, admin = false) {
     stmt(env, 'SELECT id, kind, status, created_at, attempts, failure_code FROM email_outbox WHERE order_id=? ORDER BY created_at', row.id).all(),
     stmt(env, 'SELECT status, created_at, actor, note FROM order_history WHERE order_id=? ORDER BY created_at, rowid', row.id).all(),
   ]);
-  return { ...baseOrder(row),
+  const { testEmailRecipient: testRecipient, ...order } = baseOrder(row);
+  return { ...order, ...(admin && testRecipient ? { testEmailRecipient: testRecipient } : {}),
     emails: messages.results.filter(message => admin || message.kind !== 'owner_order').map(message => ({
       id: message.id, kind: message.kind, status: message.status, createdAt: message.created_at,
       ...(admin ? { attempts: message.attempts, failureCode: message.failure_code } : {}),
@@ -191,11 +220,12 @@ async function presentOrder(env, row, admin = false) {
 }
 
 function outboxInsert(env, order, kind, config, id = crypto.randomUUID(), condition = null, recentCutoff = null) {
-  const rendered = renderEmail(kind, order, { supportEmail: config.supportEmail, publicUrl: env.PUBLIC_STORE_URL });
+  const testRecipient = order.preview && order.testDelivery === true ? order.testEmailRecipient : null;
+  const rendered = renderEmail(kind, order, { supportEmail: testRecipient || config.supportEmail, publicUrl: env.PUBLIC_STORE_URL });
   const payload = JSON.stringify({ from: env.EMAIL_FROM || 'preview@invalid.test',
-    to: [kind === 'owner_order' ? (config.ownerEmail || 'owner@invalid.test') : order.customer.email],
-    reply_to: config.supportEmail || undefined, ...rendered });
-  const params = [id, order.id, kind, payload, order.preview ? 'preview' : 'queued', nowISO(), seconds()];
+    to: [testRecipient || (kind === 'owner_order' ? (config.ownerEmail || 'owner@invalid.test') : order.customer.email)],
+    reply_to: testRecipient || config.supportEmail || undefined, ...rendered });
+  const params = [id, order.id, kind, payload, order.preview && !testRecipient ? 'preview' : 'queued', nowISO(), seconds()];
   let sql = 'INSERT INTO email_outbox(id, order_id, kind, payload, status, created_at, next_attempt_at) SELECT ?,?,?,?,?,?,?';
   if (condition) { sql += ' WHERE EXISTS (SELECT 1 FROM orders WHERE id=? AND mutation_id=?)'; params.push(order.id, condition); }
   if (recentCutoff) {
@@ -206,17 +236,22 @@ function outboxInsert(env, order, kind, config, id = crypto.randomUUID(), condit
   return stmt(env, sql, ...params);
 }
 
-async function placeOrder(request, env, ctx) {
+async function placeOrder(request, env, ctx, testDelivery = false) {
   const config = await settings(env);
   const local = isLocalPreview(request, env);
   const preview = env.STORE_MODE !== 'live';
-  if (preview ? !previewCheckoutAllowed(request, env) : missingSetup(config, env).length) fail(503, 'The shop is being prepared. Ordering will open soon.', 'setup_incomplete');
+  if (testDelivery) {
+    if (new URL(request.url).protocol !== 'https:' || !testCheckoutSetup(config, env).enabled) fail(503, 'Complete the owner-only test email setup before testing a purchase.', 'setup_incomplete');
+  } else if (preview ? !previewCheckoutAllowed(request, env) : missingSetup(config, env).length) fail(503, 'The shop is being prepared. Ordering will open soon.', 'setup_incomplete');
   const body = validateCheckout(await readJSON(request), config);
+  if (testDelivery && body.customer.email !== testEmailRecipient(env)) fail(400, 'Use the approved test inbox shown on this checkout.', 'test_recipient_mismatch');
   const mode = preview ? 'preview' : 'live';
-  const idempotencyHash = await sha256(`${mode}:${body.idempotencyKey}`);
+  const idempotencyHash = await sha256(`${testDelivery ? 'preview-email' : mode}:${body.idempotencyKey}`);
   const requestHash = await sha256(JSON.stringify({ quantity: body.quantity, customer: body.customer, shippingAddress: body.shippingAddress }));
   const existing = await stmt(env, 'SELECT * FROM orders WHERE idempotency_hash=?', idempotencyHash).first();
   if (existing) return existingOrderResponse(env, existing, body, requestHash, local);
+  const deleted = await stmt(env, 'SELECT idempotency_hash FROM deleted_test_orders WHERE idempotency_hash=?', idempotencyHash).first();
+  if (deleted) fail(409, 'This test order was deleted. Start a new checkout to test again.', 'test_order_deleted');
   if (body.catalogRevision !== config.revision) fail(409, 'Price or delivery options changed. Please review your order again.', 'catalog_changed');
   if (body.quantity > config.maxQuantity) fail(400, 'Please review the quantity in your bag.', 'invalid_input');
   await limited(env, `order:${request.headers.get('cf-connecting-ip') || 'local'}`, 6, 600);
@@ -229,7 +264,8 @@ async function placeOrder(request, env, ctx) {
     totalCents: Number.isSafeInteger(config.productPriceCents) && Number.isSafeInteger(config.shippingCents)
       ? config.productPriceCents * body.quantity + config.shippingCents : null,
     customer: body.customer, shippingAddress: body.shippingAddress,
-    bank: preview ? { accountName: '', bsb: '', accountNumber: '' } : { ...config.bank } };
+    bank: preview && !testDelivery ? { accountName: '', bsb: '', accountNumber: '' } : { ...config.bank },
+    ...(testDelivery ? { testDelivery: true, testEmailRecipient: testEmailRecipient(env) } : {}) };
   const order = { ...snapshot, id, reference, status: 'awaiting_payment', quantity: body.quantity, preview,
     createdAt, updatedAt: createdAt, trackingNumber: '' };
   try {
@@ -244,11 +280,12 @@ async function placeOrder(request, env, ctx) {
   } catch (error) {
     const duplicate = await stmt(env, 'SELECT * FROM orders WHERE idempotency_hash=?', idempotencyHash).first();
     if (duplicate) return existingOrderResponse(env, duplicate, body, requestHash, local);
+    if (String(error.message).includes('test_order_deleted')) fail(409, 'This test order was deleted. Start a new checkout to test again.', 'test_order_deleted');
     if (String(error.message).includes('insufficient_stock')) fail(409, 'That quantity is no longer available. Please update your bag.', 'insufficient_stock');
     if (String(error.message).includes('FOREIGN KEY')) fail(409, 'Price or delivery options changed. Please review your order again.', 'catalog_changed');
     throw error;
   }
-  if (!preview) ctx?.waitUntil?.(processOutbox(env));
+  if (canSendOrderEmail(env, order)) ctx?.waitUntil?.(processOutbox(env));
   return response({ order: await presentOrder(env, await stmt(env, 'SELECT * FROM orders WHERE id=?', id).first()), token }, 201);
 }
 
@@ -310,8 +347,41 @@ async function setOrderStatus(request, env, ctx, id, actor) {
   if (['paid', 'shipped'].includes(body.status)) batch.push(outboxInsert(env, order, body.status, config, crypto.randomUUID(), mutationId));
   const result = await env.DB.batch(batch);
   if (result[0].meta.changes === 0) fail(409, 'This order changed. Refresh it before continuing.', 'order_changed');
-  if (!order.preview) ctx?.waitUntil?.(processOutbox(env));
+  if (canSendOrderEmail(env, order)) ctx?.waitUntil?.(processOutbox(env));
   return response({ order: await presentOrder(env, await stmt(env, 'SELECT * FROM orders WHERE id=?', id).first(), true) });
+}
+
+async function deleteTestOrder(request, env, id) {
+  const body = await readJSON(request);
+  const expectedUpdatedAt = text(body.updatedAt, 'Order version', { min: 1, max: 40 });
+  const row = await stmt(env, 'SELECT mode, updated_at FROM orders WHERE id=?', id).first();
+  if (!row) fail(404, 'Order not found.', 'not_found');
+  if (row.mode !== 'preview') fail(409, 'Only test orders can be deleted. Keep real orders for your records.', 'live_order_delete_forbidden');
+  if (row.updated_at !== expectedUpdatedAt) fail(409, 'This order changed. Refresh it before deleting.', 'order_changed');
+  const current = seconds();
+  const sending = await stmt(env, "SELECT id FROM email_outbox WHERE order_id=? AND (status='sending' OR lease_until>?) LIMIT 1", id, current).first();
+  if (sending) fail(409, 'An email is being processed. Refresh the order and try again when it finishes.', 'email_in_progress');
+
+  const mutationId = crypto.randomUUID();
+  // Claim the current order and perform all cleanup in one transaction. A sender
+  // that has already claimed an email blocks deletion; an unclaimed sender sees
+  // no outbox row after deletion and cannot start a new send.
+  const claimed = 'EXISTS (SELECT 1 FROM orders WHERE id=? AND mode=\'preview\' AND mutation_id=?)';
+  const result = await env.DB.batch([
+    stmt(env, `UPDATE orders SET mutation_id=? WHERE id=? AND mode='preview' AND updated_at=?
+      AND NOT EXISTS (SELECT 1 FROM email_outbox WHERE order_id=orders.id AND (status='sending' OR lease_until>?))`, mutationId, id, expectedUpdatedAt, current),
+    stmt(env, `INSERT INTO deleted_test_orders(idempotency_hash, deleted_at)
+      SELECT idempotency_hash, ? FROM orders WHERE id=? AND mode='preview' AND mutation_id=?`, nowISO(), id, mutationId),
+    stmt(env, `UPDATE inventory SET
+      reserved=reserved-(SELECT CASE WHEN status IN ('awaiting_payment','paid') THEN quantity ELSE 0 END FROM orders WHERE id=? AND mutation_id=?),
+      stock_on_hand=stock_on_hand+(SELECT CASE WHEN status='shipped' THEN quantity ELSE 0 END FROM orders WHERE id=? AND mutation_id=?)
+      WHERE mode='preview' AND ${claimed}`, id, mutationId, id, mutationId, id, mutationId),
+    stmt(env, `DELETE FROM email_outbox WHERE order_id=? AND ${claimed}`, id, id, mutationId),
+    stmt(env, `DELETE FROM order_history WHERE order_id=? AND ${claimed}`, id, id, mutationId),
+    stmt(env, "DELETE FROM orders WHERE id=? AND mode='preview' AND mutation_id=?", id, mutationId),
+  ]);
+  if (!result[0].meta.changes) fail(409, 'This order changed or an email is being processed. Refresh it before deleting.', 'order_changed');
+  return response({ ok: true, deletedId: id });
 }
 
 function validateSettings(body) {
@@ -367,7 +437,7 @@ async function resend(request, env, ctx, id) {
   const config = await settings(env);
   if (row.mode === 'live' && missingSetup(config, env).length) fail(503, 'Complete email and shop setup before sending again.', 'setup_incomplete');
   await outboxInsert(env, baseOrder(row), body.kind, config, crypto.randomUUID(), null, new Date(Date.now() - 60000).toISOString()).run();
-  if (row.mode === 'live') ctx?.waitUntil?.(processOutbox(env));
+  if (canSendOrderEmail(env, baseOrder(row))) ctx?.waitUntil?.(processOutbox(env));
   return response({ ok: true });
 }
 
@@ -400,31 +470,52 @@ async function emailPreview(request, env, kind) {
   const config = await settings(env);
   const order = baseOrder(row);
   if (!order.preview && kind !== 'owner_order' && kind !== order.status) fail(400, 'Choose the email for the current order status.', 'invalid_input');
-  const rendered = renderEmail(kind, order, { supportEmail: config.supportEmail, publicUrl: env.PUBLIC_STORE_URL });
+  const rendered = renderEmail(kind, order, { supportEmail: order.preview && order.testDelivery === true ? order.testEmailRecipient : config.supportEmail, publicUrl: env.PUBLIC_STORE_URL });
   return new Response(rendered.html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store',
     'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; frame-ancestors 'self'; base-uri 'none'; form-action 'none'",
     'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' } });
 }
 
 export async function processOutbox(env) {
-  if (env.STORE_MODE !== 'live' || !env.RESEND_API_KEY) return;
+  const testRecipient = testEmailRecipient(env);
+  if ((env.STORE_MODE !== 'live' && !testRecipient) || !env.RESEND_API_KEY) return;
+  const mode = env.STORE_MODE === 'live' ? 'live' : 'preview';
   const current = seconds();
   // Provider idempotency lasts 24 hours. Stop ambiguous retries before it expires.
   await stmt(env, `UPDATE email_outbox SET status='needs_review', failure_code='retry_window_expired'
-    WHERE status IN ('queued','sending') AND ambiguous_at IS NOT NULL AND ambiguous_at < ?`, current - 23 * 3600).run();
-  const due = await stmt(env, `SELECT e.*, o.mode, o.status AS order_status FROM email_outbox e JOIN orders o ON o.id=e.order_id
-    WHERE o.mode='live' AND ((e.status='queued' AND e.next_attempt_at<=?) OR (e.status='sending' AND e.lease_until<?))
-    ORDER BY e.created_at LIMIT 5`, current, current).all();
+    WHERE status IN ('queued','sending') AND lease_until<=? AND ambiguous_at IS NOT NULL AND ambiguous_at < ?
+    AND EXISTS (SELECT 1 FROM orders WHERE id=email_outbox.order_id AND mode=?
+      AND (mode='live' OR (json_extract(snapshot,'$.testDelivery')=1 AND json_extract(snapshot,'$.testEmailRecipient')=?)))`,
+    current, current - 23 * 3600, mode, testRecipient).run();
+  const due = await stmt(env, `SELECT e.*, o.mode, o.status AS order_status, o.snapshot FROM email_outbox e JOIN orders o ON o.id=e.order_id
+    WHERE o.mode=? AND (o.mode='live' OR (json_extract(o.snapshot,'$.testDelivery')=1 AND json_extract(o.snapshot,'$.testEmailRecipient')=?))
+    AND ((e.status='queued' AND e.next_attempt_at<=?) OR (e.status='sending' AND e.lease_until<?))
+    ORDER BY e.created_at LIMIT 5`, mode, testRecipient, current, current).all();
   const sendFetch = env.FETCH || fetch;
   for (const entry of due.results) {
     if (['awaiting_payment','owner_order'].includes(entry.kind) && entry.order_status !== 'awaiting_payment') {
       await stmt(env, "UPDATE email_outbox SET status='cancelled' WHERE id=? AND status IN ('queued','sending')", entry.id).run(); continue;
     }
+    if (entry.mode === 'preview') {
+      // Recheck the immutable order and rendered payload at the actual send boundary.
+      // No caller or stale queued payload may introduce another recipient or Reply-To.
+      let payload;
+      try { payload = JSON.parse(entry.payload); } catch { /* Mark unsafe payload below. */ }
+      if (!payload || !Array.isArray(payload.to) || payload.to.length !== 1 || payload.to[0] !== testRecipient ||
+          payload.reply_to !== testRecipient || Object.hasOwn(payload, 'cc') || Object.hasOwn(payload, 'bcc') ||
+          typeof payload.subject !== 'string' || !payload.subject.startsWith('[TEST] ')) {
+        await stmt(env, "UPDATE email_outbox SET status='failed',failure_code='test_recipient_guard',lease_until=0 WHERE id=? AND status IN ('queued','sending') AND lease_until<=?", entry.id, current).run();
+        continue;
+      }
+    }
     const lease = current + 120;
     const claim = await stmt(env, `UPDATE email_outbox SET status='sending', lease_until=?, attempts=attempts+1,
       first_attempt_at=COALESCE(first_attempt_at,?), ambiguous_at=COALESCE(ambiguous_at,?) WHERE id=? AND
       ((status='queued' AND next_attempt_at<=?) OR (status='sending' AND lease_until<?))
-      AND (kind NOT IN ('awaiting_payment','owner_order') OR EXISTS (SELECT 1 FROM orders WHERE id=email_outbox.order_id AND status='awaiting_payment'))`, lease, current, current, entry.id, current, current).run();
+      AND EXISTS (SELECT 1 FROM orders WHERE id=email_outbox.order_id AND mode=?
+        AND (mode='live' OR (json_extract(snapshot,'$.testDelivery')=1 AND json_extract(snapshot,'$.testEmailRecipient')=?))
+        AND (email_outbox.kind NOT IN ('awaiting_payment','owner_order') OR status='awaiting_payment'))`,
+      lease, current, current, entry.id, current, current, mode, testRecipient).run();
     if (!claim.meta.changes) continue;
     let result;
     try {
@@ -454,10 +545,14 @@ export async function processOutbox(env) {
 }
 
 async function updateDeliveryStatus(env) {
-  if (env.STORE_MODE !== 'live' || !env.RESEND_API_KEY) return;
+  const testRecipient = testEmailRecipient(env);
+  if ((env.STORE_MODE !== 'live' && !testRecipient) || !env.RESEND_API_KEY) return;
+  const mode = env.STORE_MODE === 'live' ? 'live' : 'preview';
   const current = seconds();
-  const rows = await stmt(env, `SELECT id,provider_id FROM email_outbox WHERE status='sent' AND checked_at<? AND created_at>? LIMIT 5`,
-    current - 300, new Date(Date.now() - 7 * 86400000).toISOString()).all();
+  const rows = await stmt(env, `SELECT e.id,e.provider_id FROM email_outbox e JOIN orders o ON o.id=e.order_id
+    WHERE e.status='sent' AND e.checked_at<? AND e.created_at>? AND o.mode=?
+    AND (o.mode='live' OR (json_extract(o.snapshot,'$.testDelivery')=1 AND json_extract(o.snapshot,'$.testEmailRecipient')=?)) LIMIT 5`,
+    current - 300, new Date(Date.now() - 7 * 86400000).toISOString(), mode, testRecipient).all();
   const sendFetch = env.FETCH || fetch;
   for (const row of rows.results) {
     try {
@@ -488,11 +583,14 @@ async function fetchHandler(request, env, ctx) {
   let match = path.match(/^\/api\/orders\/([a-f0-9-]{36})$/);
   if (match && request.method === 'GET') return customerOrder(request, env, match[1]);
   if (path === '/api/admin/orders' && request.method === 'GET') return adminOrders(request, env);
-  if (path === '/api/admin/settings' && request.method === 'GET') { const config = await settings(env); return response({ settings: config, missingSetup: missingSetup(config, env) }); }
+  if (path === '/api/admin/test-checkout' && request.method === 'GET') return testCheckoutCatalog(request, env);
+  if (path === '/api/admin/test-orders' && request.method === 'POST') return placeOrder(request, env, ctx, true);
+  if (path === '/api/admin/settings' && request.method === 'GET') { const config = await settings(env); return response({ settings: config, missingSetup: missingSetup(config, env), testCheckout: testCheckoutSetup(config, env) }); }
   if (path === '/api/admin/settings' && request.method === 'PUT') return updateSettings(request, env, actor);
   if (path === '/api/admin/export' && request.method === 'GET') return exportOrders(env);
   match = path.match(/^\/api\/admin\/orders\/([a-f0-9-]{36})(?:\/(status|resend))?$/);
   if (match) {
+    if (!match[2] && request.method === 'DELETE') return deleteTestOrder(request, env, match[1]);
     if (match[2] === 'status' && request.method === 'POST') return setOrderStatus(request, env, ctx, match[1], actor);
     if (match[2] === 'resend' && request.method === 'POST') return resend(request, env, ctx, match[1]);
     if (!match[2] && request.method === 'GET') { const row = await stmt(env, 'SELECT * FROM orders WHERE id=?', match[1]).first(); if (!row) fail(404, 'Order not found.', 'not_found'); return response({ order: await presentOrder(env, row, true) }); }

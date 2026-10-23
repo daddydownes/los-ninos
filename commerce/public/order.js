@@ -33,11 +33,14 @@ function setupCopy(id, value, label, enabled) {
 function render(order) {
   currentOrder = order;
   const preview = order.preview === true;
+  const testDelivery = preview && order.testDelivery === true;
   const awaiting = order.status === 'awaiting_payment';
   const completeBank = [order.bank?.accountName, order.bank?.bsb, order.bank?.accountNumber].every((value) => typeof value === 'string' && value.trim());
   const canPay = !preview && completeBank && typeof order.totalCents === 'number';
   document.title = `${order.reference || 'Your order'} — Los Niños`;
   $('preview-banner').hidden = !preview;
+  $('test-dashboard-link').hidden = !testDelivery;
+  text($('preview-copy'), testDelivery ? 'This is an email test order. Emails go only to the approved test inbox. No payment or shipment is required.' : 'This is a test order. No payment is due and no email has been sent. Bank details below are placeholders.');
   text($('order-reference'), order.reference);
   text($('order-date'), safeDate(order.createdAt));
   text($('order-status'), preview ? `Test order · ${statusLabel(order.status)}` : statusLabel(order.status));
@@ -57,12 +60,12 @@ function render(order) {
     text($('order-intro'), preview ? 'This is how your customer’s order page will look. No payment is due.' : 'Thanks for your order. It’s awaiting payment—please complete the bank transfer using the details below.');
     text($('payment-eyebrow'), preview ? 'Preview · no payment due' : 'Pay by bank transfer');
     text($('payment-heading'), preview ? 'Payment details preview' : 'Your payment details');
-    text($('payment-description'), preview ? 'The account holder, BSB and account number will appear here once the owner has confirmed them. Do not make a transfer for this test order.' : canPay ? 'Open your banking app and transfer the exact amount to this account. Include your payment reference.' : 'Payment details are temporarily unavailable. Do not transfer money yet. Please reply to your order email for help.');
+    text($('payment-description'), testDelivery ? 'These are the configured payment details for checking the purchase flow. Do not make a transfer for this test order.' : preview ? 'The account holder, BSB and account number will appear here once the owner has confirmed them. Do not make a transfer for this test order.' : canPay ? 'Open your banking app and transfer the exact amount to this account. Include your payment reference.' : 'Payment details are temporarily unavailable. Do not transfer money yet. Please reply to your order email for help.');
     if (!preview && !canPay) text($('order-intro'), 'Your order is saved and awaiting payment. Please wait until the payment details have been confirmed.');
     text($('payment-total'), preview ? 'No payment due' : money(order.totalCents));
-    text($('bank-name'), preview ? '[Account name]' : bankValue(order.bank?.accountName, 'To be confirmed'));
-    text($('bank-bsb'), preview ? '[BSB]' : bankValue(order.bank?.bsb, 'To be confirmed'));
-    text($('bank-account'), preview ? '[Account number]' : bankValue(order.bank?.accountNumber, 'To be confirmed'));
+    text($('bank-name'), preview && !testDelivery ? '[Account name]' : bankValue(order.bank?.accountName, 'To be confirmed'));
+    text($('bank-bsb'), preview && !testDelivery ? '[BSB]' : bankValue(order.bank?.bsb, 'To be confirmed'));
+    text($('bank-account'), preview && !testDelivery ? '[Account number]' : bankValue(order.bank?.accountNumber, 'To be confirmed'));
     text($('bank-reference'), order.reference);
     text($('reference-help'), preview ? 'Each real order gets a unique reference so the owner can match the transfer to the order.' : 'Enter this in your banking app’s reference or description field so we can match your payment.');
     text($('payment-next-copy'), preview ? 'For a real order, the owner checks the bank payment and confirms it. The customer is then emailed, with dispatch within 1–3 business days after payment is confirmed.' : 'We’ll email you when we’ve confirmed your payment. We dispatch within 1–3 business days after payment is confirmed.');
@@ -79,7 +82,7 @@ function render(order) {
     text($('state-description'), preview ? 'In the live shop, the owner packs the hat and adds tracking when it is dispatched.' : 'We dispatch within 1–3 business days after payment is confirmed. We’ll email you again when your order has been shipped.');
   } else if (order.status === 'shipped') {
     text($('order-title'), 'On its way.');
-    text($('order-intro'), preview ? 'This test order has been marked as shipped. Nothing has actually been sent.' : 'Your hat has been dispatched. Thanks for being part of Los Niños.');
+    text($('order-intro'), preview ? 'This test order has been marked as shipped. No parcel has been sent.' : 'Your hat has been dispatched. Thanks for being part of Los Niños.');
     text($('state-eyebrow'), 'Order dispatched');
     text($('state-heading'), 'Keep an eye out.');
     text($('state-description'), preview ? 'The customer will see the tracking number here and in their dispatch email.' : 'Your shipping email includes your dispatch details. You can also find your tracking number below.');
@@ -94,7 +97,7 @@ function render(order) {
     text($('state-heading'), 'Need a hand?');
     text($('state-description'), preview ? 'The owner can cancel an unpaid order manually from the dashboard.' : 'If you have already sent a bank transfer, reply to your order email with your order reference so we can help.');
   }
-  text($('order-help-copy'), preview ? 'Preview orders are separate from real orders. You can test the owner’s payment and shipping workflow from the dashboard.' : 'Need to change something? Reply to your order email and include your order reference. Keep this order link private—it contains your delivery details.');
+  text($('order-help-copy'), testDelivery ? 'Use the owner dashboard to simulate payment confirmation and dispatch, inspect email delivery, then delete this test order. Real stock is unchanged. Keep this private order link to yourself.' : preview ? 'Preview orders are separate from real orders. You can test the owner’s payment and shipping workflow from the dashboard.' : 'Need to change something? Reply to your order email and include your order reference. Keep this order link private—it contains your delivery details.');
   $('order-content').hidden = false;
 }
 
