@@ -6,8 +6,8 @@ You check the receiving bank account yourself, then confirm payment and dispatch
 through your private dashboard.
 
 This handover does not mean the shop is live. The domain, sending email, owner
-accounts, postage, stock, and bank details still need to be confirmed
-and connected. The confirmed hat price is A$25 each, with shipping to be determined.
+accounts, stock, and bank details still need to be connected.
+The confirmed hat price is A$50 each with free Australian shipping.
 The [setup guide](commerce-setup.md) covers those steps.
 
 ## Sign in
@@ -73,19 +73,18 @@ hat a second time when editing stock.
 
 | Setting | What to enter |
 | --- | --- |
-| Hat price (AUD) | A$25 per hat, as confirmed by the owner. |
+| Hat price (AUD) | A$50 per hat, as confirmed by the owner. |
 | Total stock on hand | Your physical hat count, including existing reservations. |
 | Maximum hats per order | Keep this at **1** until packed postage for larger orders is checked. |
-| Flat shipping per order (AUD) | The actual confirmed Australian shipping charge for the maximum allowed quantity. |
+| Flat shipping per order (AUD) | A$0: Australian shipping is free to the customer. |
 | Postage confirmation | Tick only after checking the packed size, weight, and coverage of the chosen charge. |
 | Bank details | The verified receiving account name, six-digit BSB, and account number. Check each digit before launch. |
 | Owner notification email | The inbox that receives new-order notifications. |
 | Customer reply email | A monitored inbox where customers can ask for help. |
 
-The **$20 shipping figure discussed during planning is not a live rate**. Shipping
-starts unset, and postage must be verified before ordering opens. There is one
-product and one Australian shipping charge; this version does not calculate
-international postage or postcode-specific rates.
+Australian shipping is free to the customer; the owner covers the carrier cost.
+The earlier $20 planning estimate is not a customer charge. This version does not
+offer international shipping or calculate postcode-specific rates.
 
 Save your changes. New orders use the new price, postage, and bank instructions;
 existing orders keep the details they were placed with. If you change bank

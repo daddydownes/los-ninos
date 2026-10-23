@@ -136,7 +136,7 @@ async function catalog(request, env) {
   return response({ mode, revision: config.revision, acceptingOrders: mode === 'live' ? missingSetup(config, env).length === 0 : isLocalPreview(request, env),
     product: { ...PRODUCT, priceCents: config.productPriceCents,
       available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
-    shipping: { country: 'AU', feeCents: mode === 'preview' ? null : config.shippingCents },
+    shipping: { country: 'AU', feeCents: config.shippingCents },
     dispatchDays: '1–3 business days' });
 }
 
@@ -216,8 +216,9 @@ async function placeOrder(request, env, ctx) {
   const createdAt = nowISO();
   const reference = `LN-${id.replace(/-/g, '').slice(0, 12).toUpperCase()}`;
   const snapshot = { productName: PRODUCT.name, unitPriceCents: config.productPriceCents,
-    shippingCents: preview ? null : config.shippingCents,
-    totalCents: preview ? null : config.productPriceCents * body.quantity + config.shippingCents,
+    shippingCents: config.shippingCents,
+    totalCents: Number.isSafeInteger(config.productPriceCents) && Number.isSafeInteger(config.shippingCents)
+      ? config.productPriceCents * body.quantity + config.shippingCents : null,
     customer: body.customer, shippingAddress: body.shippingAddress,
     bank: preview ? { accountName: '', bsb: '', accountNumber: '' } : { ...config.bank } };
   const order = { ...snapshot, id, reference, status: 'awaiting_payment', quantity: body.quantity, preview,

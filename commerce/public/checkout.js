@@ -32,7 +32,7 @@ function updateSummary() {
   const shipping = catalog.shipping.feeCents;
   text($('subtotal-label'), quantity === 1 ? 'Hat subtotal' : `Hat subtotal · ${quantity} hats`);
   text($('subtotal'), money(typeof unit === 'number' ? unit * quantity : null));
-  text($('shipping-cost'), money(shipping, 'To be determined'));
+  text($('shipping-cost'), shipping === 0 ? 'Free' : money(shipping, 'To be determined'));
   text($('total'), money(typeof unit === 'number' && typeof shipping === 'number' ? unit * quantity + shipping : null, typeof unit === 'number' ? 'Pending shipping' : 'To be set'));
   $('quantity-minus').disabled = submitting || quantity <= 1;
   $('quantity-plus').disabled = submitting || quantity >= quantityLimit();

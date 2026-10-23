@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS settings (
   revision INTEGER NOT NULL DEFAULT 1,
   mutation_id TEXT NOT NULL DEFAULT ''
 );
-INSERT OR IGNORE INTO settings (id, value) VALUES (1, '{"productPriceCents":2500,"stockOnHand":null,"maxQuantity":1,"shippingCents":null,"shippingConfirmed":false,"bank":{"accountName":"","bsb":"","accountNumber":""},"ownerEmail":"","supportEmail":""}');
+INSERT OR IGNORE INTO settings (id, value) VALUES (1, '{"productPriceCents":5000,"stockOnHand":null,"maxQuantity":1,"shippingCents":0,"shippingConfirmed":true,"bank":{"accountName":"","bsb":"","accountNumber":""},"ownerEmail":"","supportEmail":""}');
 
 CREATE TABLE IF NOT EXISTS inventory (
   mode TEXT PRIMARY KEY CHECK (mode IN ('preview', 'live')),

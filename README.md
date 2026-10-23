@@ -8,8 +8,8 @@ cancellation.
 
 The repository defaults to preview mode. Live ordering needs owner-controlled
 Cloudflare hosting, a D1 database, protected owner sign-in, verified Resend email,
-and the owner's confirmed postage, stock, and bank details. Hats are A$25 each;
-shipping is still to be determined. Production
+and the owner's confirmed stock and bank details. Hats are A$50 each with free
+Australian shipping. Production
 accounts, sending domain, and deployment are not configured here.
 
 ## Try the checkout locally

@@ -18,9 +18,11 @@ until those steps are complete.
 
 The store defaults to `STORE_MODE=preview`. Hosted preview refuses customer
 orders. Only the local loopback preview can create sample orders without login.
-The confirmed hat price defaults to A$25. Postage and stock are initially unset,
-bank/email fields are blank, and the maximum order quantity defaults to one. The $20 postage figure
-is a planning estimate only; `shippingCents` remains `null` until confirmed.
+The confirmed hat price defaults to A$50 with free Australian shipping
+(`shippingCents=0`, `shippingConfirmed=true`). Stock is initially unset,
+bank/email fields are blank, and the maximum order quantity defaults to one.
+Existing databases retain their current settings; update those through the
+protected dashboard before launch.
 
 The code can remain on GitHub. The existing Pages workflow builds the ordinary
 demonstration site; it does not enable the commerce entry point. Use Cloudflare

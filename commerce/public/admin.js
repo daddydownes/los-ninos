@@ -108,7 +108,7 @@ function renderOrderDetail() {
   productDescription.append(element('p', '', order.productName || 'Navy snapback'), element('p', 'muted', `Quantity ${order.quantity} · ${money(order.unitPriceCents)} each`));
   product.append(productDescription); summary.append(product);
   const facts = element('dl', 'admin-facts');
-  facts.append(fact('Shipping', money(order.shippingCents, 'To be determined')), fact('Total (AUD)', money(order.totalCents, typeof order.unitPriceCents === 'number' ? 'Pending shipping' : 'To be set'), true));
+  facts.append(fact('Shipping', order.shippingCents === 0 ? 'Free' : money(order.shippingCents, 'To be determined')), fact('Total (AUD)', money(order.totalCents, typeof order.unitPriceCents === 'number' ? 'Pending shipping' : 'To be set'), true));
   summary.append(facts); panel.append(summary);
   const contact = section(''); contact.firstElementChild.remove();
   const columns = element('div', 'admin-contact-columns');

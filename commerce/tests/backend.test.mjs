@@ -64,19 +64,20 @@ async function ownerToken(env) {
   };
 }
 
-test('preview shows the confirmed hat price, keeps postage unknown and stock separate, and requires loopback opt-in', async t => {
+test('preview shows AUD 50 with free shipping, keeps bank details private and stock separate, and requires loopback opt-in', async t => {
   const env = await setup(t);
   const catalog = await call(env, '/api/catalog');
   assert.equal(catalog.data.acceptingOrders, true);
-  assert.equal(catalog.data.product.priceCents, 2500);
+  assert.equal(catalog.data.product.priceCents, 5000);
   assert.equal(catalog.data.product.maxQuantity, 1);
-  assert.equal(catalog.data.shipping.feeCents, null);
+  assert.equal(catalog.data.shipping.feeCents, 0);
   const remote = await call(env, '/api/orders', 'POST', checkout(), {}, 'https://preview.example.test');
   assert.equal(remote.status, 503);
   const result = await call(env, '/api/orders', 'POST', checkout());
   assert.equal(result.status, 201, JSON.stringify(result.data));
-  assert.equal(result.data.order.totalCents, null);
-  assert.equal(result.data.order.unitPriceCents, 2500);
+  assert.equal(result.data.order.totalCents, 5000);
+  assert.equal(result.data.order.unitPriceCents, 5000);
+  assert.equal(result.data.order.shippingCents, 0);
   assert.equal(result.data.order.preview, true);
   assert.deepEqual(result.data.order.bank, { accountName: '', bsb: '', accountNumber: '' });
   assert.deepEqual(result.data.order.emails.map(item => item.status), ['preview']);
