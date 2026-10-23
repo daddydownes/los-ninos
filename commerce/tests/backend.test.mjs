@@ -64,20 +64,20 @@ async function ownerToken(env) {
   };
 }
 
-test('preview shows AUD 50 with free shipping, keeps bank details private and stock separate, and requires loopback opt-in', async t => {
+test('preview shows AUD 30 plus flat shipping, keeps bank details private and stock separate, and requires loopback opt-in', async t => {
   const env = await setup(t);
   const catalog = await call(env, '/api/catalog');
   assert.equal(catalog.data.acceptingOrders, true);
-  assert.equal(catalog.data.product.priceCents, 5000);
-  assert.equal(catalog.data.product.maxQuantity, 1);
-  assert.equal(catalog.data.shipping.feeCents, 0);
+  assert.equal(catalog.data.product.priceCents, 3000);
+  assert.equal(catalog.data.product.maxQuantity, 10);
+  assert.equal(catalog.data.shipping.feeCents, 2000);
   const remote = await call(env, '/api/orders', 'POST', checkout(), {}, 'https://preview.example.test');
   assert.equal(remote.status, 503);
   const result = await call(env, '/api/orders', 'POST', checkout());
   assert.equal(result.status, 201, JSON.stringify(result.data));
   assert.equal(result.data.order.totalCents, 5000);
-  assert.equal(result.data.order.unitPriceCents, 5000);
-  assert.equal(result.data.order.shippingCents, 0);
+  assert.equal(result.data.order.unitPriceCents, 3000);
+  assert.equal(result.data.order.shippingCents, 2000);
   assert.equal(result.data.order.preview, true);
   assert.deepEqual(result.data.order.bank, { accountName: '', bsb: '', accountNumber: '' });
   assert.deepEqual(result.data.order.emails.map(item => item.status), ['preview']);
@@ -86,13 +86,27 @@ test('preview shows AUD 50 with free shipping, keeps bank details private and st
   assert.equal(stock.stock_on_hand, 0);
 });
 
+test('shipping is charged once for one, two and three hats and retained on each receipt', async t => {
+  const env = await setup(t);
+  for (const [quantity, totalCents] of [[1, 5000], [2, 8000], [3, 11000]]) {
+    const placed = await call(env, '/api/orders', 'POST', checkout(undefined, { quantity, shippingCents: 0, totalCents: 1 }));
+    assert.equal(placed.status, 201, JSON.stringify(placed.data));
+    const receipt = await call(env, `/api/orders/${placed.data.order.id}`, 'GET', undefined, { 'X-Order-Token': placed.data.token });
+    assert.equal(receipt.status, 200);
+    assert.equal(receipt.data.order.unitPriceCents, 3000);
+    assert.equal(receipt.data.order.shippingCents, 2000);
+    assert.equal(receipt.data.order.totalCents, totalCents);
+  }
+  assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 6);
+});
+
 test('all mutations reject cross-origin, missing CSRF header and oversized input', async t => {
   const env = await setup(t);
   for (const headers of [{ Origin: 'https://evil.example' }, { 'X-Requested-With': '' }, { 'Sec-Fetch-Site': 'cross-site' }]) {
     assert.equal((await call(env, '/api/orders', 'POST', checkout(), headers)).status, 403);
   }
   assert.equal((await call(env, '/api/orders', 'POST', { excess: 'x'.repeat(20000) })).status, 413);
-  assert.equal((await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 2 }))).status, 400);
+  assert.equal((await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 11 }))).status, 400);
 });
 
 test('hosted checkout requires explicit HTTPS test mode and a private order secret', async t => {

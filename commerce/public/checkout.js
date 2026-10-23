@@ -45,6 +45,7 @@ function updateSummary() {
   const quantity = getQuantity();
   const unit = catalog.product.priceCents;
   const shipping = catalog.shipping.feeCents;
+  text(document.querySelector('.product-caption'), typeof unit === 'number' ? `${money(unit)} each · Adjustable fit` : 'Adjustable fit');
   text($('subtotal-label'), quantity === 1 ? 'Hat subtotal' : `Hat subtotal · ${quantity} hats`);
   text($('subtotal'), money(typeof unit === 'number' ? unit * quantity : null));
   text($('shipping-cost'), shipping === 0 ? 'Free' : money(shipping, 'To be determined'));

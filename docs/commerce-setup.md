@@ -24,9 +24,11 @@ details. It never grants owner access. Local loopback preview also accepts test
 orders without login.
 An authenticated owner can separately enable the purchase rehearsal described
 below to send clearly marked test emails to one approved inbox.
-The confirmed hat price defaults to A$50 with free Australian shipping
-(`shippingCents=0`, `shippingConfirmed=true`). Stock is initially unset,
-bank/email fields are blank, and the maximum order quantity defaults to one.
+The hat price defaults to A$30 with A$20 flat Australian shipping per order
+(`productPriceCents=3000`, `shippingCents=2000`). Three hats total A$110.
+Stock is initially unset, bank/email fields are blank, and the maximum order
+quantity is ten. The requested shipping charge is not a verified carrier quote;
+check packed postage before live launch.
 Existing databases retain their current settings; update those through the
 protected dashboard before launch.
 
@@ -198,8 +200,9 @@ as tightly as those operations permit.
 
 Use **Store settings** in the protected dashboard to enter the final price, stock,
 shipping, bank details, owner notification inbox, and customer reply inbox. Do not
-put real bank details or customer data in repository fixtures. Keep
-`maxQuantity=1` until postage for the maximum allowed parcel has been verified.
+put real bank details or customer data in repository fixtures. The current
+`maxQuantity=10` allows multiple hats with one flat shipping charge. Verify packed
+postage for the maximum allowed parcel before live launch.
 
 ## Hosted checks and launch
 

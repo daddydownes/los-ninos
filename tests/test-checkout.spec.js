@@ -3,8 +3,8 @@ const { test, expect } = require('@playwright/test');
 const recipient = 'tester@example.com';
 const catalog = {
   mode: 'preview', revision: 7, acceptingOrders: true,
-  product: { id: 'navy-snapback', name: 'Navy snapback', priceCents: 5000, available: 100, maxQuantity: 1 },
-  shipping: { country: 'AU', feeCents: 0 },
+  product: { id: 'navy-snapback', name: 'Navy snapback', priceCents: 3000, available: 100, maxQuantity: 10 },
+  shipping: { country: 'AU', feeCents: 2000 },
 };
 
 async function readyTest(page) {
@@ -92,11 +92,27 @@ test('ordinary preview still uses the public checkout without email-test capabil
   expect(ownerRequests).toBe(0);
 });
 
+test('checkout discloses flat shipping before details and keeps it fixed for three hats', async ({ page }) => {
+  await page.route('**/api/catalog', route => route.fulfill({ json: catalog }));
+  await page.goto('/checkout.html');
+  await expect(page.locator('#shipping-cost')).toHaveText('$20.00');
+  await expect(page.locator('#subtotal')).toHaveText('$30.00');
+  await expect(page.locator('#total')).toHaveText('$50.00');
+  await expect(page.getByLabel('Street address', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
+  await expect(page.locator('#total')).toHaveText('$80.00');
+  await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
+  await expect(page.getByLabel('Hat quantity')).toHaveValue('3');
+  await expect(page.locator('#subtotal')).toHaveText('$90.00');
+  await expect(page.locator('#shipping-cost')).toHaveText('$20.00');
+  await expect(page.locator('#total')).toHaveText('$110.00');
+});
+
 test('email-test receipt displays configured details while clearly forbidding payment', async ({ page }) => {
   await page.route('**/api/orders/test-order', route => route.fulfill({ json: { order: {
     id: 'test-order', reference: 'TEST-123', preview: true, testDelivery: true, status: 'awaiting_payment',
     createdAt: '2026-10-24T00:00:00Z', productName: 'Navy snapback', quantity: 1,
-    unitPriceCents: 5000, shippingCents: 0, totalCents: 5000,
+    unitPriceCents: 3000, shippingCents: 2000, totalCents: 5000,
     customer: { name: 'Test Customer', email: recipient },
     shippingAddress: { line1: '1 Test Street', suburb: 'Sydney', state: 'NSW', postcode: '2000', country: 'AU' },
     bank: { accountName: 'Example Test Account', bsb: '000000', accountNumber: '12345678' },

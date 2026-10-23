@@ -24,8 +24,10 @@ or runtime secrets are committed to Git.
 ## Purchase rehearsal
 
 Public browsing and ordinary preview checkout are enabled. The configured price
-is A$50 with free Australian shipping. Live inventory is 100; preview inventory
-is separate. A previous preview order reserves one test hat.
+is A$30 per hat plus A$20 flat Australian shipping per order, with up to ten hats
+per order. Three hats total A$110. Packed carrier postage has not yet been tested.
+Live inventory is 100; preview inventory is separate. A previous preview order
+reserves one test hat.
 
 The owner dashboard includes **Test purchase** and **Delete test order**.
 The email rehearsal uses the actual checkout form, configured prices and payment

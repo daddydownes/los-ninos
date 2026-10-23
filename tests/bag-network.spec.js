@@ -2,8 +2,8 @@ const { test, expect } = require('@playwright/test');
 
 const catalog = {
   mode: 'preview', acceptingOrders: true,
-  product: { id: 'navy-snapback', priceCents: 5000, available: 100, maxQuantity: 1 },
-  shipping: { country: 'AU', feeCents: 0 },
+  product: { id: 'navy-snapback', priceCents: 3000, available: 100, maxQuantity: 1 },
+  shipping: { country: 'AU', feeCents: 2000 },
 };
 
 async function enableCheckout(page) {
@@ -59,4 +59,29 @@ test('a stalled checkout request times out and retries when the connection retur
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect(page.getByRole('button', { name: 'Preview checkout', exact: true })).toBeEnabled();
   expect(errors).toEqual([]);
+});
+
+test('bag shows price and shipping before checkout and charges shipping once for three hats', async ({ page }) => {
+  if (test.info().project.name === 'chromium-android') await page.setViewportSize({ width: 375, height: 667 });
+  await enableCheckout(page);
+  await page.route('**/api/catalog', route => route.fulfill({ json: {
+    ...catalog, product: { ...catalog.product, maxQuantity: 10 },
+  } }));
+  await page.goto('/#shop');
+  await expect(page.locator('[data-product-price]')).toContainText('A$30.00');
+  await expect(page.locator('[data-product-price]')).toContainText('A$20.00 shipping per order');
+  await page.screenshot({ path: test.info().outputPath('product-pricing.png') });
+  await page.getByRole('button', { name: 'Add to bag', exact: true }).click();
+  await expect(page.locator('[data-bag-total]')).toHaveText('$50.00');
+  await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
+  await expect(page.locator('[data-bag-total]')).toHaveText('$80.00');
+  await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
+  await expect(page.locator('.journey-bag-number')).toHaveText('3');
+  await expect(page.locator('[data-bag-subtotal]')).toHaveText('$90.00');
+  await expect(page.locator('[data-bag-shipping]')).toHaveText('$20.00');
+  await expect(page.locator('[data-bag-total]')).toHaveText('$110.00');
+  await expect(page.getByRole('button', { name: 'Preview checkout', exact: true })).toBeInViewport();
+  await page.screenshot({ path: test.info().outputPath('three-hat-bag.png') });
+  await page.getByRole('button', { name: 'Preview checkout', exact: true }).click();
+  await expect(page).toHaveURL(/checkout\.html\?quantity=3/);
 });
