@@ -9,8 +9,9 @@ cancellation.
 The repository defaults to preview mode. Live ordering needs owner-controlled
 Cloudflare hosting, a D1 database, protected owner sign-in, verified Resend email,
 and the owner's confirmed stock and bank details. Hats are A$50 each with free
-Australian shipping. A closed Cloudflare preview is deployed; owner sign-in,
-email verification, stock and live checkout still need configuration. See the
+Australian shipping. A Cloudflare test checkout is deployed with 100 hats and no
+customer login; test orders do not send email or request payment. Owner sign-in,
+email verification and live checkout still need configuration. See the
 [deployment status](docs/deployment-status.md) for the current addresses and checks.
 
 ## Try the checkout locally

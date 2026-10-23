@@ -95,6 +95,52 @@ test('all mutations reject cross-origin, missing CSRF header and oversized input
   assert.equal((await call(env, '/api/orders', 'POST', checkout(undefined, { quantity: 2 }))).status, 400);
 });
 
+test('hosted checkout requires explicit HTTPS test mode and a private order secret', async t => {
+  const env = await setup(t);
+  env.LOCAL_PREVIEW = 'false';
+  const host = 'https://preview.example.test';
+  const catalog = () => call(env, '/api/catalog', 'GET', undefined, {}, host);
+  assert.equal((await catalog()).data.acceptingOrders, false);
+  env.HOSTED_TEST_CHECKOUT = 'true';
+  assert.equal((await catalog()).data.acceptingOrders, false);
+  env.ORDER_TOKEN_SECRET = 'a-private-hosted-test-secret-with-at-least-32-characters';
+  assert.equal((await catalog()).data.acceptingOrders, true);
+  assert.equal((await call(env, '/api/catalog', 'GET', undefined, {}, 'http://preview.example.test')).data.acceptingOrders, false);
+  env.STORE_MODE = 'live';
+  assert.equal((await catalog()).data.acceptingOrders, false);
+  assert.equal((await call(env, '/api/orders', 'POST', checkout(), {}, host)).status, 503);
+});
+
+test('hosted test order saves once without login, real bank details, email delivery or live stock reservations', async t => {
+  const env = await setup(t);
+  await configure(env);
+  await env.DB.prepare("UPDATE inventory SET stock_on_hand=100 WHERE mode='live'").run();
+  Object.assign(env, { LOCAL_PREVIEW: 'false', HOSTED_TEST_CHECKOUT: 'true',
+    ORDER_TOKEN_SECRET: 'another-private-hosted-test-secret-with-at-least-32-characters',
+    FETCH: async () => { throw new Error('Hosted tests must never send email.'); } });
+  const host = 'https://preview.example.test';
+  const body = checkout();
+  const placed = await call(env, '/api/orders', 'POST', body, {}, host);
+  assert.equal(placed.status, 201, JSON.stringify(placed.data));
+  assert.equal(placed.data.order.preview, true);
+  assert.deepEqual(placed.data.order.bank, { accountName: '', bsb: '', accountNumber: '' });
+  const retried = await call(env, '/api/orders', 'POST', body, {}, host);
+  assert.equal(retried.status, 200);
+  assert.equal(retried.data.token, placed.data.token);
+  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n, 1);
+  const receipt = await call(env, `/api/orders/${placed.data.order.id}`, 'GET', undefined,
+    { 'X-Order-Token': placed.data.token }, host);
+  assert.equal(receipt.status, 200);
+  assert.equal((await call(env, `/api/orders/${placed.data.order.id}`, 'GET', undefined, {}, host)).status, 404);
+  assert.equal((await call(env, '/api/admin/orders', 'GET', undefined, {}, host)).status, 403);
+  await processOutbox(env);
+  assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM email_outbox WHERE status='preview'").first()).n, 2);
+  const stock = await env.DB.prepare("SELECT * FROM inventory WHERE mode='live'").first();
+  assert.equal(stock.stock_on_hand, 100);
+  assert.equal(stock.reserved, 0);
+  assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 1);
+});
+
 test('incomplete live configuration and missing launch confirmation fail closed', async t => {
   const env = await setup(t);
   env.STORE_MODE = 'live';

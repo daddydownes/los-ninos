@@ -16,8 +16,12 @@ until those steps are complete.
 | Resend | Sends customer and owner emails and supplies delivery status. |
 | Five-minute Worker cron | Retries queued emails and checks accepted-email delivery state. |
 
-The store defaults to `STORE_MODE=preview`. Hosted preview refuses customer
-orders. Only the local loopback preview can create sample orders without login.
+The store defaults to `STORE_MODE=preview`. Hosted preview refuses orders unless
+`HOSTED_TEST_CHECKOUT=true` and a private `ORDER_TOKEN_SECRET` of at least 32
+characters is configured. That explicit test mode allows HTTPS checkout without
+customer login, uses separate preview inventory and sends no email or real bank
+details. It never grants owner access. Local loopback preview also accepts test
+orders without login.
 The confirmed hat price defaults to A$50 with free Australian shipping
 (`shippingCents=0`, `shippingConfirmed=true`). Stock is initially unset,
 bank/email fields are blank, and the maximum order quantity defaults to one.
@@ -112,6 +116,11 @@ during setup. An unset `LAUNCH_CONFIRMED` also keeps launch blocked. The schema 
 an initial bootstrap, not an automatic upgrade system: future changes to an
 existing database need a reviewed migration and a backup.
 
+Set `HOSTED_TEST_CHECKOUT=false` to close test submissions too. The current
+deployment explicitly enables hosted test checkout at the owner's request;
+keep the visible test-order notices and use fictional details. A test order
+reserves only preview inventory, leaving the 100-hat live inventory unchanged.
+
 Keep `assets.run_worker_first` set to **true**. Owner authentication must run
 before static files are served. Do not publish `_site` as a standalone live shop
 or give a second host unprotected access to admin/API routes.
@@ -157,6 +166,7 @@ orders. Never assume a dashboard-only setting survives deployment.
 | `DB` | D1 binding to the intended owner's database. |
 | `ASSETS` | Built `_site` binding; keep Worker-first routing enabled. |
 | `STORE_MODE` | `preview` during setup; `live` only for the controlled live test or approved launch. |
+| `HOSTED_TEST_CHECKOUT` | `true` to permit HTTPS test checkout in preview mode with a private order-token secret; `false` to close hosted preview submissions. Does not bypass owner login or live launch checks. |
 | `LOCAL_PREVIEW` | `false` for every hosted environment. |
 | `PUBLIC_STORE_URL` | Final HTTPS origin, with no path, credentials, query, or fragment. |
 | `ACCESS_TEAM_DOMAIN` | Full HTTPS Cloudflare Access team origin. |
@@ -220,11 +230,11 @@ Before opening the production shop, record the results of these checks:
 Then configure the production domain and database, review all values, and enable
 `STORE_MODE=live` and `LAUNCH_CONFIRMED=true` for the approved launch.
 `LOCAL_PREVIEW` remains `false`. Confirm the public catalog reports accepting
-orders and make one final owner-authorized smoke test. Hosted preview otherwise
-remains closed to orders, even if store settings look complete.
+orders and make one final owner-authorized smoke test. Hosted preview never
+accepts real orders; its optional test checkout only creates preview orders.
 
-To close ordering without deleting records, return `STORE_MODE` to `preview` and
-`LAUNCH_CONFIRMED` to `false`. Coordinate fulfilment of existing orders: preview
+To close ordering without deleting records, return `STORE_MODE` to `preview`,
+`HOSTED_TEST_CHECKOUT` to `false`, and `LAUNCH_CONFIRMED` to `false`. Coordinate fulfilment of existing orders: preview
 mode also stops outbound-email processing. Do not clear orders, change live stock
 to a false count, or remove customer history to pause the shop.
 

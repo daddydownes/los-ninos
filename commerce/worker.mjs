@@ -129,11 +129,20 @@ export function missingSetup(config, env) {
   return missing;
 }
 
+function previewCheckoutAllowed(request, env) {
+  if (isLocalPreview(request, env)) return true;
+  // Hosted tests use separate preview inventory and never queue real email or
+  // expose bank details. This does not grant access to any owner route.
+  return env.STORE_MODE === 'preview' && env.HOSTED_TEST_CHECKOUT === 'true' &&
+    new URL(request.url).protocol === 'https:' &&
+    typeof env.ORDER_TOKEN_SECRET === 'string' && env.ORDER_TOKEN_SECRET.length >= 32;
+}
+
 async function catalog(request, env) {
   const config = await settings(env);
   const mode = env.STORE_MODE === 'live' ? 'live' : 'preview';
   const stock = await stmt(env, 'SELECT stock_on_hand, reserved FROM inventory WHERE mode=?', mode).first();
-  return response({ mode, revision: config.revision, acceptingOrders: mode === 'live' ? missingSetup(config, env).length === 0 : isLocalPreview(request, env),
+  return response({ mode, revision: config.revision, acceptingOrders: mode === 'live' ? missingSetup(config, env).length === 0 : previewCheckoutAllowed(request, env),
     product: { ...PRODUCT, priceCents: config.productPriceCents,
       available: stock.stock_on_hand - stock.reserved, maxQuantity: config.maxQuantity },
     shipping: { country: 'AU', feeCents: config.shippingCents },
@@ -201,7 +210,7 @@ async function placeOrder(request, env, ctx) {
   const config = await settings(env);
   const local = isLocalPreview(request, env);
   const preview = env.STORE_MODE !== 'live';
-  if (preview ? !local : missingSetup(config, env).length) fail(503, 'The shop is being prepared. Ordering will open soon.', 'setup_incomplete');
+  if (preview ? !previewCheckoutAllowed(request, env) : missingSetup(config, env).length) fail(503, 'The shop is being prepared. Ordering will open soon.', 'setup_incomplete');
   const body = validateCheckout(await readJSON(request), config);
   const mode = preview ? 'preview' : 'live';
   const idempotencyHash = await sha256(`${mode}:${body.idempotencyKey}`);
