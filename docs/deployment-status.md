@@ -47,6 +47,20 @@ The existing D1 database was privately backed up before applying the additive
 `commerce/migrations/0001-test-order-cleanup.sql` migration. Confirmed bank and
 owner/contact settings are stored privately in D1, not the public build.
 
+The Resend account and `losninos.com.au` sender are now configured. Domain
+verification passed with the DKIM TXT record and two DNS-only sending CNAMEs.
+Open and click tracking are disabled. `RESEND_API_KEY` is stored as a Cloudflare
+secret, and the sender is `Los Niños <orders@losninos.com.au>`.
+
+A disposable local Worker rehearsal sent all four real `[TEST]` message types
+through Resend to the approved test inbox. Resend reported all four delivered,
+each on its first attempt. The four-hat fixture used A$120 plus A$25 shipping,
+for A$145 total, and the configured bank instructions. The test order was then
+deleted through the Worker cleanup endpoint and its local preview stock restored.
+Hosted orders and inventory were unchanged. This verifies real email delivery
+and local workflow integration; it does not verify hosted Cloudflare Access,
+the full hosted checkout journey, or which inbox folder received the messages.
+
 ## What is not live yet
 
 `STORE_MODE=preview`, `HOSTED_TEST_CHECKOUT=true`, `LOCAL_PREVIEW=false`,
@@ -60,14 +74,13 @@ Account setup still requires:
    for `/admin*` and `/api/admin*` under one Access application. The current free
    plan activation screen requests billing details and terms/usage authorization;
    this has not been accepted by the agent.
-2. Sign in to Resend, verify the sending domain and configure the private API key
-   and sender address.
-3. Enable the explicit owner-only test-email switch and complete an authorized
+2. Enable the explicit owner-only test-email switch and complete an authorized
    purchase/payment/dispatch rehearsal. Confirm actual inbox receipt, then delete
    the test order and turn test sending off.
-4. Complete the live-launch checks before enabling real ordering.
+3. Complete the live-launch checks before enabling real ordering.
 
-No real email, payment or fulfilment has been performed in this setup step.
+Four explicitly labelled test emails were delivered. No payment or fulfilment
+has been performed. The website remains in preview mode.
 
 ## Verification
 
@@ -80,7 +93,10 @@ No real email, payment or fulfilment has been performed in this setup step.
   completed checkout, simulated payment and dispatch, then deleted only its
   disposable order and restored test availability from 8 back to 9.
 - Prior broader regression checks passed across eight Safari/Chrome profiles.
-  Real Cloudflare login and Resend inbox delivery remain outstanding checks.
+  Real Cloudflare login and the complete hosted email checkout remain outstanding.
+- After configuring the sender, the shop and public catalogue return HTTP 200,
+  pricing remains A$30 with the A$20/A$25 shipping tiers, and unsigned owner API
+  requests still return HTTP 403.
 
 Configuration and operator instructions are in `wrangler.jsonc`,
 `docs/commerce-setup.md` and `docs/commerce-owner-guide.md`.
