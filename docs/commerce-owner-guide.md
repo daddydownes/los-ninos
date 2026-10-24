@@ -5,8 +5,8 @@ by bank transfer. It emails your payment instructions after saving the order.
 You check the receiving bank account yourself, then confirm payment and dispatch
 through your private dashboard.
 
-This handover does not mean the shop is live. The domain, sending email, owner
-accounts, stock, and bank details still need to be connected.
+Use the protected owner dashboard to manage the connected shop. The setup guide
+documents hosting, email, owner access and recovery for future changes.
 The hat price is A$30 each. Australian shipping is A$20 per order for one to
 three hats and A$25 for four or more. Three hats total A$110; four total A$145.
 The [setup guide](commerce-setup.md) covers those steps.

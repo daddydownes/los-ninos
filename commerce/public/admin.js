@@ -262,7 +262,7 @@ async function resendEmail(order) {
 function showMissingSetup(missing) {
   const node = $('#settings-setup'); node.replaceChildren();
   const items = Array.isArray(missing) ? missing : [];
-  if (!items.length) { node.append(element('strong', '', 'Store details are complete.'), element('div', 'admin-small', 'Live checkout still requires the owner account, email service and launch configuration to be ready.')); }
+  if (!items.length) { node.append(element('strong', '', 'Store details are complete.'), element('div', 'admin-small', 'Live checkout is enabled. New orders use these details.')); }
   else { node.append(element('strong', '', 'Still needed before launch')); const list = element('ul', 'admin-setup-list'); for (const item of items) list.append(element('li', '', typeof item === 'string' ? item : item.label || item.message || item.key || 'Setup step incomplete')); node.append(list); }
   node.hidden = false;
 }
@@ -341,6 +341,8 @@ let searchTimer;
 $('#order-search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadOrders(), 250); });
 api('/api/catalog').then((catalog) => {
   const preview = $('#preview-notice'); preview.hidden = catalog.mode !== 'preview';
+  $('#test-purchase').hidden = catalog.mode === 'live';
+  $('#test-purchase-help').hidden = catalog.mode === 'live';
   if (!['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
     $('strong', preview).textContent = 'Setup mode';
     $('span', preview).textContent = 'Live checkout is not enabled. Public preview orders do not send emails. Use Test purchase for the private email test.';

@@ -22,8 +22,9 @@
   }],
   "triggers": { "crons": ["*/5 * * * *"] },
   "vars": {
-    "STORE_MODE": "preview",
-    "HOSTED_TEST_CHECKOUT": "true",
+    "STORE_MODE": "live",
+    "LAUNCH_CONFIRMED": "true",
+    "HOSTED_TEST_CHECKOUT": "false",
     "TEST_EMAILS_ENABLED": "false",
     "LOCAL_PREVIEW": "false",
     "PUBLIC_STORE_URL": "https://losninos.com.au",

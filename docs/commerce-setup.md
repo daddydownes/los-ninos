@@ -16,7 +16,7 @@ until those steps are complete.
 | Resend | Sends customer and owner emails and supplies delivery status. Tracking is sent separately by the owner, not in these emails. |
 | Five-minute Worker cron | Retries queued emails and checks accepted-email delivery state. |
 
-The store defaults to `STORE_MODE=preview`. Hosted preview refuses orders unless
+Start new deployments with `STORE_MODE=preview`. Hosted preview refuses orders unless
 `HOSTED_TEST_CHECKOUT=true` and a private `ORDER_TOKEN_SECRET` of at least 32
 characters is configured. That explicit test mode allows HTTPS checkout without
 customer login, uses separate preview inventory and sends no email or real bank
@@ -122,9 +122,9 @@ during setup. An unset `LAUNCH_CONFIRMED` also keeps launch blocked. The schema 
 an initial bootstrap, not an automatic upgrade system: future changes to an
 existing database need a reviewed migration and a backup.
 
-Set `HOSTED_TEST_CHECKOUT=false` to close test submissions too. The current
-deployment explicitly enables hosted test checkout at the owner's request;
-keep the visible test-order notices and use fictional details. A test order
+Set `HOSTED_TEST_CHECKOUT=false` to close test submissions too. When enabling
+hosted test checkout, keep the visible test-order notices and use fictional
+details. A test order
 reserves only preview inventory, leaving the 100-hat live inventory unchanged.
 
 Keep `assets.run_worker_first` set to **true**. Owner authentication must run
@@ -171,8 +171,9 @@ References: [Access applications](https://developers.cloudflare.com/cloudflare-o
 ## Runtime configuration and secrets
 
 Configure the Worker variables in Cloudflare for the selected deployment. The
-checked-in `wrangler.jsonc` contains safe preview defaults. A later CLI deployment
-can replace dashboard variable values with those defaults: after each deploy,
+checked-in `wrangler.jsonc` records this shop's approved live configuration. Use
+preview values for a new installation. A later CLI deployment can replace dashboard
+variable values with those in the file: after each deploy,
 review the variables and explicitly restore the intended state before reopening
 orders. Never assume a dashboard-only setting survives deployment.
 
