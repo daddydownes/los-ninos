@@ -55,6 +55,8 @@
 !/demo/directions/pages/journey.js
 !/demo/directions/pages/purchase-motion.css
 !/demo/directions/pages/purchase-motion.js
+!/demo/directions/pages/price-written.css
+!/demo/directions/pages/price-written.js
 !/scripts/build-site.py
 !/scripts/optimize-hat-spin.py
 !/assets/hat-spin/optimized/*.webp

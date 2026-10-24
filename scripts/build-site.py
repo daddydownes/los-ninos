@@ -66,16 +66,15 @@ def build(commerce_enabled=False):
     # A design review uses the maintained shop, rather than a second hand-edited
     # copy. Keep the real four-second intro, product layout and checkout behavior.
     opening = (OUTPUT / 'index.html').read_text(encoding='utf-8')
-    opening = opening.replace('<html lang="en">', '<html lang="en" data-price-treatment="written">')
-    opening = opening.replace('</head>', '  <link rel="stylesheet" href="price-written.css?v=3">\n  <script defer src="price-written.js?v=3"></script>\n</head>')
+    opening = opening.replace('data-price-size="03"', 'data-price-size="original"')
     opening = opening.replace('<title>Los Niños — Con Sueños</title>', '<title>Los Niños — Bold 06 opening preview</title>')
     opening_path = OUTPUT / 'opening-06.html'
     opening_path.write_text(opening, encoding='utf-8')
     expected.add(opening_path)
     # Five smaller versions share the exact storefront and post-intro reveal.
     # Only this review route includes the size switcher; the shop stays intact.
-    sizes = opening.replace('data-price-treatment="written"', 'data-price-treatment="written" data-price-size="03"')
-    sizes = sizes.replace('</head>', '  <link rel="stylesheet" href="price-sizes.css?v=1">\n  <script defer src="price-sizes.js?v=1"></script>\n</head>')
+    sizes = opening.replace('data-price-size="original"', 'data-price-size="03"')
+    sizes = sizes.replace('</head>', '  <link rel="stylesheet" href="price-sizes.css?v=2">\n  <script defer src="price-sizes.js?v=1"></script>\n</head>')
     sizes = sizes.replace('<title>Los Niños — Bold 06 opening preview</title>', '<title>Los Niños — Five smaller price options</title>')
     sizes_path = OUTPUT / 'price-sizes.html'
     sizes_path.write_text(sizes, encoding='utf-8')

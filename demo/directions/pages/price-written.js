@@ -22,7 +22,7 @@
   mark.insertAdjacentHTML('beforeend', createMarkup());
   const update = () => {
     // This drawing represents $30 only. Other prices and network states retain
-    // the real catalog text, so the preview cannot advertise a stale amount.
+    // the real catalog text, so the storefront cannot advertise a stale amount.
     const hand = mark.dataset.priceState === 'ready' && value.textContent.trim() === '$30';
     if (mark.dataset.handPrice !== String(hand)) mark.dataset.handPrice = String(hand);
   };

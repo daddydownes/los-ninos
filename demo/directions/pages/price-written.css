@@ -5,10 +5,15 @@
 .price-lettering .dollar-stem{stroke-width:9}
 .price-lettering .written-zero{stroke-width:16}
 
-/* The complete preview reuses the shop's layout, intro and catalog. */
+/* 03 is the selected storefront size; the other sizes remain review options. */
+html[data-price-size="01"]{--price-mark-height:28px}
+html[data-price-size="02"]{--price-mark-height:33px}
+html[data-price-size="03"]{--price-mark-height:38px}
+html[data-price-size="04"]{--price-mark-height:43px}
+html[data-price-size="05"]{--price-mark-height:48px}
 html[data-price-treatment=written] .purchase-price{width:132px;height:50px;margin:1px 0 0 -7px;transform:none}
 html[data-price-treatment=written] .price-outline{display:none}
-html[data-price-treatment=written] .purchase-price .price-lettering{position:absolute;display:none;width:132px;height:58px;left:0;top:-4px;overflow:visible;transform:none;transition:transform 550ms var(--ease)}
+html[data-price-treatment=written] .purchase-price .price-lettering{position:absolute;display:none;width:132px;height:var(--price-mark-height,58px);left:0;top:calc((50px - var(--price-mark-height,58px)) / 2);overflow:visible;transform:none;transition:transform 550ms var(--ease)}
 html[data-price-treatment=written] .purchase-price[data-hand-price=true] .price-lettering{display:block}
 html[data-price-treatment=written] .purchase-price[data-hand-price=true] .price-value{visibility:hidden;animation:none}
 html[data-price-treatment=written] .purchase-action:has(.add-button:is(.is-pointing,:focus-visible)) .purchase-price{transform:none}
