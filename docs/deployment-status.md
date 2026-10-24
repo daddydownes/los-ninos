@@ -13,6 +13,9 @@ inboxes and runtime secrets are kept out of Git.
 - Temporary host: https://los-ninos-shop.los-ninos.workers.dev/.
 - `STORE_MODE=live`, `LAUNCH_CONFIRMED=true`, `LOCAL_PREVIEW=false`.
 - Public test ordering and test email sending are disabled.
+- `OWNER_SETTINGS_EDITABLE=false`: settings navigation and updates are disabled
+  at the owner's request. The server rejects saves from older open dashboard
+  tabs too. Order processing and automatic inventory updates remain enabled.
 - Owner access uses an allowlisted email address and a six-digit email code.
   Cloudflare Access / Zero Trust is not used by this deployment.
 - The brand inbox is configured for owner notifications and customer replies.

@@ -11,7 +11,7 @@
   <link rel="icon" href="/assets/brand-icon.svg">
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/owner-demo.css?v=1">
-  <script defer src="/owner-demo.js?v=1"></script>
+  <script defer src="/owner-demo.js?v=2"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to orders</a>
@@ -20,26 +20,12 @@
   <main id="main" tabindex="-1">
     <p id="feedback" class="feedback" role="status" aria-live="polite" hidden></p>
     <section id="list-view" aria-labelledby="list-title">
-      <div class="heading"><div><h1 id="list-title">Orders</h1><p id="work-count"></p></div><button class="quiet" id="open-settings" type="button">Shop settings</button></div>
+      <div class="heading"><div><h1 id="list-title">Orders</h1><p id="work-count"></p></div></div>
       <div class="tabs" aria-label="Filter orders"><button id="todo" type="button" aria-pressed="true">To do <span id="todo-count"></span></button><button id="all" type="button" aria-pressed="false">All orders <span id="all-count"></span></button></div>
       <div id="orders" class="orders"></div>
       <p class="hint">Open an order to try confirming payment and dispatch.</p>
     </section>
     <section id="detail-view" hidden aria-labelledby="order-title"></section>
-    <section id="settings-view" hidden aria-labelledby="settings-title">
-      <button class="back" id="settings-back" type="button">← Orders</button>
-      <h1 id="settings-title">Shop settings</h1><p class="intro">Try changing a few details. These changes stay in this demo.</p>
-      <form id="settings-form" class="card settings">
-        <div class="fields">
-          <label>Hat price (AUD)<input name="price" type="number" min="1" max="10000" step="0.01" required></label>
-          <label>Stock on hand<input name="stock" type="number" min="0" max="10000" step="1" required></label>
-          <label>Shipping · 1–3 hats (AUD)<input name="shipping" type="number" min="0" max="1000" step="0.01" required></label>
-          <label>Shipping · 4+ hats (AUD)<input name="tier" type="number" min="0" max="1000" step="0.01" required></label>
-        </div>
-        <button class="primary" type="submit">Save demo settings</button>
-      </form>
-      <p class="hint">Existing sample orders keep their original totals. Reset demo restores everything.</p>
-    </section>
     <noscript><p>Enable JavaScript to try this interactive demo.</p></noscript>
   </main>
   <footer>A simpler owner workspace · Design preview</footer>

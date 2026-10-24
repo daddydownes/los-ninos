@@ -1,5 +1,5 @@
 const $ = (selector, parent = document) => parent.querySelector(selector);
-const state = { orders: [], selectedId: null, order: null, settings: null, testCheckout: null, listRequest: 0, detailRequest: 0, busy: false };
+const state = { orders: [], selectedId: null, order: null, settings: null, settingsEditable: false, testCheckout: null, listRequest: 0, detailRequest: 0, busy: false };
 const statuses = { awaiting_payment: 'Awaiting payment', paid: 'Paid — ready to pack', shipped: 'Shipped', cancelled: 'Cancelled' };
 const emailKinds = { awaiting_payment: 'Payment instructions', paid: 'Payment confirmation', shipped: 'Shipping confirmation', owner: 'Owner notification', owner_order: 'Owner notification' };
 const emailStatusLabels = { queued: 'Queued', sending: 'Sending', sent: 'Sent · delivery pending', delivered: 'Delivered', failed: 'Failed', bounced: 'Bounced', complained: 'Marked as spam', needs_review: 'Needs review', preview: 'Preview only', cancelled: 'Cancelled' };
@@ -318,6 +318,7 @@ async function loadSettings() {
 
 function switchView(view) {
   if (state.busy) return;
+  if (view === 'settings' && !state.settingsEditable) return;
   $('#admin-main').classList.remove('is-reading-order');
   for (const name of ['orders', 'settings']) { $(`#${name}-view`).hidden = name !== view; if (name === view) $(`#${name}-tab`).setAttribute('aria-current', 'page'); else $(`#${name}-tab`).removeAttribute('aria-current'); }
   notice(''); if (view === 'settings') loadSettings();
@@ -327,6 +328,7 @@ function amountToCents(value) { if (!value.trim()) return null; if (!/^\d+(?:\.\
 
 $('#settings-form').addEventListener('submit', async (event) => {
   event.preventDefault(); const form = event.currentTarget;
+  if (!state.settingsEditable) { notice('Store settings are locked for now.'); return; }
   if (state.busy || !form.reportValidity()) return;
   try {
     const values = new FormData(form);
@@ -368,7 +370,7 @@ api('/api/catalog').then((catalog) => {
     $('span', preview).textContent = 'Live checkout is not enabled. Public preview orders do not send emails. Use Test purchase for the private email test.';
   }
 }).catch(() => {});
-api('/api/admin/settings').then(result => { showTestCheckout(result.testCheckout); $('#owner-signout').hidden = result.ownerAuthMode !== 'email'; }).catch(() => {
-  $('#test-purchase-help').textContent = 'Test setup could not be checked. Open Store settings to try again.';
+api('/api/admin/settings').then(result => { state.settingsEditable = result.settingsEditable !== false; $('#settings-tab').hidden = !state.settingsEditable; showTestCheckout(result.testCheckout); $('#owner-signout').hidden = result.ownerAuthMode !== 'email'; }).catch(() => {
+  $('#test-purchase-help').textContent = 'Test setup could not be checked. Reload the dashboard to try again.';
 });
 loadOrders();

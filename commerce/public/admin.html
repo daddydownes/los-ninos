@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="./commerce.css">
     <link rel="stylesheet" href="./admin.css?v=20261025">
-    <script type="module" src="./admin.js?v=7"></script>
+    <script type="module" src="./admin.js?v=8"></script>
   </head>
   <body class="admin-page">
     <a class="admin-skip" href="#admin-main">Skip to orders</a>
@@ -29,7 +29,7 @@
       </div>
       <nav class="admin-nav" aria-label="Owner workspace">
         <button class="admin-nav-button" id="orders-tab" type="button" aria-current="page" aria-controls="orders-view">Orders</button>
-        <button class="admin-nav-button" id="settings-tab" type="button" aria-controls="settings-view">Store settings</button>
+        <button class="admin-nav-button" id="settings-tab" type="button" aria-controls="settings-view" hidden>Store settings</button>
       </nav>
       <div id="admin-message" class="notice" role="status" aria-live="polite" hidden></div>
       <section id="orders-view" aria-labelledby="orders-tab">

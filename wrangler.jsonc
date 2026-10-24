@@ -31,6 +31,7 @@
     "ACCESS_TEAM_DOMAIN": "",
     "ACCESS_AUD": "",
     "OWNER_AUTH_MODE": "email",
+    "OWNER_SETTINGS_EDITABLE": "false",
     "EMAIL_FROM": "Los Niños <orders@losninos.com.au>"
   },
   "observability": { "enabled": false }

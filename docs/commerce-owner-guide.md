@@ -14,10 +14,16 @@ The [setup guide](commerce-setup.md) covers those steps.
 ## Sign in
 
 To explore a simpler layout without signing in, open `/owner-demo`. This is a
-separate design preview with fictional orders. Payment, dispatch and settings
-changes are simulated in the browser; it cannot call shop APIs, send email or
+separate design preview with fictional orders. Payment and dispatch actions
+are simulated in the browser; it cannot call shop APIs, send email or
 change real orders. **Reset demo** (or reloading) restores the sample data. The
 live `/admin` dashboard still requires owner sign-in.
+
+Store settings are currently disabled at the owner's request. The demo has no
+settings section, and the live dashboard cannot save price, shipping, stock,
+bank or email changes. Payment, dispatch and order handling remain available.
+The settings instructions below are retained for a future re-enable; current
+configuration changes must be handled by the site maintainer.
 
 Open `/admin` on your shop's domain. The owner sign-in page asks for your approved
 email address and sends a six-digit code to that inbox. Use the code within ten

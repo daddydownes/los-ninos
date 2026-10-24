@@ -445,6 +445,7 @@ function validateSettings(body, previous = {}) {
 }
 
 async function updateSettings(request, env, actor) {
+  if (env.OWNER_SETTINGS_EDITABLE === 'false') fail(403, 'Store settings are locked for now. Orders can still be managed normally.', 'settings_locked');
   const body = await readJSON(request);
   const previous = await settings(env);
   if (body.revision !== previous.revision) fail(409, 'Settings or stock changed. Refresh before saving.', 'settings_changed');
@@ -641,7 +642,7 @@ async function fetchHandler(request, env, ctx) {
   if (path === '/api/admin/orders' && request.method === 'GET') return adminOrders(request, env);
   if (path === '/api/admin/test-checkout' && request.method === 'GET') return testCheckoutCatalog(request, env);
   if (path === '/api/admin/test-orders' && request.method === 'POST') return placeOrder(request, env, ctx, true);
-  if (path === '/api/admin/settings' && request.method === 'GET') { const config = await settings(env); return response({ settings: config, ownerAuthMode: env.OWNER_AUTH_MODE || 'cloudflare', missingSetup: missingSetup(config, env), testCheckout: testCheckoutSetup(config, env) }); }
+  if (path === '/api/admin/settings' && request.method === 'GET') { const config = await settings(env); return response({ settings: config, settingsEditable: env.OWNER_SETTINGS_EDITABLE !== 'false', ownerAuthMode: env.OWNER_AUTH_MODE || 'cloudflare', missingSetup: missingSetup(config, env), testCheckout: testCheckoutSetup(config, env) }); }
   if (path === '/api/admin/settings' && request.method === 'PUT') return updateSettings(request, env, actor);
   if (path === '/api/admin/export' && request.method === 'GET') return exportOrders(env);
   match = path.match(/^\/api\/admin\/orders\/([a-f0-9-]{36})(?:\/(status|resend))?$/);

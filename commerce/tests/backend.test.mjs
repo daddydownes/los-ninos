@@ -42,6 +42,27 @@ async function configure(env, values = {}) {
   return result.data.settings;
 }
 
+test('locked owner settings reject old forms without changing prices, stock or order processing', async t => {
+  const env = await setup(t);
+  await configure(env);
+  env.OWNER_SETTINGS_EDITABLE = 'false';
+  const before = await env.DB.prepare('SELECT value,revision FROM settings').first();
+  const stock = await env.DB.prepare("SELECT * FROM inventory WHERE mode='live'").first();
+  const history = await env.DB.prepare('SELECT COUNT(*) AS n FROM settings_history').first();
+  assert.equal((await call(env, '/api/admin/settings')).data.settingsEditable, false);
+  const changed = await call(env, '/api/admin/settings', 'PUT', {...complete, productPriceCents: 9900, shippingCents: 0, stockOnHand: 500});
+  assert.equal(changed.status, 403);
+  assert.equal(changed.data.code, 'settings_locked');
+  assert.deepEqual(await env.DB.prepare('SELECT value,revision FROM settings').first(), before);
+  assert.deepEqual(await env.DB.prepare("SELECT * FROM inventory WHERE mode='live'").first(), stock);
+  assert.deepEqual(await env.DB.prepare('SELECT COUNT(*) AS n FROM settings_history').first(), history);
+  const placed = await call(env, '/api/orders', 'POST', checkout());
+  assert.equal(placed.status, 201);
+  const paid = await call(env, '/api/admin/orders/' + placed.data.order.id + '/status', 'POST', {status:'paid', expectedUpdatedAt:placed.data.order.updatedAt, note:''});
+  assert.equal(paid.status, 200);
+  assert.equal(paid.data.order.status, 'paid');
+});
+
 test('new checkout requires a usable mobile number for manually texted tracking', async t => {
   const env = await setup(t);
   for (const phone of ['', '--- --- ---', '1234567', '+61<script>', '+1234567890123456']) {

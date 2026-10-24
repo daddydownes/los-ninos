@@ -5,19 +5,19 @@ const money = cents => new Intl.NumberFormat('en-AU',{style:'currency',currency:
 const labels = {awaiting_payment:'Awaiting payment',paid:'Ready to pack',shipped:'Shipped'};
 const create = (tag,className,value) => {const node=document.createElement(tag);if(className)node.className=className;if(value!==undefined)node.textContent=value;return node;};
 const action = (label,handler,className='primary') => {const node=create('button',className,label);node.type='button';node.addEventListener('click',handler);return node;};
-let orders,settings,selected=null,filter='todo',pending=null;
+let orders,selected=null,filter='todo',pending=null;
 function reset(){
   orders=[
     {id:'LN-DEMO-001',name:'Alex Example',quantity:4,total:14500,shipping:2500,status:'awaiting_payment',emails:['Payment instructions']},
     {id:'LN-DEMO-002',name:'Sam Sample',quantity:1,total:5000,shipping:2000,status:'paid',emails:['Payment instructions','Payment confirmation']},
     {id:'LN-DEMO-003',name:'Taylor Demo',quantity:3,total:11000,shipping:2000,status:'shipped',emails:['Payment instructions','Payment confirmation','Dispatch confirmation']}
   ];
-  settings={price:30,stock:100,shipping:20,tier:25};selected=null;filter='todo';pending=null;
+  selected=null;filter='todo';pending=null;
   $('confirm-dialog').close();feedback('');show('list');renderList();
 }
 function feedback(message){$('feedback').textContent=message;$('feedback').hidden=!message;}
 function show(view){
-  for(const name of ['list','detail','settings']) $(name+'-view').hidden=name!==view;
+  for(const name of ['list','detail']) $(name+'-view').hidden=name!==view;
   $('main').focus({preventScroll:true});
   window.scrollTo({top:0,behavior:'auto'});
 }
@@ -88,14 +88,4 @@ $('confirm-dialog').addEventListener('cancel',()=>{pending=null;});
 $('reset').addEventListener('click',()=>{reset();feedback('Demo reset. You can start again.');});
 $('todo').addEventListener('click',()=>{filter='todo';feedback('');renderList();});
 $('all').addEventListener('click',()=>{filter='all';feedback('');renderList();});
-$('open-settings').addEventListener('click',()=>{
-  for(const [name,value] of Object.entries(settings))$('settings-form').elements.namedItem(name).value=value;
-  feedback('');show('settings');
-});
-$('settings-back').addEventListener('click',back);
-$('settings-form').addEventListener('submit',event=>{
-  event.preventDefault();if(!$('settings-form').reportValidity())return;
-  for(const name of Object.keys(settings))settings[name]=Number($('settings-form').elements.namedItem(name).value);
-  feedback('Demo settings saved. The live shop has not changed.');
-});
 reset();
