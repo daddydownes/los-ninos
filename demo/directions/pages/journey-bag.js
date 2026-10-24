@@ -109,7 +109,7 @@
     const bagTotals = document.createElement('div');
     bagTotals.className = 'journey-bag-pricing';
     bagTotals.hidden = true;
-    bagTotals.innerHTML = '<dl class="journey-bag-totals"><div><dt>Subtotal <small>AUD</small></dt><dd data-bag-subtotal></dd></div></dl><p class="journey-bag-shipping-note">Shipping added at checkout</p>';
+    bagTotals.innerHTML = '<dl class="journey-bag-totals"><div><dt>Subtotal <small>AUD</small></dt><dd data-bag-subtotal></dd></div></dl>';
     dialog.querySelector('.journey-bag-footer').prepend(bagTotals);
     const formatMoney = value => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(value / 100);
 
@@ -121,9 +121,15 @@
         bagTotals.querySelector('[data-bag-subtotal]').textContent = formatMoney(unit * quantity);
       }
       if (commerceEnabled) document.querySelectorAll('[data-product-price]').forEach(slot => {
-        slot.textContent = catalogPhase === 'loading' ? 'Checking price…'
-          : catalogPhase === 'ready' && hasPrice ? `A${formatMoney(unit)} each`
-          : 'Price currently unavailable';
+        const ready = catalogPhase === 'ready' && hasPrice;
+        const amount = ready ? formatMoney(unit).replace(/\.00$/, '') : null;
+        const label = catalogPhase === 'loading' ? 'Checking price…' : ready ? amount : 'Price unavailable';
+        if (slot.textContent !== label) slot.textContent = label;
+        const mark = slot.closest('.purchase-price');
+        if (mark) {
+          mark.dataset.priceState = ready ? amount.length > 4 ? 'wide' : 'ready' : catalogPhase === 'loading' ? 'loading' : 'error';
+          mark.setAttribute('aria-label', ready ? `Price: ${formatMoney(unit)} Australian dollars each` : label);
+        }
       });
     }
 

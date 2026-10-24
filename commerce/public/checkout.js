@@ -76,11 +76,12 @@ function updateSummary() {
   text(document.querySelector('.product-caption'), typeof unit === 'number' ? `${money(unit)} each · Adjustable fit` : 'Adjustable fit');
   text($('subtotal-label'), quantity === 1 ? 'Hat subtotal' : `Hat subtotal · ${quantity} hats`);
   text($('subtotal'), money(typeof unit === 'number' ? unit * quantity : null));
-  text($('shipping-cost'), reviewed ? shipping === 0 ? 'Free' : money(shipping, 'To be determined') : 'Shown after delivery details');
+  text($('shipping-cost'), reviewed ? shipping === 0 ? 'Free' : money(shipping, 'To be determined') : '');
   text($('total-label'), reviewed ? 'Total' : 'Subtotal');
   text($('total'), money(typeof unit === 'number' && (!reviewed || typeof shipping === 'number') ? unit * quantity + (reviewed ? shipping : 0) : null, typeof unit === 'number' ? 'Pending shipping' : 'To be set'));
   text($('summary-heading'), reviewed ? 'Review your order' : 'Your order');
   $('shipping-basis').hidden = !reviewed;
+  $('shipping-line').hidden = !reviewed;
   $('shipping-review-note').hidden = reviewed;
   $('review-actions').hidden = !reviewed;
   reviewButton.hidden = reviewed;

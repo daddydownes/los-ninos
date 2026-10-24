@@ -68,8 +68,11 @@ test('bag labels its item subtotal and leaves shipping for the checkout review',
     ...catalog, product: { ...catalog.product, maxQuantity: 10 },
   } }));
   await page.goto('/#shop');
-  await expect(page.locator('[data-product-price]')).toContainText('A$30.00');
-  await expect(page.getByText('Shipping added at checkout', { exact: true }).first()).toBeVisible();
+  await expect(page.locator('[data-product-price]')).toHaveText('$30');
+  await expect(page.getByRole('img', { name: 'Price: $30.00 Australian dollars each' })).toBeVisible();
+  await expect(page.locator('.price-outline')).toBeVisible();
+  await expect(page.locator('.purchase-action')).not.toContainText(/shipping/i);
+  await expect(page.locator('.price-oval')).toHaveCSS('animation-name', 'none');
   await page.screenshot({ path: test.info().outputPath('product-pricing.png') });
   await page.getByRole('button', { name: 'Add to bag', exact: true }).click();
   await expect(page.locator('[data-bag-subtotal]')).toHaveText('$30.00');
@@ -79,7 +82,7 @@ test('bag labels its item subtotal and leaves shipping for the checkout review',
   await expect(page.locator('.journey-bag-number')).toHaveText('3');
   await expect(page.locator('[data-bag-subtotal]')).toHaveText('$90.00');
   await expect(page.locator('.journey-bag-pricing')).toContainText('Subtotal');
-  await expect(page.locator('.journey-bag-pricing')).toContainText('Shipping added at checkout');
+  await expect(page.getByRole('dialog', { name: 'Your bag.' })).not.toContainText(/shipping/i);
   await expect(page.locator('[data-bag-shipping]')).toHaveCount(0);
   await expect(page.locator('[data-bag-total]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Preview checkout', exact: true })).toBeInViewport();

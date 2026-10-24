@@ -117,6 +117,8 @@ test('checkout reviews shipping after details, with the higher tier at four hats
   await page.goto('/checkout.html');
   await expect(page.locator('#subtotal')).toHaveText('$30.00');
   await expect(page.locator('#total')).toHaveText('$30.00');
+  await expect(page.locator('#shipping-line')).toBeHidden();
+  expect(await page.locator('body').innerText()).not.toMatch(/shipping/i);
   await expect(page.locator('#submit-order')).toBeHidden();
   await expect(page.getByLabel('Street address', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
@@ -129,12 +131,14 @@ test('checkout reviews shipping after details, with the higher tier at four hats
   await fillAddress(page);
   await page.getByLabel('Email address').fill(recipient);
   await page.getByRole('button', { name: 'Review order', exact: true }).click();
+  await expect(page.locator('#shipping-line')).toBeVisible();
   await expect(page.locator('#shipping-cost')).toHaveText('$20.00');
   await expect(page.locator('#total')).toHaveText('$110.00');
   await expect(page.locator('#submit-order')).toBeVisible();
   expect(submitted).toBe(0);
   await page.getByRole('button', { name: 'Increase quantity', exact: true }).click();
   await expect(page.locator('#submit-order')).toBeHidden();
+  await expect(page.locator('#shipping-line')).toBeHidden();
   await page.getByRole('button', { name: 'Review order', exact: true }).click();
   await expect(page.locator('#shipping-cost')).toHaveText('$25.00');
   await expect(page.locator('#total')).toHaveText('$145.00');
