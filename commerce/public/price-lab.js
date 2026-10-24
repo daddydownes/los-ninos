@@ -7,7 +7,7 @@
   const designs = [
     { id: '04', key: 'baseline', name: 'Just $30', copy: 'Your reference: the original lettering and movement, with the circle removed.' },
     { id: '05', key: 'editorial', name: 'Editorial', copy: 'A larger price, a small currency sign and a measured arrival. The clearest hierarchy.' },
-    { id: '06', key: 'written', name: 'Written by hand', short: 'Written', copy: 'Custom numerals draw stroke by stroke, then the arrow takes you to the button.' },
+    { id: '06', key: 'written', name: 'Written by hand', short: 'Written', copy: 'Refined with fuller strokes and smoother curves. Watch it after the real hat opening.' },
     { id: '07', key: 'woven', name: 'Satin stitch', short: 'Stitched', copy: 'Fine diagonal threads build the price from left to right, echoing the embroidery on the hat.' },
     { id: '08', key: 'studio', name: 'Studio light', short: 'Studio', copy: 'A single light passes over raised white lettering. Hover the button for a subtle change in angle.' },
     { id: '09', key: 'beside', name: 'Price + action', short: 'Together', copy: 'The price sits beside Add to bag, putting the amount and the action on one line.' },
@@ -18,7 +18,7 @@
   let prefix = 0;
   function price(key) {
     if (key === 'editorial') return '<span class="editorial-currency">$</span><span class="editorial-digits">30</span>';
-    if (key === 'written') return '<svg class="written-mark" viewBox="0 0 170 82" aria-hidden="true"><path class="written-dollar" pathLength="1" d="M37 21C24 10 11 23 16 32C20 39 40 37 37 49C34 62 15 60 11 51"/><path class="dollar-stem" pathLength="1" d="M30 12 21 68"/><path class="written-three" pathLength="1" d="M66 23C84 6 107 17 98 32C94 39 85 40 78 40C97 37 106 51 92 62C84 68 67 66 61 59"/><path class="written-zero" pathLength="1" d="M139 19C117 18 105 62 128 65C147 69 162 15 140 18C134 19 130 23 127 28"/></svg>';
+    if (key === 'written') return window.LosNinosPriceLettering?.markup || '<span class="type">$30</span>';
     if (key === 'woven') {
       const id = `woven-${++prefix}`;
       return `<svg class="woven-mark" viewBox="0 0 125 57" aria-hidden="true"><defs><linearGradient id="${id}-satin" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#e8edf2"/><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#d1dae5"/></linearGradient><pattern id="${id}-thread" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(34)"><path d="M.35 0V1.6" stroke="#fff" stroke-width=".4"/><path d="M1.1 0V1.6" stroke="#738195" stroke-width=".22"/></pattern><clipPath id="${id}-letters"><text x="62.5" y="44" text-anchor="middle">$30</text></clipPath></defs><g class="woven-reveal"><text class="woven-base" x="62.5" y="44" text-anchor="middle" fill="url(#${id}-satin)">$30</text><rect class="woven-thread" width="125" height="57" fill="url(#${id}-thread)" clip-path="url(#${id}-letters)"/></g></svg>`;
@@ -175,6 +175,11 @@
     const sample = event.target.closest('.sample-button');
     if (sample) playComparison(sample.closest('.design'));
   });
+  const openingLink = document.createElement('a');
+  openingLink.href = '/opening-06';
+  openingLink.textContent = 'Watch refined 06 after the full hat opening ↗';
+  openingLink.style.cssText = 'display:block;text-align:center;font-size:12px;line-height:1.5;padding:16px 10px;border:1px solid #ffffff36;border-radius:12px;margin-top:18px';
+  $('.focus-view').append(openingLink);
   $('.focus-design').addEventListener('click', event => { if (event.target.closest('.sample-button')) playFocus(); });
   $('.view-toggle').addEventListener('click', () => setView(!compareMode));
   $('.replay').addEventListener('click', playFocus);
