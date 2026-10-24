@@ -67,8 +67,8 @@ def build(commerce_enabled=False):
     # copy. Keep the real four-second intro, product layout and checkout behavior.
     opening = (OUTPUT / 'index.html').read_text(encoding='utf-8')
     opening = opening.replace('<html lang="en">', '<html lang="en" data-price-treatment="written">')
-    opening = opening.replace('</head>', '  <link rel="stylesheet" href="price-written.css?v=2">\n  <script defer src="price-written.js?v=2"></script>\n</head>')
-    opening = opening.replace('<title>Los Niños — Con Sueños</title>', '<title>Los Niños — Refined 06 opening preview</title>')
+    opening = opening.replace('</head>', '  <link rel="stylesheet" href="price-written.css?v=3">\n  <script defer src="price-written.js?v=3"></script>\n</head>')
+    opening = opening.replace('<title>Los Niños — Con Sueños</title>', '<title>Los Niños — Bold 06 opening preview</title>')
     opening_path = OUTPUT / 'opening-06.html'
     opening_path.write_text(opening, encoding='utf-8')
     expected.add(opening_path)

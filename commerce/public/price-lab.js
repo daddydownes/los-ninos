@@ -7,7 +7,7 @@
   const designs = [
     { id: '04', key: 'baseline', name: 'Just $30', copy: 'Your reference: the original lettering and movement, with the circle removed.' },
     { id: '05', key: 'editorial', name: 'Editorial', copy: 'A larger price, a small currency sign and a measured arrival. The clearest hierarchy.' },
-    { id: '06', key: 'written', name: 'Written by hand', short: 'Written', copy: 'Refined with fuller strokes and smoother curves. Watch it after the real hat opening.' },
+    { id: '06', key: 'written', name: 'Bold reveal', short: 'Bold', copy: 'Solid, upright type with the same character-by-character reveal. Watch it after the real hat opening.' },
     { id: '07', key: 'woven', name: 'Satin stitch', short: 'Stitched', copy: 'Fine diagonal threads build the price from left to right, echoing the embroidery on the hat.' },
     { id: '08', key: 'studio', name: 'Studio light', short: 'Studio', copy: 'A single light passes over raised white lettering. Hover the button for a subtle change in angle.' },
     { id: '09', key: 'beside', name: 'Price + action', short: 'Together', copy: 'The price sits beside Add to bag, putting the amount and the action on one line.' },
@@ -177,7 +177,7 @@
   });
   const openingLink = document.createElement('a');
   openingLink.href = '/opening-06';
-  openingLink.textContent = 'Watch refined 06 after the full hat opening ↗';
+  openingLink.textContent = 'Watch bold 06 after the full hat opening ↗';
   openingLink.style.cssText = 'display:block;text-align:center;font-size:12px;line-height:1.5;padding:16px 10px;border:1px solid #ffffff36;border-radius:12px;margin-top:18px';
   $('.focus-view').append(openingLink);
   $('.focus-design').addEventListener('click', event => { if (event.target.closest('.sample-button')) playFocus(); });
