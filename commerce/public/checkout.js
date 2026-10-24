@@ -66,6 +66,24 @@ function invalidateReview() {
   if (wasReviewed) announce($('checkout-message'), 'Your details changed. Review shipping and your total again before placing the order.');
 }
 
+function renderTotal(value, label) {
+  const total = $('total');
+  total.setAttribute('aria-label', `${label}: ${value} Australian dollars`);
+  // Typing an address must not keep replaying the price. Animate only a change
+  // in the displayed amount, using the actual final amount throughout.
+  if (total.dataset.value === value) return;
+  total.dataset.value = value;
+  total.dataset.amount = String(value.startsWith('$'));
+  total.replaceChildren(...Array.from(value, (character, index) => {
+    const span = document.createElement('span');
+    span.className = 'checkout-price-character';
+    span.textContent = character;
+    span.setAttribute('aria-hidden', 'true');
+    span.style.setProperty('--character-delay', `${index * 35}ms`);
+    return span;
+  }));
+}
+
 function updateSummary() {
   if (!catalog) return;
   const quantity = getQuantity();
@@ -78,10 +96,11 @@ function updateSummary() {
   text($('subtotal'), money(typeof unit === 'number' ? unit * quantity : null));
   text($('shipping-cost'), reviewed ? shipping === 0 ? 'Free' : money(shipping, 'To be determined') : '');
   text($('total-label'), reviewed ? 'Total' : 'Subtotal');
-  text($('total'), money(typeof unit === 'number' && (!reviewed || typeof shipping === 'number') ? unit * quantity + (reviewed ? shipping : 0) : null, typeof unit === 'number' ? 'Pending shipping' : 'To be set'));
+  renderTotal(money(typeof unit === 'number' && (!reviewed || typeof shipping === 'number') ? unit * quantity + (reviewed ? shipping : 0) : null, typeof unit === 'number' ? 'Pending shipping' : 'To be set'), reviewed ? 'Total' : 'Subtotal');
   text($('summary-heading'), reviewed ? 'Review your order' : 'Your order');
   $('shipping-basis').hidden = !reviewed;
   $('shipping-line').hidden = !reviewed;
+  $('summary-breakdown').hidden = !reviewed;
   $('shipping-review-note').hidden = reviewed;
   $('review-actions').hidden = !reviewed;
   reviewButton.hidden = reviewed;

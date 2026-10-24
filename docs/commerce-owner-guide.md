@@ -27,6 +27,9 @@ limited to three per fifteen minutes and ten per day per owner; repeatedly
 requesting codes does not speed up delivery. Keep your email account and its recovery methods secure.
 The local preview intentionally has no sign-in and must stay on your computer.
 
+On a phone, selecting an order opens its details. Use **Back to orders** to
+return to the list. **Tools** holds test and export actions.
+
 ## When an order comes in
 
 1. Open **Orders**. Search by order number, customer name, or email, or choose a
@@ -98,8 +101,8 @@ Packed postage has not yet been tested, including whether the maximum order fits
 this tier. Check parcel size and weight before live launch. This version does not
 offer international shipping or calculate postcode-specific rates.
 
-The product and bag state that shipping is added at checkout. After entering
-delivery details, the customer reviews shipping and the full total before placing
+The bag shows the hat subtotal. After entering delivery details, the customer
+reviews shipping and the full total before placing
 the order. The bag amount is an item subtotal, never presented as the final total.
 
 Save your changes. New orders use the new price, postage, and bank instructions;
@@ -114,7 +117,10 @@ protected owner dashboard.
 
 ## Check customer emails
 
-Every order has an email-status list and **Preview customer email**. Previewing
+Every order has an **Emails** section with delivery statuses and **Preview
+customer email**. Delivery problems are also flagged in the order list, and the
+Emails section opens automatically when an email needs attention. **History** is
+a separate expandable section. Previewing
 opens the message without sending it. In local preview, every message is a
 sample and no email network request is made.
 
@@ -141,7 +147,7 @@ instructions also appear on the customer's confirmation page.
 ## Clear test orders
 
 When the email service and approved test inbox are configured, **Test purchase**
-at the top of the dashboard opens the actual checkout in private test mode.
+inside **Tools** opens the actual checkout in private test mode.
 The dashboard shows which inbox receives the test messages. Both the customer
 and owner notification go only to that inbox, and the messages are labelled as
 tests. No payment or parcel is required. The test reserves preview stock, not
@@ -169,7 +175,7 @@ request automatically.
 
 ## Exports and backups
 
-**Export orders** downloads a CSV containing customer contact and delivery
+**Tools → Export orders** downloads a CSV containing customer contact and delivery
 details. Save it privately and share it only with people who need it to fulfil
 orders. It is not a complete system backup: it omits database settings, the full
 email queue, and other recovery information.
@@ -183,11 +189,11 @@ are in the [setup guide](commerce-setup.md#backups-and-recovery).
 - Confirm owner access and recovery for the domain, hosting, database, email,
   and GitHub accounts.
 - Confirm the price, stock count, bank details, support inbox, and packed postage;
-  keep the order limit at one until larger parcels are checked.
+  check that the configured quantity limit and shipping tiers cover larger parcels.
 - Review the customer emails and the 1–3-business-day dispatch promise.
 - Complete an owner-authorized hosted test and check actual messages in Gmail,
   Apple Mail, and Outlook. Browser previews do not establish inbox rendering.
 - Agree who checks unpaid orders, handles delivery problems, and maintains
   backups. Decide the project-code license explicitly; none is invented here.
-- Ask the maintainer to finish the protected-hosting and launch checks before
-  enabling real orders.
+- Complete the brand owner's first sign-in and confirm that his inbox receives
+  its code. This last owner-inbox check was deferred during the 25 October review.

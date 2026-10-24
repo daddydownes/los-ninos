@@ -6,13 +6,14 @@ delivery details, and queues payment instructions. A private owner dashboard
 supports manual payment confirmation, dispatch confirmation, and unpaid-order
 cancellation.
 
-The repository defaults to preview mode. Live ordering needs owner-controlled
-Cloudflare hosting, a D1 database, protected owner sign-in, verified Resend email,
-and the owner's confirmed stock and bank details. Hats are A$50 each with free
-Australian shipping. A Cloudflare test checkout is deployed with 100 hats and no
-customer login; test orders do not send email or request payment. Owner sign-in,
-email verification and live checkout still need configuration. See the
-[deployment status](docs/deployment-status.md) for the current addresses and checks.
+The hosted shop uses Cloudflare Workers, D1, email-code owner sign-in and Resend
+for order emails. Hats are A$30 each, with Australian shipping of A$20 for one to
+three hats or A$25 for four or more. Customers review the shipping charge and
+full total after entering delivery details, before placing an order. Payment is
+by manual bank transfer; the owner checks the bank before confirming payment.
+Local previews remain separate from live orders and send no email. See the
+[deployment status](docs/deployment-status.md) for verified checks and the
+remaining owner handover step.
 
 ## Try the checkout locally
 

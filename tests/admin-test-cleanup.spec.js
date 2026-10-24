@@ -47,7 +47,7 @@ test('test deletion requires confirmation, disables while pending and removes on
   expect(requests[0].headers()['x-requested-with']).toBe('LosNinos');
   orders.shift();
   await pending.fulfill({ json: { ok: true, deletedId: 'test-order-1' } });
-  await expect(page.getByRole('heading', { name: 'Test order removed.' })).toBeVisible();
+  await expect(page.locator('#admin-message')).toContainText('Test order deleted.');
   await expect(page.getByRole('button', { name: /LN-TEST-001/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /LN-LIVE-001/ })).toBeVisible();
   await expect(page.locator('#order-count')).toHaveText('(1)');
@@ -57,6 +57,7 @@ test('live orders have no delete control; unavailable email tests stay disabled'
   await dashboard(page, [order({ preview: false })]);
   await page.getByRole('button', { name: /LN-TEST-001/ }).click();
   await expect(page.getByRole('button', { name: 'Delete test order', exact: true })).toHaveCount(0);
+  await page.locator('.admin-tools > summary').click();
   await expect(page.getByRole('button', { name: 'Test purchase', exact: true })).toBeDisabled();
   await expect(page.locator('#test-purchase-help')).toContainText('once the test inbox and sender are connected');
 });
@@ -116,13 +117,58 @@ test('private email test setup names its inbox and opens the real test checkout'
   await dashboard(page, [order({ testDelivery: true, testEmailRecipient: 'test@example.com' })], {
     testCheckout: { enabled: true, recipient: 'test@example.com' },
   });
+  await page.locator('.admin-tools > summary').click();
   await expect(page.getByRole('button', { name: 'Test purchase', exact: true })).toBeEnabled();
   await expect(page.locator('#test-purchase-help')).toContainText('test@example.com');
+  await page.locator('.admin-tools > summary').click();
   await page.getByRole('button', { name: /LN-TEST-001/ }).click();
   await expect(page.locator('#order-detail')).toContainText('Test emails go to test@example.com');
   await page.getByRole('button', { name: 'Confirm test payment', exact: true }).click();
   await expect(page.locator('#order-action')).toContainText('email will go to the test inbox');
   await expect(page.locator('#order-action')).not.toContainText('No customer email will be sent.');
+  await page.locator('.admin-tools > summary').click();
   await page.getByRole('button', { name: 'Test purchase', exact: true }).click();
   await expect(page).toHaveURL(/\/checkout\.html\?test=1$/);
+});
+
+test('email problems remain visible and mobile detail has a clear return to orders', async ({ page }) => {
+  const orders = [order({ emails: [{ kind: 'awaiting_payment', status: 'bounced' }], preview: false })];
+  await dashboard(page, orders);
+  await expect(page.locator('.admin-order-card')).toContainText('Email needs attention');
+  await page.getByRole('button', { name: /LN-TEST-001/ }).click();
+  await expect(page.locator('.admin-detail-disclosure').first()).toHaveAttribute('open', '');
+  await expect(page.locator('.admin-email-item')).toContainText('Bounced');
+  await expect(page.getByRole('button', { name: 'Confirm payment', exact: true })).toBeVisible();
+  if (page.viewportSize().width <= 800) {
+    await expect(page.locator('#order-list-region')).toBeHidden();
+    await page.getByRole('button', { name: '← Back to orders', exact: true }).click();
+    await expect(page.locator('#order-list-region')).toBeVisible();
+    await expect(page.locator('#order-detail')).toBeHidden();
+  } else {
+    orders[0].emails[0].status = 'delivered';
+    await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+    await expect(page.locator('.admin-email-item')).toContainText('Delivered');
+    await expect(page.locator('.admin-order-card')).not.toContainText('Email needs attention');
+  }
+});
+
+test('payment confirmation still requires the owner to check the bank before sending confirmation', async ({ page }) => {
+  const orders = [order({ preview: false, unitPriceCents: 3000, shippingCents: 2500, quantity: 4, totalCents: 14500 })];
+  await dashboard(page, orders);
+  const submitted = [];
+  await page.route('**/api/admin/orders/*/status', route => {
+    submitted.push(route.request().postDataJSON());
+    orders[0] = {...orders[0],status:'paid'};
+    return route.fulfill({json:{order:orders[0]}});
+  });
+  await page.getByRole('button',{name:/LN-TEST-001/}).click();
+  await page.getByRole('button',{name:'Confirm payment',exact:true}).click();
+  await expect(page.locator('#order-action')).toContainText('$145.00 with reference LN-TEST-001');
+  await page.getByRole('button',{name:'Mark paid & send confirmation',exact:true}).click();
+  expect(submitted).toHaveLength(0);
+  await page.getByRole('checkbox',{name:'I have checked the bank account and the full payment has arrived.'}).check();
+  await page.getByRole('button',{name:'Mark paid & send confirmation',exact:true}).click();
+  await expect(page.locator('#admin-message')).toContainText('Payment confirmed.');
+  await expect(page.getByRole('button',{name:'Mark as shipped',exact:true})).toBeVisible();
+  expect(submitted).toEqual([{status:'paid',note:'',expectedUpdatedAt:updatedAt}]);
 });

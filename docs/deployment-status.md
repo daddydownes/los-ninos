@@ -1,102 +1,99 @@
 # Deployment status
 
-Updated 24 October 2026 (Australia/Sydney).
+Updated 25 October 2026 (Australia/Sydney).
 
-The shop runs on the `los-ninos-shop` Cloudflare Worker with the private
-`los-ninos-orders` D1 database. No customer data, bank details, personal inboxes
-or runtime secrets are committed to Git.
+The live shop runs on the `los-ninos-shop` Cloudflare Worker with the private
+`los-ninos-orders` D1 database. Bank details, customer records, approved personal
+inboxes and runtime secrets are kept out of Git.
 
-## Addresses and connection checks
+## Live configuration
 
-- Shop: https://losninos.com.au/ (also https://www.losninos.com.au/).
+- Shop: https://losninos.com.au/ and https://www.losninos.com.au/.
+- Owner dashboard: https://losninos.com.au/admin.
 - Temporary host: https://los-ninos-shop.los-ninos.workers.dev/.
-- GoDaddy delegates DNS to `dalary.ns.cloudflare.com` and
-  `fred.ns.cloudflare.com`. Both authoritative servers and all five parent
-  nameservers agree. Cloudflare's certificate validates for the shop hostname.
-- During migration, old GoDaddy parking addresses caused TLS failures on some
-  networks. Cloudflare's public DNS cache was refreshed. The affected Pixel now
-  opens the shop after restoring normal DNS; ordinary IPv4 requests on the
-  previously failing development network also return HTTP 200 for root and www.
-  These checks do not guarantee every resolver worldwide has refreshed.
-- HTTP/3 remains disabled after the reported QUIC failure. HTTP/2, HTTPS
-  enforcement and TLS 1.3 remain enabled.
+- `STORE_MODE=live`, `LAUNCH_CONFIRMED=true`, `LOCAL_PREVIEW=false`.
+- Public test ordering and test email sending are disabled.
+- Owner access uses an allowlisted email address and a six-digit email code.
+  Cloudflare Access / Zero Trust is not used by this deployment.
+- The brand inbox is configured for owner notifications and customer replies.
+  Dashboard access is configured separately; changing the notification email
+  does not grant login access.
+- The sender is `Los Niños <orders@losninos.com.au>`, using the configured Resend
+  secret. Open and click tracking were disabled during sender setup.
 
-## Purchase rehearsal
+The catalogue and D1 settings were checked on 25 October. Hats are A$30 each,
+with Australian shipping of A$20 for one to three hats or A$25 for four or more.
+The maximum is ten hats per order. Three hats total A$110; four total A$145.
+Shipping and the full total appear after entering delivery details and before
+final submission. These are owner-set charges, not live Australia Post quotes;
+packed carrier postage has not been validated.
 
-Public browsing and ordinary preview checkout are enabled. The configured price
-is A$30 per hat plus A$20 shipping for one to three hats, or A$25 for four or
-more, with up to ten hats per order. Three hats total A$110; four total A$145.
-The bag shows an item subtotal and a shipping-at-checkout note. Shipping and the
-full order total appear after the delivery-details step, before final submission.
-Packed carrier postage has not yet been tested.
-Live inventory is 100; preview inventory is separate. A previous preview order
-reserves one test hat.
+At that check, live inventory was 100 with no reservations, and the hosted
+database had no orders or queued emails. Inventory will change as customers order.
 
-The owner dashboard includes **Test purchase** and **Delete test order**.
-The email rehearsal uses the actual checkout form, configured prices and payment
-instructions, but remains a clearly labelled preview order with no payment due.
-All four message types and Reply-To are restricted to one deployment-configured
-test inbox. Public preview submissions cannot enable email sending.
+## Payment and email flow
 
-Deleting a test order removes its order details and outbox and restores test
-stock. Live orders cannot be deleted. A hash-only tombstone prevents delayed
-checkout retries from recreating deleted tests. Active email sends block cleanup;
-messages already delivered to an inbox cannot be withdrawn.
+1. A saved order reserves stock and queues the customer's bank instructions and
+   a separate owner notification. The receipt page also shows the bank details,
+   exact total and unique payment reference.
+2. The owner checks the actual bank account and confirms that payment arrived.
+   Only then does the dashboard mark the order paid and queue its payment email.
+3. After handing over the parcel, the owner marks it shipped. This queues the
+   dispatch email. Tracking is sent separately by the owner by text; it is not
+   included in the email and the site does not automatically send SMS.
 
-The existing D1 database was privately backed up before applying the additive
-`commerce/migrations/0001-test-order-cleanup.sql` migration. Confirmed bank and
-owner/contact settings are stored privately in D1, not the public build.
+The confirmed bank details are stored privately. Each order preserves its own
+price, shipping and bank snapshot so later settings changes do not rewrite
+instructions already given to a customer. The app does not move money or
+automatically reconcile bank transfers.
 
-The Resend account and `losninos.com.au` sender are now configured. Domain
-verification passed with the DKIM TXT record and two DNS-only sending CNAMEs.
-Open and click tracking are disabled. `RESEND_API_KEY` is stored as a Cloudflare
-secret, and the sender is `Los Niños <orders@losninos.com.au>`.
+Email sends are queued and retried by a five-minute schedule. The dashboard
+distinguishes provider acceptance from delivery and flags failures, bounces,
+complaints or uncertain sends. The owner must check the dashboard; there is no
+separate guaranteed alert for every email failure.
 
-A disposable local Worker rehearsal sent all four real `[TEST]` message types
-through Resend to the approved test inbox. Resend reported all four delivered,
-each on its first attempt. The four-hat fixture used A$120 plus A$25 shipping,
-for A$145 total, and the configured bank instructions. The test order was then
-deleted through the Worker cleanup endpoint and its local preview stock restored.
-Hosted orders and inventory were unchanged. This verifies real email delivery
-and local workflow integration; it does not verify hosted Cloudflare Access,
-the full hosted checkout journey, or which inbox folder received the messages.
+## Owner handover and testing
 
-## What is not live yet
+The owner dashboard now uses a light, minimal layout. Confirming payment or
+dispatch is the primary action. Email details and history expand when needed;
+email problems expand automatically. On a phone, an order has a **Back to orders**
+control. Test and export actions sit under **Tools**.
 
-`STORE_MODE=preview`, `HOSTED_TEST_CHECKOUT=true`, `LOCAL_PREVIEW=false`,
-`TEST_EMAILS_ENABLED=false`; the live launch flag remains unset.
-The order-token secret is configured. Owner routes remain protected and reject
-unsigned requests; no hosted login bypass has been added.
+The brand owner has not yet checked receipt of his sign-in code and completed
+his first sign-in. The user explicitly deferred this check. His inbox delivery
+and first login must not be described as verified.
 
-Account setup still requires:
+Previously, the approved test recipient received all four test email types and
+confirmed receipt, and that recipient's hosted email-code login was verified.
+No new message or live customer order was created during the 25 October review.
+Today's email checks rendered the real templates locally with the stored bank
+configuration and a fictional customer; they did not establish fresh provider
+delivery or appearance in every email client.
 
-1. Activate Cloudflare Zero Trust and configure the exact owner email allowlist
-   for `/admin*` and `/api/admin*` under one Access application. The current free
-   plan activation screen requests billing details and terms/usage authorization;
-   this has not been accepted by the agent.
-2. Enable the explicit owner-only test-email switch and complete an authorized
-   purchase/payment/dispatch rehearsal. Confirm actual inbox receipt, then delete
-   the test order and turn test sending off.
-3. Complete the live-launch checks before enabling real ordering.
+Test orders use separate inventory and can be deleted through the dashboard.
+Live customer orders cannot be deleted with that control. Deletion restores
+test stock and removes that test's stored history and outbox, but cannot retract
+emails already delivered. Active sends block cleanup.
 
-Four explicitly labelled test emails were delivered. No payment or fulfilment
-has been performed. The website remains in preview mode.
+## Verification on 25 October
 
-## Verification
+- 79 commerce tests passed, covering authentication, checkout, shipping tiers,
+  bank snapshots, idempotency, stock, cleanup and email retries. Provider calls
+  are mocked in automated tests.
+- 45 targeted browser checks passed across desktop Chromium, Android Chromium
+  and iPhone WebKit profiles, covering the dashboard, payment guard, email
+  attention state, test cleanup, shipping review and retry handling.
+- Sixteen locally rendered email cases checked the four message types at one,
+  three, four and ten hats, including totals and payment-reference formatting.
+- Dashboard and email layouts were reviewed at desktop and phone widths.
+- Public root, www and checkout responded successfully; HTTP redirected to
+  HTTPS. `/admin` redirected to owner sign-in, and an unsigned owner API request
+  was rejected with HTTP 403.
 
-- 68 commerce tests pass, covering checkout, quantity shipping tiers, owner authentication, idempotency,
-  inventory, cleanup races, exact test recipients, send retries and queue
-  isolation. Provider calls are mocked in automated tests.
-- 28 targeted browser checks pass across desktop Chrome and a Pixel profile,
-  using the installed Chromium 1234 binary. They cover the separate shipping
-  review, the three-to-four-hat boundary, retry handling and test cleanup. The local browser rehearsal also
-  completed checkout, simulated payment and dispatch, then deleted only its
-  disposable order and restored test availability from 8 back to 9.
-- Prior broader regression checks passed across eight Safari/Chrome profiles.
-  Real Cloudflare login and the complete hosted email checkout remain outstanding.
-- After configuring the sender, the shop and public catalogue return HTTP 200,
-  pricing remains A$30 with the A$20/A$25 shipping tiers, and unsigned owner API
-  requests still return HTTP 403.
+Earlier DNS migration checks resolved the reported stale parking/TLS issue on
+the affected Pixel. HTTP/3 was disabled after its QUIC error. Those historical
+checks and today's successful requests do not guarantee every device or network.
 
-Configuration and operator instructions are in `wrangler.jsonc`,
-`docs/commerce-setup.md` and `docs/commerce-owner-guide.md`.
+The [owner guide](commerce-owner-guide.md) explains daily operation. The
+[setup guide](commerce-setup.md) covers hosting and recovery. Account ownership,
+recovery access, parcel costs and a backup routine remain handover responsibilities.

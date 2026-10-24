@@ -2,6 +2,8 @@ const $ = (selector, parent = document) => parent.querySelector(selector);
 const state = { orders: [], selectedId: null, order: null, settings: null, testCheckout: null, listRequest: 0, detailRequest: 0, busy: false };
 const statuses = { awaiting_payment: 'Awaiting payment', paid: 'Paid — ready to pack', shipped: 'Shipped', cancelled: 'Cancelled' };
 const emailKinds = { awaiting_payment: 'Payment instructions', paid: 'Payment confirmation', shipped: 'Shipping confirmation', owner: 'Owner notification', owner_order: 'Owner notification' };
+const emailStatusLabels = { queued: 'Queued', sending: 'Sending', sent: 'Sent · delivery pending', delivered: 'Delivered', failed: 'Failed', bounced: 'Bounced', complained: 'Marked as spam', needs_review: 'Needs review', preview: 'Preview only', cancelled: 'Cancelled' };
+const emailNeedsAttention = email => ['failed', 'bounced', 'complained', 'needs_review'].includes(email.status);
 const money = (cents, placeholder = 'To be set') => cents === null || cents === undefined || !Number.isFinite(Number(cents)) ? placeholder : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(Number(cents) / 100);
 const date = (value) => { const parsed = new Date(value); return value && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Date unavailable'; };
 const element = (tag, className, content) => { const node = document.createElement(tag); if (className) node.className = className; if (content !== undefined) node.textContent = String(content); return node; };
@@ -84,6 +86,7 @@ function renderOrderList() {
     card.append(top, element('p', 'admin-order-card-name', order.customer?.name || 'Customer'));
     if (order.preview) card.append(element('p', 'admin-order-card-preview', order.testDelivery ? 'Email test order' : 'Preview order'));
     card.append(bottom);
+    if (Array.isArray(order.emails) && order.emails.some(emailNeedsAttention)) card.append(element('p', 'admin-email-warning', 'Email needs attention'));
     list.append(card);
   }
 }
@@ -101,6 +104,7 @@ async function loadOrder(id, { focus = true } = {}) {
     state.selectedId = id;
     renderOrderList();
     renderOrderDetail();
+    $('#admin-main').classList.add('is-reading-order');
     if (focus) { panel.focus({ preventScroll: true }); if (window.matchMedia('(max-width: 800px)').matches) panel.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
   } catch (error) { if (request === state.detailRequest) notice(error.message, true); }
   finally { if (request === state.detailRequest) panel.removeAttribute('aria-busy'); }
@@ -110,6 +114,12 @@ function renderOrderDetail() {
   const order = state.order;
   const panel = $('#order-detail');
   panel.replaceChildren();
+  panel.append(button('← Back to orders', () => {
+    if (state.busy) return;
+    $('#admin-main').classList.remove('is-reading-order');
+    $('.admin-order-card[aria-pressed=true]')?.focus({ preventScroll: true });
+    $('#order-list-region').scrollIntoView({ behavior: 'auto', block: 'start' });
+  }, 'admin-back-to-orders'));
   const top = element('div', 'admin-detail-top');
   const heading = element('div');
   heading.append(element('h2', '', order.reference || order.id), element('p', 'muted', `Received ${date(order.createdAt)}`));
@@ -141,10 +151,15 @@ function renderOrderDetail() {
   if (order.status === 'awaiting_payment') buttons.append(button('Cancel order', () => showAction('cancelled'), 'button button-secondary button-small admin-danger-button'));
   if (!buttons.childElementCount) actions.append(element('p', 'admin-small muted', order.status === 'cancelled' ? 'This unpaid order is cancelled. Its reserved stock has been released.' : 'This order has been marked as shipped.'));
   else actions.append(buttons);
-  const actionSlot = element('div'); actionSlot.id = 'order-action'; actions.append(actionSlot); panel.append(actions);
-  const emails = section('Customer emails'); const emailList = element('div', 'admin-email-list');
+  const actionSlot = element('div'); actionSlot.id = 'order-action'; actions.append(actionSlot); panel.insertBefore(actions, contact);
+  const emails = element('details', 'admin-detail-disclosure'); const emailList = element('div', 'admin-email-list');
   const emailRecords = Array.isArray(order.emails) ? order.emails : Object.entries(order.emails || {}).map(([kind, value]) => typeof value === 'object' && value ? { ...value, kind: value.kind || kind } : { kind, status: value });
-  for (const email of emailRecords) { const row = element('div', 'admin-email-item'); row.append(element('span', '', emailKinds[email.kind] || email.kind || 'Email'), element('span', '', email.status || 'Queued')); emailList.append(row); }
+  const problems = emailRecords.filter(emailNeedsAttention).length;
+  const emailHeading = element('summary');
+  emailHeading.append(element('span', '', 'Emails'), element('span', problems ? 'admin-email-warning' : 'muted', problems ? `${problems} need attention` : `${emailRecords.length} messages`));
+  emails.append(emailHeading);
+  emails.open = problems > 0;
+  for (const email of emailRecords) { const row = element('div', `admin-email-item${emailNeedsAttention(email) ? ' has-error' : ''}`); row.append(element('span', '', emailKinds[email.kind] || email.kind || 'Email'), element('span', '', emailStatusLabels[email.status] || email.status || 'Queued')); emailList.append(row); }
   if (!emailRecords.length) emailList.append(element('p', 'admin-small muted', 'No email delivery events recorded yet.'));
   emails.append(emailList);
   if (['awaiting_payment', 'paid', 'shipped'].includes(order.status)) {
@@ -155,7 +170,7 @@ function renderOrderDetail() {
   }
   emails.append(element('p', 'admin-small muted', order.preview && !order.testDelivery ? 'Preview emails are saved for testing only. No emails are sent.' : 'Sent means the email service accepted it. Delivery to an inbox can take longer.'));
   panel.append(emails);
-  const history = section('Order history'); const timeline = element('ol', 'admin-history');
+  const history = element('details', 'admin-detail-disclosure'); history.append(element('summary', '', 'Order history')); const timeline = element('ol', 'admin-history');
   for (const item of Array.isArray(order.history) ? order.history : []) {
     const row = element('li'); const label = item.message || item.action || statuses[item.status] || item.type || 'Order updated'; row.append(element('span', '', label));
     const when = element('time', '', date(item.createdAt || item.at || item.timestamp)); if (item.createdAt || item.at || item.timestamp) when.dateTime = item.createdAt || item.at || item.timestamp; row.append(when);
@@ -197,6 +212,7 @@ function showDeleteTestOrder(order) {
     if (removed) {
       // Invalidate earlier reads so they cannot restore a deleted card or detail.
       state.listRequest++; state.detailRequest++; state.selectedId = null; state.order = null;
+      $('#admin-main').classList.remove('is-reading-order');
       state.orders = state.orders.filter(item => item.id !== order.id); renderOrderList();
       const panel = $('#order-detail'); panel.replaceChildren();
       const empty = element('div', 'admin-detail-empty'); empty.append(element('h2', '', 'Test order removed.'), element('p', 'muted', 'Choose another order to continue.')); panel.append(empty);
@@ -302,6 +318,7 @@ async function loadSettings() {
 
 function switchView(view) {
   if (state.busy) return;
+  $('#admin-main').classList.remove('is-reading-order');
   for (const name of ['orders', 'settings']) { $(`#${name}-view`).hidden = name !== view; if (name === view) $(`#${name}-tab`).setAttribute('aria-current', 'page'); else $(`#${name}-tab`).removeAttribute('aria-current'); }
   notice(''); if (view === 'settings') loadSettings();
 }
@@ -335,7 +352,10 @@ $('#owner-signout').addEventListener('click', async () => {
 });
 $('#settings-tab').addEventListener('click', () => switchView('settings'));
 $('#test-purchase').addEventListener('click', () => { if (!state.busy && state.testCheckout?.enabled) location.assign('/checkout.html?test=1'); });
-$('#refresh-orders').addEventListener('click', () => { if (!state.busy) loadOrders(); });
+$('#refresh-orders').addEventListener('click', async () => {
+  if (state.busy) return;
+  if (await loadOrders() && state.selectedId) await loadOrder(state.selectedId, { focus: false });
+});
 $('#order-status').addEventListener('change', () => loadOrders());
 let searchTimer;
 $('#order-search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadOrders(), 250); });
