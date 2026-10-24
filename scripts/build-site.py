@@ -72,6 +72,14 @@ def build(commerce_enabled=False):
     opening_path = OUTPUT / 'opening-06.html'
     opening_path.write_text(opening, encoding='utf-8')
     expected.add(opening_path)
+    # Five smaller versions share the exact storefront and post-intro reveal.
+    # Only this review route includes the size switcher; the shop stays intact.
+    sizes = opening.replace('data-price-treatment="written"', 'data-price-treatment="written" data-price-size="03"')
+    sizes = sizes.replace('</head>', '  <link rel="stylesheet" href="price-sizes.css?v=1">\n  <script defer src="price-sizes.js?v=1"></script>\n</head>')
+    sizes = sizes.replace('<title>Los Niños — Bold 06 opening preview</title>', '<title>Los Niños — Five smaller price options</title>')
+    sizes_path = OUTPUT / 'price-sizes.html'
+    sizes_path.write_text(sizes, encoding='utf-8')
+    expected.add(sizes_path)
     (OUTPUT / '.nojekyll').write_text('', encoding='utf-8')
     expected.add(OUTPUT / '.nojekyll')
     # Refuse stale output rather than accidentally publishing an unrelated file.

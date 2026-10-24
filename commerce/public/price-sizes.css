@@ -1,0 +1,29 @@
+/* Review-only sizing. Each version uses the same solid glyphs and timing. */
+html[data-price-size="01"]{--price-mark-height:28px}
+html[data-price-size="02"]{--price-mark-height:33px}
+html[data-price-size="03"]{--price-mark-height:38px}
+html[data-price-size="04"]{--price-mark-height:43px}
+html[data-price-size="05"]{--price-mark-height:48px}
+html[data-price-size] .purchase-price .price-lettering{
+  height:var(--price-mark-height);
+  top:calc((50px - var(--price-mark-height)) / 2);
+}
+
+/* The selector sits in the existing header, so neither hat nor bag moves. */
+.size-review{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:148px;color:inherit;font-family:'DM Sans',sans-serif;
+  transition:opacity 220ms ease;
+}
+.size-review-heading{display:flex;align-items:center;justify-content:center;gap:8px;height:20px}
+.size-review-heading span{font-size:9px;line-height:1;letter-spacing:.035em;white-space:nowrap}
+.size-opening{display:grid;place-items:center;width:24px;height:24px;padding:0;background:none;border:0;color:inherit;cursor:pointer;border-radius:5px}
+.size-opening svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.size-options{display:flex;gap:2px;justify-content:center;margin-top:2px}
+.size-choice{flex:1;min-width:0;height:36px;padding:0;border:1px solid transparent;border-radius:7px;background:transparent;color:inherit;font:500 11px/1 'DM Sans',sans-serif;opacity:.5;cursor:pointer;touch-action:manipulation;transition:background 180ms ease,opacity 180ms ease}
+.size-choice[aria-pressed=true]{background:#ffffff13;border-color:#ffffff25;opacity:1}
+.is-on-paper .size-choice[aria-pressed=true]{background:#080f190c;border-color:#080f1926}
+.size-review button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.intro-pending .size-review{visibility:hidden;opacity:0;pointer-events:none}
+@media(hover:hover){.size-review button:hover{opacity:1;background:#ffffff13}.is-on-paper .size-review button:hover{background:#080f190c}}
+@media(prefers-reduced-motion:reduce){.size-review,.size-review button{transition:none}}
