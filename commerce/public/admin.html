@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="./commerce.css">
     <link rel="stylesheet" href="./admin.css">
-    <script type="module" src="./admin.js?v=4"></script>
+    <script type="module" src="./admin.js?v=6"></script>
   </head>
   <body class="admin-page">
     <a class="admin-skip" href="#admin-main">Skip to orders</a>
@@ -18,8 +18,10 @@
       <a class="brand" href="/" aria-label="Los Niños home"><span>LOS</span><span>NIÑOS</span></a>
       <span class="admin-header-label">Owner workspace</span>
       <a class="admin-store-link" href="/">View store <span aria-hidden="true">↗</span></a>
+      <button class="button button-secondary button-small" id="owner-signout" type="button" hidden>Sign out</button>
     </header>
     <main id="admin-main" class="admin-main" tabindex="-1">
+      <a id="owner-signin" class="button button-secondary button-small" href="/owner-login" hidden>Sign in again</a>
       <div id="preview-notice" class="notice admin-preview" hidden><strong>Local preview</strong><span>These are test orders. No customer emails or payments are sent. This preview has no owner sign-in.</span></div>
       <div class="admin-title-row">
         <div><p class="eyebrow">LOS NIÑOS / THE EVERYDAY DETAILS</p><h1>Your orders.</h1><p class="muted">Check the transfer. Pack the hat. Send it on its way.</p></div>
@@ -38,7 +40,7 @@
         </div>
         <div class="admin-orders-layout">
           <section class="admin-order-list-panel" aria-label="Order list" aria-busy="true" id="order-list-region"><div class="admin-list-heading"><h2>Orders <span id="order-count" class="muted"></span></h2><span class="muted">Newest first</span></div><div id="order-list" class="admin-order-list"><p class="admin-empty muted">Loading your orders…</p></div></section>
-          <section id="order-detail" class="admin-detail panel" aria-label="Order details" tabindex="-1"><div class="admin-detail-empty"><span class="eyebrow">A LITTLE ORDER</span><h2>Every hat has a home.</h2><p class="muted">Choose an order to see the delivery address, confirm payment and add tracking.</p><p class="admin-small muted">Unpaid orders stay here until you decide what to do. No automatic reminders or cancellations.</p></div></section>
+          <section id="order-detail" class="admin-detail panel" aria-label="Order details" tabindex="-1"><div class="admin-detail-empty"><span class="eyebrow">A LITTLE ORDER</span><h2>Every hat has a home.</h2><p class="muted">Choose an order to see the delivery address, confirm payment and record dispatch.</p><p class="admin-small muted">Unpaid orders stay here until you decide what to do. No automatic reminders or cancellations.</p></div></section>
         </div>
       </section>
       <section id="settings-view" hidden aria-labelledby="settings-tab">

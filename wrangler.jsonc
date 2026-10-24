@@ -29,7 +29,7 @@
     "PUBLIC_STORE_URL": "https://losninos.com.au",
     "ACCESS_TEAM_DOMAIN": "",
     "ACCESS_AUD": "",
-    "OWNER_EMAILS": "",
+    "OWNER_AUTH_MODE": "email",
     "EMAIL_FROM": "Los Niños <orders@losninos.com.au>"
   },
   "observability": { "enabled": false }

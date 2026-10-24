@@ -61,6 +61,26 @@ test('live orders have no delete control; unavailable email tests stay disabled'
   await expect(page.locator('#test-purchase-help')).toContainText('once the test inbox and sender are connected');
 });
 
+test('dispatch confirmation requires handover but no tracking number and sends no tracking in the request', async ({ page }) => {
+  const orders = [order({ status: 'paid', preview: false })];
+  await dashboard(page, orders);
+  const submitted = [];
+  await page.route('**/api/admin/orders/*/status', route => {
+    submitted.push(route.request().postDataJSON());
+    orders[0] = { ...orders[0], status: 'shipped', trackingNumber: '' };
+    return route.fulfill({ json: { order: orders[0] } });
+  });
+  await page.getByRole('button', { name: /LN-TEST-001/ }).click();
+  await page.getByRole('button', { name: 'Mark as shipped', exact: true }).click();
+  await expect(page.getByLabel('Tracking number', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Mark shipped & send confirmation', exact: true }).click();
+  expect(submitted).toHaveLength(0);
+  await page.getByRole('checkbox', { name: 'I have handed this parcel over for delivery.' }).check();
+  await page.getByRole('button', { name: 'Mark shipped & send confirmation', exact: true }).click();
+  await expect(page.locator('#admin-message')).toContainText('dispatch confirmation has been queued');
+  expect(submitted).toEqual([{ status: 'shipped', note: '', expectedUpdatedAt: updatedAt }]);
+});
+
 test('rejected deletion retains the order and confirmation for an explicit retry', async ({ page }) => {
   let deletes = 0;
   await dashboard(page, [order()], { onDelete: route => { deletes++; return route.fulfill({ status: 409, json: { error: 'A test email is still sending. Try again shortly.' } }); } });

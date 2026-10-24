@@ -15,6 +15,7 @@ async function readyTest(page) {
 
 async function fillAddress(page) {
   await page.getByLabel('Full name').fill('Test Customer');
+  await page.getByLabel('Mobile number').fill('0400000000');
   await page.getByLabel('Street address', { exact: true }).fill('1 Test Street');
   await page.getByLabel('Suburb or town').fill('Sydney');
   await page.getByLabel('State or territory', { exact: true }).selectOption('NSW');
@@ -59,6 +60,17 @@ test('test URL cannot enable purchase without owner access or complete setup', a
   await expect(page.locator('#checkout-message')).toContainText('Connect the email provider');
   await expect(page.locator('#submit-order')).toBeDisabled();
   await expect(page.getByRole('link', { name: 'Owner dashboard' })).toBeVisible();
+});
+
+test('checkout asks for a mobile number before reviewing the order', async ({ page }) => {
+  await readyTest(page); await fillAddress(page);
+  await page.getByLabel('Mobile number').fill('');
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Place test order & send emails' })).toBeHidden();
+  await expect(page.getByLabel('Mobile number')).toHaveAttribute('required', '');
+  await page.getByLabel('Mobile number').fill('0400000000');
+  await page.getByRole('button', { name: 'Review order', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Place test order & send emails' })).toBeVisible();
 });
 
 test('a deleted test stops the old form and a fresh checkout gets a new retry key', async ({ page }) => {

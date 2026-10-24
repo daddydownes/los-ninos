@@ -28,7 +28,7 @@ async function call(env, path, method = 'GET', body, extraHeaders = {}, host = o
 
 async function place(env) {
   const body = { idempotencyKey: crypto.randomUUID(), catalogRevision: 1, quantity: 2,
-    customer: { name: 'Cleanup Test', email: 'cleanup@example.test', phone: '' },
+    customer: { name: 'Cleanup Test', email: 'cleanup@example.test', phone: '0400000000' },
     shippingAddress: { line1: '10 Test Street', line2: '', suburb: 'Melbourne', state: 'VIC', postcode: '3000', country: 'AU' },
   };
   const result = await call(env, '/api/orders', 'POST', body);

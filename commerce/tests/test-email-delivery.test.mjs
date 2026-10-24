@@ -46,7 +46,7 @@ async function setup(t) {
     return { status: result.status, data: result.headers.get('content-type')?.includes('application/json') ? await result.json() : await result.text() };
   }
   const checkout = (overrides = {}) => ({ idempotencyKey: crypto.randomUUID(), catalogRevision: 1, quantity: 1,
-    customer: { name: 'Test Buyer', email: recipient, phone: '' },
+    customer: { name: 'Test Buyer', email: recipient, phone: '0400000000' },
     shippingAddress: { line1: '1 Test Street', line2: '', suburb: 'Melbourne', state: 'VIC', postcode: '3000', country: 'AU' }, ...overrides });
   return { env, call, checkout, sent, state };
 }
@@ -123,13 +123,14 @@ test('all four real-delivery test stages use the test inbox, then scheduled deli
   await processOutbox(env);
   assert.equal((await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'paid' })).status, 200);
   await processOutbox(env);
-  assert.equal((await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'shipped', trackingNumber: 'TEST-TRACKING' })).status, 200);
+  assert.equal((await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'shipped' })).status, 200);
   await processOutbox(env);
   assert.equal(sent.length, 4);
   assert.ok(sent.every(item => item.payload.to.length === 1 && item.payload.to[0] === recipient && item.payload.reply_to === recipient));
   assert.match(sent[2].payload.text, /does not confirm a payment/);
   assert.match(sent[3].payload.text, /does not confirm a payment or a shipment/);
-  assert.match(sent[3].payload.text, /https:\/\/auspost\.com\.au\/mypost\/track\/details\/TEST-TRACKING/);
+  assert.match(sent[3].payload.text, /DISPATCH CONFIRMATION/);
+  assert.doesNotMatch(sent[3].payload.text + sent[3].payload.html, /tracking|auspost\.com/i);
   await worker.scheduled({}, env, {});
   const order = (await call(`/api/admin/orders/${id}`)).data.order;
   assert.ok(order.emails.every(message => message.status === 'delivered'));

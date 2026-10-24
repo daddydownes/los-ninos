@@ -1,3 +1,5 @@
+import { ownerEmailSession } from './email-auth.mjs';
+
 const JWKS_CACHE_MS = 5 * 60 * 1000;
 const CLOCK_SKEW_SECONDS = 30;
 const keyCaches = new WeakMap();
@@ -53,7 +55,7 @@ async function signingKeys(issuer, env) {
     try {
       const response = await fetcher(`${issuer}/cdn-cgi/access/certs`, {
         headers: { Accept: 'application/json' },
-        redirect: 'error',
+        redirect: 'manual',
         signal: controller.signal,
       });
       if (!response.ok) throw forbidden();
@@ -139,6 +141,12 @@ export async function validateAccessJWT(token, env = {}) {
 export async function authorizeAdmin(request, env = {}) {
   if (isLocalPreview(request, env)) return { email: 'local-preview@localhost', preview: true };
   try {
+    if (env.OWNER_AUTH_MODE === 'email') {
+      const actor = await ownerEmailSession(request, env);
+      if (!actor) throw forbidden();
+      return actor;
+    }
+    if (env.OWNER_AUTH_MODE && env.OWNER_AUTH_MODE !== 'cloudflare') throw forbidden();
     const owners = new Set(String(env.OWNER_EMAILS || '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean));
     if (!owners.size) throw forbidden();
     const payload = await validateAccessJWT(request.headers.get('Cf-Access-Jwt-Assertion'), env);

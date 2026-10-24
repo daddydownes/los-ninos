@@ -12,8 +12,8 @@ until those steps are complete.
 | `commerce/worker.mjs` | Validates checkout, calculates totals from stored settings, reserves stock, saves orders, and handles owner actions. |
 | Cloudflare D1 (`DB`) | Stores settings, separate preview/live inventory, orders, history, and a durable email outbox. |
 | Static assets (`ASSETS`) | Serves the built storefront, checkout, and owner interface from the same origin. |
-| Cloudflare Access | Requires an approved owner's email-code login; the Worker also validates the signed Access token and owner allowlist. |
-| Resend | Sends customer and owner emails and supplies delivery status. |
+| Owner authentication | Email codes through Resend with private D1 sessions, or optional Cloudflare Access with signed-token validation. Both require an exact owner allowlist. |
+| Resend | Sends customer and owner emails and supplies delivery status. Tracking is sent separately by the owner, not in these emails. |
 | Five-minute Worker cron | Retries queued emails and checks accepted-email delivery state. |
 
 The store defaults to `STORE_MODE=preview`. Hosted preview refuses orders unless
@@ -135,6 +135,15 @@ Reference: [Cloudflare D1 setup](https://developers.cloudflare.com/d1/get-starte
 
 ## Protect owner access
 
+The current deployment uses `OWNER_AUTH_MODE=email`: owner codes are sent through
+the existing verified Resend sender without activating Cloudflare Zero Trust.
+Follow [owner email-code setup](../commerce/OWNER-LOGIN.md), including its additive
+database migration and private `OWNER_AUTH_SECRET` and `OWNER_EMAILS` secrets.
+Verify a delivered code opens `/admin` and sign-out revokes access before launch.
+
+For installations using Cloudflare Access instead, set
+`OWNER_AUTH_MODE=cloudflare` and follow these steps:
+
 1. Add the final shop hostname to the Worker, then set up a Cloudflare Access
    self-hosted application for its owner paths. Include `/admin*` and
    `/api/admin*` under the **same application**, so they share an audience value.
@@ -152,7 +161,7 @@ Reference: [Cloudflare D1 setup](https://developers.cloudflare.com/d1/get-starte
 5. Disable unused alternate public hostnames such as a `workers.dev` address, or
    verify that the same Worker authentication remains effective through them.
 
-The Worker verifies the Access token's signature, issuer, audience, timing, and
+In Cloudflare mode, the Worker verifies the Access token's signature, issuer, audience, timing, and
 email. The Access policy and `OWNER_EMAILS` are both required. No login bypass is
 allowed on hosted preview: `LOCAL_PREVIEW` stays the string `false` there.
 
@@ -177,21 +186,25 @@ orders. Never assume a dashboard-only setting survives deployment.
 | `TEST_EMAIL_TO` | One approved test inbox, stored privately in the deployment. All email-test recipients and replies are restricted to this exact address. |
 | `LOCAL_PREVIEW` | `false` for every hosted environment. |
 | `PUBLIC_STORE_URL` | Final HTTPS origin, with no path, credentials, query, or fragment. |
-| `ACCESS_TEAM_DOMAIN` | Full HTTPS Cloudflare Access team origin. |
-| `ACCESS_AUD` | Audience for the single protected owner application. |
-| `OWNER_EMAILS` | Comma-separated exact owner-login email allowlist. |
+| `OWNER_AUTH_MODE` | `email` for the current Resend-code login, or `cloudflare` for Access. |
+| `OWNER_AUTH_SECRET` | Private independent random secret, at least 32 characters, for email codes and sessions. |
+| `ACCESS_TEAM_DOMAIN` | Full HTTPS Cloudflare Access team origin; required only in Cloudflare mode. |
+| `ACCESS_AUD` | Audience for the protected application; required only in Cloudflare mode. |
+| `OWNER_EMAILS` | Private comma-separated exact owner-login email allowlist, stored as a Worker secret. |
 | `EMAIL_FROM` | Sender address on the verified domain, optionally `Los Niños <sender@your-domain>`. |
 | `LAUNCH_CONFIRMED` | `true` only after the relevant launch checks and owner confirmation. |
 | `RESEND_API_KEY` | Secret for sending and retrieving email delivery status. |
 | `ORDER_TOKEN_SECRET` | Secret containing at least 32 strong random characters; use a password generator. |
 
-Store the two secrets through Cloudflare's secret interface or interactive
+Store secrets through Cloudflare's secret interface or interactive
 commands, never by putting their values in shell commands, source, HTML, a public
 Page, or a commit:
 
 ```sh
 npx wrangler@4 secret put RESEND_API_KEY
 npx wrangler@4 secret put ORDER_TOKEN_SECRET
+npx wrangler@4 secret put OWNER_EMAILS
+npx wrangler@4 secret put OWNER_AUTH_SECRET
 ```
 
 Keep the order-token secret stable and backed up privately. Replacing it can stop
@@ -237,7 +250,7 @@ ordering remains a separate launch step.
 
 ### Live launch verification
 
-Local preview does not validate production email or Access. Use a separate
+Local preview does not validate production email or owner authentication. Use a separate
 staging Worker/database and owner-only hostname for hosted checks, with the same
 configuration model. To exercise real sends, obtain the owner's authorization
 for the recipients and test details before setting that isolated deployment to
@@ -254,9 +267,10 @@ Before opening the production shop, record the results of these checks:
   address, uses stored prices, and shows the correct total and reference.
 - A limited-stock test using a separate test database, plus cancellation releasing
   unpaid reservations and shipping reducing stock only once.
-- Actual payment-instruction, owner, payment-confirmation, and tracking emails.
+- Actual payment-instruction, owner, payment-confirmation, and dispatch emails.
   Inspect Gmail, Apple Mail, and Outlook on the intended devices, including
-  narrow screens, bank details, totals, replies, and tracking links. HTML previews
+  narrow screens, bank details, totals, and replies. Tracking numbers and tracking
+  links must be absent; the owner sends tracking separately by text. HTML previews
   and provider acceptance are insufficient evidence of inbox delivery/rendering.
 - Payment is marked paid only after the receiving-bank match; shipped is marked
   only after dispatch. The customer promise is 1–3 business days after payment

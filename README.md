@@ -3,7 +3,7 @@
 Storefront with the stitched opening, photography, interactive hat views, and an
 optional bank-transfer checkout. The checkout saves orders, collects Australian
 delivery details, and queues payment instructions. A private owner dashboard
-supports manual payment confirmation, dispatch with tracking, and unpaid-order
+supports manual payment confirmation, dispatch confirmation, and unpaid-order
 cancellation.
 
 The repository defaults to preview mode. Live ordering needs owner-controlled

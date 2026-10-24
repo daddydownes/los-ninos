@@ -32,7 +32,7 @@ async function call(env, path, method = 'GET', body, headers = {}, host = origin
 }
 
 function checkout(key = crypto.randomUUID(), updates = {}) {
-  return { idempotencyKey: key, quantity: 1, customer: { name: 'Sample Buyer', email: 'buyer@example.test', phone: '' },
+  return { idempotencyKey: key, quantity: 1, customer: { name: 'Sample Buyer', email: 'buyer@example.test', phone: '0400000000' },
     shippingAddress: { line1: '10 Test Street', line2: '', suburb: 'Melbourne', state: 'VIC', postcode: '3000', country: 'AU' }, ...updates };
 }
 
@@ -41,6 +41,16 @@ async function configure(env, values = {}) {
   assert.equal(result.status, 200, JSON.stringify(result.data));
   return result.data.settings;
 }
+
+test('new checkout requires a usable mobile number for manually texted tracking', async t => {
+  const env = await setup(t);
+  for (const phone of ['', '--- --- ---', '1234567', '+61<script>', '+1234567890123456']) {
+    const body = checkout(); body.customer.phone = phone;
+    assert.equal((await call(env, '/api/orders', 'POST', body)).status, 400, phone);
+  }
+  const body = checkout(); body.customer.phone = '+61 400 000 000';
+  assert.equal((await call(env, '/api/orders', 'POST', body)).status, 201);
+});
 
 async function live(env) {
   await configure(env);
@@ -325,10 +335,11 @@ test('manual cancellation releases stock exactly once and shipped orders deduct 
   const paid = await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'paid' });
   assert.equal(paid.status, 200, JSON.stringify(paid.data));
   assert.equal((await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'cancelled' })).status, 409);
-  assert.equal((await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'shipped' })).status, 400);
+  assert.equal((await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'shipped', trackingNumber: 'https://invalid.test/' })).status, 400);
   assert.equal((await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'shipped', trackingNumber: '12345678', expectedUpdatedAt: current.updatedAt })).status, 409);
-  const shipped = await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'shipped', trackingNumber: '12345678', expectedUpdatedAt: paid.data.order.updatedAt });
+  const shipped = await call(env, `/api/admin/orders/${current.id}/status`, 'POST', { status: 'shipped', expectedUpdatedAt: paid.data.order.updatedAt });
   assert.equal(shipped.status, 200, JSON.stringify(shipped.data));
+  assert.equal(shipped.data.order.trackingNumber, '');
   const stock = await env.DB.prepare("SELECT * FROM inventory WHERE mode='preview'").first();
   assert.equal(stock.stock_on_hand, 9); assert.equal(stock.reserved, 0);
 });

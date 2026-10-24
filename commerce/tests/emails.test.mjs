@@ -63,7 +63,7 @@ test('all four email kinds have complete HTML and plain text and truthful state-
   const owner = renderEmail('owner_order', order(), config);
   assert.match(owner.text, /Check the receiving bank account/);
   assert.match(owner.text, /alex@example\.test/);
-  assert.match(owner.html, /href="https:\/\/store\.example\.test\/admin\/"/);
+  assert.match(owner.html, /href="https:\/\/store\.example\.test\/admin"/);
 });
 
 test('preview removes real bank data, amounts and tracking links in every variant', () => {
@@ -85,14 +85,15 @@ test('preview removes real bank data, amounts and tracking links in every varian
   assert.doesNotThrow(() => renderEmail('awaiting_payment', order({ preview: true, unitPriceCents: null, shippingCents: null, totalCents: null, bank: {} })));
 });
 
-test('only a fixed Australia Post origin can be used for a tracking link', () => {
-  const tracking = 'https://evil.example/track?x="&a=<script>#fragment';
-  const result = renderEmail('shipped', order({ status: 'shipped', trackingNumber: tracking, trackingUrl: 'javascript:alert(1)' }), config);
-  const expected = `https://auspost.com.au/mypost/track/details/${encodeURIComponent(tracking)}`;
-  assert.ok(result.text.includes(expected));
-  assert.ok(result.html.includes(`href="${expected}"`));
-  assert.doesNotMatch(result.html, /href="(?:javascript:|https:\/\/evil)/);
-  assert.doesNotMatch(result.html, /<script>/);
+test('emails omit tracking values, links and promises even for older orders with saved tracking', () => {
+  for (const kind of ['awaiting_payment', 'paid', 'shipped', 'owner_order']) {
+    const status = kind === 'paid' || kind === 'shipped' ? kind : 'awaiting_payment';
+    const result = renderEmail(kind, order({ status, trackingNumber: 'SAVED-TRACKING-123', trackingUrl: 'https://evil.example/track' }), config);
+    for (const value of Object.values(result)) assert.doesNotMatch(value, /tracking|auspost\.com|evil\.example/i);
+  }
+  const dispatched = renderEmail('shipped', order({ status: 'shipped', trackingNumber: '' }), config);
+  assert.match(dispatched.text, /ORDER DISPATCHED/);
+  assert.match(dispatched.text, /Reply to this email/);
 });
 
 test('owner links reject unsafe URLs and support email cannot inject attributes or headers', () => {
@@ -107,7 +108,7 @@ test('renderer refuses stale payment instructions and premature paid or shipped 
   assert.throws(() => renderEmail('awaiting_payment', order({ status: 'paid' })), /awaiting_payment/);
   assert.throws(() => renderEmail('paid', order()), /owner-confirmed/);
   assert.throws(() => renderEmail('shipped', order({ status: 'paid' })), /shipped order/);
-  assert.throws(() => renderEmail('shipped', order({ status: 'shipped', trackingNumber: '' })), /trackingNumber/);
+  assert.doesNotThrow(() => renderEmail('shipped', order({ status: 'shipped', trackingNumber: '' })));
   assert.doesNotThrow(() => renderEmail('paid', order({ status: 'shipped' })));
 });
 

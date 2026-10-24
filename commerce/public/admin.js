@@ -24,6 +24,7 @@ async function api(path, options = {}) {
       throw new Error(controller.signal.aborted ? 'The connection took too long. Refresh the order to check its latest status before trying again.' : 'We could not connect. Check your connection and try again.');
     }
     if (!response.ok || !isJson) {
+      if (response.status === 401 || response.status === 403) $('#owner-signin').hidden = false;
       const message = response.status === 401 || response.status === 403
         ? 'Your owner session has expired or you do not have access. Sign in with the approved owner email and try again.'
         : !isJson ? 'The order dashboard is not connected here. Open the configured owner dashboard to manage orders.'
@@ -220,22 +221,21 @@ function showAction(status) {
     : { paid: 'Has the money arrived?', shipped: 'Ready to send?', cancelled: 'Cancel this order?' };
   form.append(element('h4', '', titles[status]));
   if (status === 'paid') form.append(element('p', '', order.preview ? `This simulates confirming a payment. Do not make a bank transfer. ${order.testDelivery ? 'A payment-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : `Check your bank account for ${money(order.totalCents)} with reference ${order.reference}. A customer screenshot alone does not confirm payment.`));
-  if (status === 'shipped') { form.append(element('p', '', order.preview ? `Use a test tracking number to try the shipping step. No parcel is sent. ${order.testDelivery ? 'A shipping-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : 'The customer will receive a shipping confirmation with this tracking number.')); const tracking = field(order.preview ? 'Test tracking number' : 'Tracking number', 'trackingNumber'); tracking.input.required = true; tracking.input.maxLength = 100; form.append(tracking.wrap); }
+  if (status === 'shipped') form.append(element('p', '', order.preview ? `No parcel is sent. ${order.testDelivery ? 'A dispatch-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : 'The customer will receive a dispatch confirmation. Send their tracking number separately by text.'));
   if (status === 'cancelled') form.append(element('p', '', order.preview ? 'This cancels the test order and releases its reserved preview stock. No customer email will be sent.' : 'This cancels the unpaid order and releases its reserved stock. Check the bank account first in case a transfer has arrived.'));
   const note = field(status === 'cancelled' ? 'Reason or note' : 'Internal note (optional)', 'note', 'textarea'); note.input.maxLength = 2000; if (status === 'cancelled') note.input.required = true; form.append(note.wrap);
   const confirmed = checkbox(order.preview ? order.testDelivery && status !== 'cancelled' ? 'I understand this is a simulation and an email will go to the test inbox.' : 'I understand this is a test and no customer email will be sent.' : status === 'paid' ? 'I have checked the bank account and the full payment has arrived.' : status === 'shipped' ? 'I have handed this parcel over for delivery.' : 'I have checked this order and want to cancel it.', 'confirmed'); form.append(confirmed.wrap);
-  const submitLabel = order.preview ? (status === 'paid' ? 'Confirm test payment' : status === 'shipped' ? 'Confirm test shipment' : 'Cancel test order') : (status === 'paid' ? 'Mark paid & send confirmation' : status === 'shipped' ? 'Mark shipped & email tracking' : 'Confirm cancellation');
+  const submitLabel = order.preview ? (status === 'paid' ? 'Confirm test payment' : status === 'shipped' ? 'Confirm test shipment' : 'Cancel test order') : (status === 'paid' ? 'Mark paid & send confirmation' : status === 'shipped' ? 'Mark shipped & send confirmation' : 'Confirm cancellation');
   const buttons = element('div', 'admin-action-buttons'); const submit = element('button', 'button button-small', submitLabel); submit.type = 'submit'; buttons.append(submit, button('Back', () => { slot.replaceChildren(); $('#order-detail').focus({ preventScroll: true }); })); form.append(buttons);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (state.busy || !form.reportValidity()) return;
     state.busy = true; [...form.elements].forEach((node) => { node.disabled = true; }); notice('');
     const body = { status, note: note.input.value.trim(), expectedUpdatedAt: order.updatedAt };
-    if (status === 'shipped') body.trackingNumber = $('[name="trackingNumber"]', form).value.trim();
     try {
       const result = await api(`/api/admin/orders/${encodeURIComponent(order.id)}/status`, { method: 'POST', body });
       state.order = result.order; renderOrderDetail(); await loadOrders({ quiet: true });
-      notice(order.preview ? order.testDelivery && status !== 'cancelled' ? 'Test order updated. Its confirmation email has been queued for the test inbox.' : 'Preview order updated. No email sent.' : status === 'cancelled' ? 'Order cancelled. Reserved stock has been released.' : status === 'paid' ? 'Payment confirmed. The customer confirmation has been queued.' : 'Order marked as shipped. The tracking email has been queued.');
+      notice(order.preview ? order.testDelivery && status !== 'cancelled' ? 'Test order updated. Its confirmation email has been queued for the test inbox.' : 'Preview order updated. No email sent.' : status === 'cancelled' ? 'Order cancelled. Reserved stock has been released.' : status === 'paid' ? 'Payment confirmed. The customer confirmation has been queued.' : 'Order marked as shipped. The dispatch confirmation has been queued.');
       $('#order-detail').focus({ preventScroll: true });
     } catch (error) { notice(error.message, true); [...form.elements].forEach((node) => { node.disabled = false; }); }
     finally { state.busy = false; }
@@ -295,7 +295,7 @@ async function loadSettings() {
   $('#settings-form').hidden = true;
   $('#settings-setup').hidden = true;
   notice('Loading current store settings…');
-  try { const result = await api('/api/admin/settings'); populateSettings(result.settings); showMissingSetup(result.missingSetup); showTestCheckout(result.testCheckout); notice(''); }
+  try { const result = await api('/api/admin/settings'); populateSettings(result.settings); showMissingSetup(result.missingSetup); showTestCheckout(result.testCheckout); $('#owner-signout').hidden = result.ownerAuthMode !== 'email'; notice(''); }
   catch (error) { notice(error.message, true); }
   finally { state.busy = false; }
 }
@@ -327,6 +327,12 @@ $('#settings-form').addEventListener('submit', async (event) => {
 });
 
 $('#orders-tab').addEventListener('click', () => switchView('orders'));
+$('#owner-signout').addEventListener('click', async () => {
+  if (state.busy) return;
+  state.busy = true; $('#owner-signout').disabled = true;
+  try { await api('/api/owner-auth/logout', { method: 'POST', body: {} }); location.replace('/owner-login'); }
+  catch (error) { notice(error.message, true); state.busy = false; $('#owner-signout').disabled = false; }
+});
 $('#settings-tab').addEventListener('click', () => switchView('settings'));
 $('#test-purchase').addEventListener('click', () => { if (!state.busy && state.testCheckout?.enabled) location.assign('/checkout.html?test=1'); });
 $('#refresh-orders').addEventListener('click', () => { if (!state.busy) loadOrders(); });
@@ -340,7 +346,7 @@ api('/api/catalog').then((catalog) => {
     $('span', preview).textContent = 'Live checkout is not enabled. Public preview orders do not send emails. Use Test purchase for the private email test.';
   }
 }).catch(() => {});
-api('/api/admin/settings').then(result => showTestCheckout(result.testCheckout)).catch(() => {
+api('/api/admin/settings').then(result => { showTestCheckout(result.testCheckout); $('#owner-signout').hidden = result.ownerAuthMode !== 'email'; }).catch(() => {
   $('#test-purchase-help').textContent = 'Test setup could not be checked. Open Store settings to try again.';
 });
 loadOrders();

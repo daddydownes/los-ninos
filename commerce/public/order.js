@@ -79,13 +79,13 @@ function render(order) {
     text($('order-intro'), preview ? 'Test payment marked as confirmed. No real payment has been taken.' : 'Thank you—we’ve confirmed your payment. Your hat is getting ready to go.');
     text($('state-eyebrow'), 'Next up · dispatch');
     text($('state-heading'), 'We’re getting it ready.');
-    text($('state-description'), preview ? 'In the live shop, the owner packs the hat and adds tracking when it is dispatched.' : 'We dispatch within 1–3 business days after payment is confirmed. We’ll email you again when your order has been shipped.');
+    text($('state-description'), preview ? 'In the live shop, the owner packs the hat and confirms when it is dispatched.' : 'We dispatch within 1–3 business days after payment is confirmed. We’ll email you again when your order has been shipped.');
   } else if (order.status === 'shipped') {
     text($('order-title'), 'On its way.');
     text($('order-intro'), preview ? 'This test order has been marked as shipped. No parcel has been sent.' : 'Your hat has been dispatched. Thanks for being part of Los Niños.');
     text($('state-eyebrow'), 'Order dispatched');
     text($('state-heading'), 'Keep an eye out.');
-    text($('state-description'), preview ? 'The customer will see the tracking number here and in their dispatch email.' : 'Your shipping email includes your dispatch details. You can also find your tracking number below.');
+    text($('state-description'), preview ? 'The customer receives a dispatch confirmation after the owner sends the parcel.' : 'Your order has been sent. Reply to your confirmation email if you need help.');
     if (order.trackingNumber) {
       $('tracking-details').hidden = false;
       text($('tracking-number'), order.trackingNumber);

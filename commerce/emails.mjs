@@ -32,7 +32,7 @@ function ownerDashboardUrl(publicUrl) {
   try {
     const url = new URL(publicUrl);
     if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) return null;
-    return new URL('/admin/', url).href;
+    return new URL('/admin', url).href;
   } catch { return null; }
 }
 
@@ -77,13 +77,7 @@ function viewOrder(kind, order) {
   const customer = { name: scalar(order.customer?.name), email: scalar(order.customer?.email), phone: scalar(order.customer?.phone) };
   const address = order.shippingAddress ?? {};
   const addressLines = [customer.name, scalar(address.line1), scalar(address.line2), [scalar(address.suburb), scalar(address.state), scalar(address.postcode)].filter(Boolean).join(' '), address.country === 'AU' ? 'Australia' : scalar(address.country)].filter(Boolean);
-  const trackingNumber = kind === 'shipped'
-    ? preview && !testDelivery ? '[TRACKING NUMBER]' : requiredText(order.trackingNumber, 'order.trackingNumber')
-    : '';
-  // Never accept a tracking URL from an order. Only the number is interpolated,
-  // encoded as a single path component on the fixed Australia Post origin.
-  const trackingUrl = kind === 'shipped' && (!preview || testDelivery) ? `https://auspost.com.au/mypost/track/details/${encodeURIComponent(trackingNumber)}` : null;
-  return { preview, testDelivery, reference, quantity, productName, unitPrice, itemTotal, shipping, total, bank, customer, addressLines, trackingNumber, trackingUrl };
+  return { preview, testDelivery, reference, quantity, productName, unitPrice, itemTotal, shipping, total, bank, customer, addressLines };
 }
 
 function wording(kind, view) {
@@ -97,7 +91,7 @@ function wording(kind, view) {
     introduction = {
       awaiting_payment: 'This preview shows the bank transfer instructions a customer will receive after placing an order.',
       paid: 'This preview shows the confirmation a customer will receive after the owner checks that payment has arrived.',
-      shipped: 'This preview shows the dispatch email a customer will receive after the owner records shipment and tracking.',
+      shipped: 'This preview shows the dispatch email a customer will receive after the owner records shipment.',
       owner_order: 'This preview shows the notification the owner will receive when a customer places an order.'
     }[kind];
     next = 'No payment is required. This preview does not confirm a payment or a shipment.';
@@ -106,13 +100,13 @@ function wording(kind, view) {
     next = 'We’ll check our bank account and email you when your payment is confirmed. Your order will be dispatched within 1–3 business days after payment is confirmed.';
   } else if (kind === 'paid') {
     introduction = `${greeting} We’ve checked our bank account and confirmed your payment. No further payment is needed for this order.`;
-    next = 'We’ll dispatch your order within 1–3 business days after this payment confirmation and email you the tracking details when it ships.';
+    next = 'We’ll dispatch your order within 1–3 business days after this payment confirmation and email you when it ships.';
   } else if (kind === 'shipped') {
-    introduction = 'Your Los Niños order has been dispatched with Australia Post. Use the tracking details below to follow its delivery.';
-    next = 'Australia Post provides delivery updates through its tracking page. Reply to this email if you need help with your order.';
+    introduction = 'Your Los Niños order has been dispatched with Australia Post. Thanks for supporting Los Niños.';
+    next = 'Reply to this email if you need help with your order.';
   } else {
     introduction = 'A customer has placed an order and has been given bank transfer instructions. Payment is still awaiting confirmation.';
-    next = 'Check the receiving bank account and match the amount and payment reference before marking the order paid. After confirming payment, dispatch within 1–3 business days and add Australia Post tracking in the dashboard.';
+    next = 'Check the receiving bank account and match the amount and payment reference before marking the order paid. After confirming payment, dispatch within 1–3 business days and mark the order shipped in the dashboard.';
   }
   const subject = `${view.testDelivery ? '[TEST] ' : view.preview ? 'PREVIEW — no payment required — ' : ''}Los Niños ${view.reference} — ${subjects[kind]}`.replace(/[\r\n]/g, ' ').slice(0, 240);
   return { title: titles[kind], state: states[kind], subject, introduction, next };
@@ -132,11 +126,10 @@ function button(url, label, light = false) {
 
 function paymentPanel(kind, view) {
   let rows = '', bottom = '';
-  let label = kind === 'paid' ? 'Payment received' : kind === 'shipped' ? 'Australia Post tracking' : kind === 'owner_order' ? 'Order to reconcile' : 'Bank transfer details';
+  let label = kind === 'paid' ? 'Payment received' : kind === 'shipped' ? 'Order dispatched' : kind === 'owner_order' ? 'Order to reconcile' : 'Bank transfer details';
   if (view.preview) label = `Sample ${label.toLowerCase()}`;
   if (kind === 'shipped') {
-    rows = panelRow('Tracking number', view.trackingNumber, { mono: true });
-    if (view.trackingUrl) bottom = button(view.trackingUrl, 'Track with Australia Post', true);
+    rows = panelRow('Order reference', view.reference, { large: true });
   } else {
     rows = panelRow(kind === 'paid' ? 'Amount received' : kind === 'owner_order' ? 'Order total' : 'Amount to transfer', view.total, { large: true });
     if (kind === 'awaiting_payment') {
@@ -199,8 +192,7 @@ function textEmail(kind, view, copy, config) {
   } else if (kind === 'paid') {
     lines.push(view.preview ? 'SAMPLE PAYMENT RECEIVED' : 'PAYMENT RECEIVED', `Amount received: ${view.total}`, `Payment reference: ${view.reference}`);
   } else if (kind === 'shipped') {
-    lines.push(view.preview ? 'SAMPLE AUSTRALIA POST TRACKING' : 'AUSTRALIA POST TRACKING', `Tracking number: ${view.trackingNumber}`);
-    if (view.trackingUrl) lines.push(`Track with Australia Post: ${view.trackingUrl}`);
+    lines.push(view.preview ? 'SAMPLE DISPATCH CONFIRMATION' : 'ORDER DISPATCHED', `Order reference: ${view.reference}`);
   } else {
     lines.push('ORDER TO RECONCILE', `Order total: ${view.total}`, `Payment reference: ${view.reference}`);
   }

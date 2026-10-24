@@ -1,5 +1,6 @@
 import { authorizeAdmin, isLocalPreview } from './auth.mjs';
 import { renderEmail } from './emails.mjs';
+import { ownerAuthAction, ownerEmailAuthReady, cleanupOwnerAuth } from './email-auth.mjs';
 
 const PRODUCT = { id: 'navy-snapback', name: 'Navy snapback' };
 const STATES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'NT', 'ACT']);
@@ -142,7 +143,9 @@ export function missingSetup(config, env) {
       !/^\d{6}$/.test((config.bank.bsb || '').replace(/[- ]/g, '')) || !/^\d{5,12}$/.test(config.bank.accountNumber || '')) missing.push('Confirm the account name, BSB and account number');
   if (!validAddressEmail(config.ownerEmail)) missing.push('Set the owner notification email');
   if (!validAddressEmail(config.supportEmail)) missing.push('Set the customer reply email');
-  if (!/^https:\/\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.cloudflareaccess\.com$/.test(env.ACCESS_TEAM_DOMAIN || '') || !env.ACCESS_AUD || !env.OWNER_EMAILS) missing.push('Configure protected owner login');
+  const ownerReady = env.OWNER_AUTH_MODE === 'email' ? ownerEmailAuthReady(env)
+    : (!env.OWNER_AUTH_MODE || env.OWNER_AUTH_MODE === 'cloudflare') && /^https:\/\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.cloudflareaccess\.com$/.test(env.ACCESS_TEAM_DOMAIN || '') && env.ACCESS_AUD && env.OWNER_EMAILS;
+  if (!ownerReady) missing.push('Configure protected owner login');
   if (!env.RESEND_API_KEY || !env.EMAIL_FROM || /@resend\.dev\b/i.test(env.EMAIL_FROM)) missing.push('Verify the sending domain and configure email delivery');
   if (!validPublicURL(env.PUBLIC_STORE_URL)) missing.push('Set the public shop domain');
   if (typeof env.ORDER_TOKEN_SECRET !== 'string' || env.ORDER_TOKEN_SECRET.length < 32) missing.push('Set the private order token secret');
@@ -205,8 +208,8 @@ function validateCheckout(body, config) {
   const quantity = integer(body.quantity, 'Quantity', 1, 10);
   const catalogRevision = integer(body.catalogRevision, 'Current shop details', 1, Number.MAX_SAFE_INTEGER);
   const customer = { name: text(body.customer?.name, 'Name', { min: 2, max: 120 }), email: email(body.customer?.email),
-    phone: text(body.customer?.phone ?? '', 'Phone', { max: 30 }) };
-  if (customer.phone && !/^[+\d ()-]{6,30}$/.test(customer.phone)) fail(400, 'Please check the phone number.', 'invalid_input');
+    phone: text(body.customer?.phone ?? '', 'Mobile number', { min: 8, max: 30 }) };
+  if (!/^\+?[\d ()-]+$/.test(customer.phone) || !/^\d{8,15}$/.test(customer.phone.replace(/\D/g, ''))) fail(400, 'Please enter a valid mobile number for delivery updates.', 'invalid_input');
   const input = body.shippingAddress || {};
   const shippingAddress = { line1: text(input.line1, 'Street address', { min: 3, max: 160 }),
     line2: text(input.line2 ?? '', 'Address line two', { max: 160 }),
@@ -364,7 +367,7 @@ async function setOrderStatus(request, env, ctx, id, actor) {
   const allowed = row.status === 'awaiting_payment' ? ['paid', 'cancelled'] : row.status === 'paid' ? ['shipped'] : [];
   if (!allowed.includes(body.status)) fail(409, 'That status change is not available. Paid cancellations and refunds need to be handled directly with the customer.', 'invalid_transition');
   const note = text(body.note ?? '', 'Note', { max: 1000 });
-  const trackingNumber = body.status === 'shipped' ? text(body.trackingNumber || '', 'Tracking number', { min: 6, max: 60 }) : row.tracking_number;
+  const trackingNumber = body.status === 'shipped' ? text(body.trackingNumber || '', 'Tracking number', { max: 60 }) : row.tracking_number;
   if (trackingNumber && !/^[a-zA-Z0-9 -]+$/.test(trackingNumber)) fail(400, 'Please enter the tracking number only.', 'invalid_input');
   const updatedAt = new Date(Math.max(Date.now(), Date.parse(row.updated_at) + 1)).toISOString();
   const mutationId = crypto.randomUUID();
@@ -560,7 +563,7 @@ export async function processOutbox(env) {
     if (!claim.meta.changes) continue;
     let result;
     try {
-      result = await sendFetch('https://api.resend.com/emails', { method: 'POST', signal: AbortSignal.timeout(15000),
+      result = await sendFetch('https://api.resend.com/emails', { method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(15000),
         headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': `los-ninos/${entry.id}` },
         body: entry.payload });
       if (result.ok) {
@@ -598,7 +601,7 @@ async function updateDeliveryStatus(env) {
   for (const row of rows.results) {
     try {
       const result = await sendFetch(`https://api.resend.com/emails/${encodeURIComponent(row.provider_id)}`, {
-        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` }, signal: AbortSignal.timeout(10000) });
+        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` }, redirect: 'manual', signal: AbortSignal.timeout(10000) });
       if (!result.ok) continue;
       const data = await result.json();
       const mapped = ({ delivered: 'delivered', bounced: 'bounced', complained: 'complained', failed: 'failed' })[data.last_event] || 'sent';
@@ -615,8 +618,20 @@ async function fetchHandler(request, env, ctx) {
   path = new URL(url.origin + path.replace(/\/{2,}/g, '/')).pathname;
   const isAdmin = path === '/admin' || path === '/admin.html' || path.startsWith('/admin/') || path === '/api/admin' || path.startsWith('/api/admin/');
   if (!env.DB && (path.startsWith('/api/') || isAdmin)) fail(503, 'Shop setup is not complete yet.', 'setup_incomplete');
+  if (path.startsWith('/api/owner-auth/')) {
+    requireSameOrigin(request);
+    return ownerAuthAction(path.slice('/api/owner-auth/'.length), request, env, await readJSON(request), ctx);
+  }
   let actor;
-  if (isAdmin) actor = await authorizeAdmin(request, env);
+  if (isAdmin) {
+    try { actor = await authorizeAdmin(request, env); }
+    catch (error) {
+      if (env.OWNER_AUTH_MODE === 'email' && ['GET','HEAD'].includes(request.method) && !path.startsWith('/api/') && validPublicURL(env.PUBLIC_STORE_URL)) {
+        return new Response(null, { status: 303, headers: { Location: `${env.PUBLIC_STORE_URL.replace(/\/$/, '')}/owner-login`, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' } });
+      }
+      throw error;
+    }
+  }
   if (path.startsWith('/api/') && !['GET', 'HEAD'].includes(request.method)) requireSameOrigin(request);
   if (path.startsWith('/api/admin/') && request.method !== 'GET') await limited(env, `admin:${actor.email}`, 60);
   if (path === '/api/catalog' && request.method === 'GET') return catalog(request, env);
@@ -626,7 +641,7 @@ async function fetchHandler(request, env, ctx) {
   if (path === '/api/admin/orders' && request.method === 'GET') return adminOrders(request, env);
   if (path === '/api/admin/test-checkout' && request.method === 'GET') return testCheckoutCatalog(request, env);
   if (path === '/api/admin/test-orders' && request.method === 'POST') return placeOrder(request, env, ctx, true);
-  if (path === '/api/admin/settings' && request.method === 'GET') { const config = await settings(env); return response({ settings: config, missingSetup: missingSetup(config, env), testCheckout: testCheckoutSetup(config, env) }); }
+  if (path === '/api/admin/settings' && request.method === 'GET') { const config = await settings(env); return response({ settings: config, ownerAuthMode: env.OWNER_AUTH_MODE || 'cloudflare', missingSetup: missingSetup(config, env), testCheckout: testCheckoutSetup(config, env) }); }
   if (path === '/api/admin/settings' && request.method === 'PUT') return updateSettings(request, env, actor);
   if (path === '/api/admin/export' && request.method === 'GET') return exportOrders(env);
   match = path.match(/^\/api\/admin\/orders\/([a-f0-9-]{36})(?:\/(status|resend))?$/);
@@ -641,7 +656,7 @@ async function fetchHandler(request, env, ctx) {
   if (path.startsWith('/api/')) fail(404, 'This page was not found.', 'not_found');
   if (!env.ASSETS) fail(404, 'This page was not found.', 'not_found');
   const asset = await env.ASSETS.fetch(request);
-  if (!isAdmin) return asset;
+  if (!isAdmin && path !== '/owner-login' && path !== '/owner-login.html') return asset;
   const headers = new Headers(asset.headers);
   headers.set('Cache-Control', 'no-store'); headers.set('X-Content-Type-Options', 'nosniff'); headers.set('Referrer-Policy', 'no-referrer');
   headers.set('X-Frame-Options', 'DENY');
@@ -659,7 +674,7 @@ export default {
     }
   },
   async scheduled(_event, env, ctx) {
-    const task = (async () => { await processOutbox(env); await updateDeliveryStatus(env);
+    const task = (async () => { await processOutbox(env); await updateDeliveryStatus(env); await cleanupOwnerAuth(env);
       await stmt(env, 'DELETE FROM rate_limits WHERE expires_at<?', seconds()).run(); })();
     if (ctx?.waitUntil) ctx.waitUntil(task); else await task;
   },

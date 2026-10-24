@@ -13,14 +13,18 @@ The [setup guide](commerce-setup.md) covers those steps.
 
 ## Sign in
 
-Once hosting is ready, open `/admin.html` on your shop's domain. Cloudflare Access
-asks for your approved owner email address and sends a one-time sign-in code to
-that inbox. Only the exact owner addresses configured for this shop can enter.
+Open `/admin` on your shop's domain. The owner sign-in page asks for your approved
+email address and sends a six-digit code to that inbox. Use the code within ten
+minutes, in the same browser that requested it. Only the exact owner addresses
+configured for this shop can enter. Customers do not need a login.
 Changing the notification address in Store settings does not grant dashboard
 access to another person.
 
-Bookmark the dashboard on your own device. If access expires, reload the page
-and sign in again. Keep your owner email account and its recovery methods secure.
+Bookmark the dashboard on your own device. Sign out on shared devices. Sessions
+expire after eight hours or thirty minutes without activity; reload or choose
+**Sign in again** if needed. Check spam if a code does not arrive. Requests are
+limited to three per fifteen minutes and ten per day per owner; repeatedly
+requesting codes does not speed up delivery. Keep your email account and its recovery methods secure.
 The local preview intentionally has no sign-in and must stay on your computer.
 
 ## When an order comes in
@@ -38,9 +42,11 @@ The local preview intentionally has no sign-in and must stay on your computer.
    **Mark paid & send confirmation**. The order becomes **Paid — ready to pack**
    and its payment-confirmation email is queued.
 5. Pack and dispatch within **1–3 business days after payment is confirmed**.
-   After handing the parcel over, choose **Mark as shipped**, enter its Australia
-   Post tracking number, then **Mark shipped & email tracking**. The order becomes
-   **Shipped** and a dispatch email is queued.
+   After handing the parcel over, choose **Mark as shipped**, then **Mark shipped
+   & send confirmation**. The order becomes **Shipped** and a dispatch email is
+   queued. Send the tracking number to the customer separately by text; email
+   confirmations do not include tracking numbers or tracking links. The website
+   does not send text messages automatically.
 
 The first email confirms receipt of the order. The second confirms receipt of
 money. Marking an order shipped is your record of dispatch; the shop does not

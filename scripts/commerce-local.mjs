@@ -27,6 +27,7 @@ const env = {
       try { pathname = decodeURIComponent(new URL(request.url).pathname); } catch { return new Response('Bad request', { status: 400 }); }
       if (pathname === '/') pathname = '/index.html';
       if (pathname === '/admin') pathname = '/admin.html';
+      if (pathname === '/owner-login') pathname = '/owner-login.html';
       if (pathname === '/checkout') pathname = '/checkout.html';
       if (pathname === '/order') pathname = '/order.html';
       const path = resolve(assets, `.${pathname}`);
