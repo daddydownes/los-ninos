@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080f19">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="same-origin">
+  <title>Checkout — Los Niños</title>
+  <link rel="icon" href="/assets/brand-icon.svg">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="commerce.css">
+  <script type="module" src="checkout.js?v=8"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to checkout</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Los Niños home"><span>LOS</span><span>NIÑOS</span></a>
+    <a class="header-link" href="./"><span class="arrow" aria-hidden="true">←</span> Back to the collection</a>
+  </header>
+  <main class="checkout-wrap" id="main">
+    <div class="notice preview-banner" id="preview-banner" hidden><span class="preview-label" id="preview-label">Preview</span><p id="preview-copy"><strong>Test details only.</strong> No payment or emails.</p></div>
+    <p id="test-dashboard-link" hidden><a class="header-link" href="admin.html">← Owner dashboard</a></p>
+    <div class="notice notice-error" id="catalog-error" role="alert" hidden></div>
+    <p id="catalog-retry-wrap" hidden><button class="button button-secondary" id="catalog-retry" type="button">Retry checkout</button></p>
+    <div class="checkout-intro"><p class="eyebrow muted">CON SUEÑOS · AUSTRALIA</p><h1>Make it yours.</h1><p id="checkout-intro-copy">Add your delivery details, then review your order.</p></div>
+    <div class="checkout-grid">
+      <form id="checkout-form">
+        <section class="checkout-section" aria-labelledby="contact-heading">
+          <div class="step-heading"><span class="number" aria-hidden="true">01</span><h2 id="contact-heading">Your details</h2></div>
+          <div class="field-grid">
+            <div class="field field-wide"><label for="customer-name">Full name</label><input id="customer-name" name="name" autocomplete="name" minlength="2" maxlength="120" required></div>
+            <div class="field field-wide"><label for="customer-email">Email address</label><input type="email" id="customer-email" name="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="email-help"><small id="email-help">We’ll send your order and payment instructions here.</small></div>
+            <div class="field field-wide"><label for="customer-phone">Mobile number</label><input type="tel" id="customer-phone" name="phone" autocomplete="tel" minlength="8" maxlength="30" required aria-describedby="phone-help"><small id="phone-help">So we can text your tracking number after dispatch.</small></div>
+          </div>
+        </section>
+        <section class="checkout-section" aria-labelledby="address-heading">
+          <div class="step-heading"><span class="number" aria-hidden="true">02</span><h2 id="address-heading">Where should we send it?</h2></div>
+          <div class="field-grid">
+            <div class="field field-wide"><label for="address-line1">Street address</label><input id="address-line1" name="line1" autocomplete="shipping address-line1" minlength="3" maxlength="160" required></div>
+            <div class="field field-wide"><label for="address-line2">Apartment, unit, etc. <span class="optional">Optional</span></label><input id="address-line2" name="line2" autocomplete="shipping address-line2" maxlength="160"></div>
+            <div class="field field-wide"><label for="address-suburb">Suburb or town</label><input id="address-suburb" name="suburb" autocomplete="shipping address-level2" minlength="2" maxlength="100" required></div>
+            <div class="field"><label for="address-state">State or territory</label><select id="address-state" name="state" autocomplete="shipping address-level1" required><option value="">Select state</option><option value="ACT">ACT</option><option value="NSW">NSW</option><option value="NT">NT</option><option value="QLD">QLD</option><option value="SA">SA</option><option value="TAS">TAS</option><option value="VIC">VIC</option><option value="WA">WA</option></select></div>
+            <div class="field"><label for="address-postcode">Postcode</label><input id="address-postcode" name="postcode" autocomplete="shipping postal-code" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" title="Enter a four-digit Australian postcode" required></div>
+            <div class="field field-wide"><label for="address-country">Country</label><input id="address-country" name="country" value="Australia" autocomplete="shipping country-name" readonly></div>
+          </div>
+        </section>
+        <div class="checkout-action">
+          <div class="notice" id="checkout-message" role="status" aria-live="polite"></div>
+          <button class="button button-full" id="review-order" type="submit" disabled>Loading checkout…</button>
+          <p class="checkout-fineprint" id="checkout-fineprint">Payment is made separately by bank transfer. Your order will be awaiting payment until we confirm the funds have arrived.</p>
+        </div>
+      </form>
+      <aside class="order-summary" id="order-summary" aria-labelledby="summary-heading">
+        <p class="eyebrow muted" id="summary-heading" tabindex="-1">Your order</p>
+        <div class="summary-product"><img class="summary-product-image" src="/assets/hat-front-logo-v1.webp" alt="Navy Los Niños snapback with white embroidery" width="224" height="224"><div><h2 id="product-name">Navy snapback</h2><p class="product-caption">Navy · Adjustable fit</p><div class="quantity-field"><label for="quantity">Qty</label><div class="quantity-control"><button type="button" id="quantity-minus" aria-label="Decrease quantity" disabled>−</button><input id="quantity" name="quantity" form="checkout-form" type="number" min="1" max="10" value="1" inputmode="numeric" required aria-label="Hat quantity" disabled><button type="button" id="quantity-plus" aria-label="Increase quantity" disabled>+</button></div></div></div></div>
+        <p id="stock-message" class="stock-message"></p>
+        <dl class="summary-lines"><div class="summary-line"><dt id="subtotal-label">Hat subtotal</dt><dd id="subtotal">To be set</dd></div><div class="summary-line" id="shipping-line" hidden><dt>Shipping · Australia <small class="shipping-basis" id="shipping-basis" hidden>Per order</small></dt><dd id="shipping-cost"></dd></div></dl>
+        <div class="summary-total"><span><span id="total-label">Subtotal</span> <small>AUD</small></span><strong id="total">To be set</strong></div>
+        <p class="summary-shipping-note" id="shipping-review-note">You’ll review your full total before placing your order.</p>
+        <div class="review-actions" id="review-actions" hidden>
+          <p class="summary-review-copy" id="review-confirmation">Review your full total, including shipping.</p>
+          <button class="button button-full" id="submit-order" type="submit" form="checkout-form" disabled>Place order — pay by bank transfer</button>
+          <button class="button button-secondary button-full" id="edit-details" type="button">Edit delivery details</button>
+        </div>
+        <div class="summary-notes"><p><strong><span class="summary-note-number">01</span> Place your order</strong>We’ll save your order and send your bank transfer instructions by email.</p><p><strong><span class="summary-note-number">02</span> Pay by bank transfer</strong>Use your order reference so we can match your payment.</p><p><strong><span class="summary-note-number">03</span> On its way</strong>We dispatch within 1–3 business days after payment is confirmed.</p></div>
+      </aside>
+    </div>
+    <noscript><p class="no-script">Please enable JavaScript to check availability and place your order.</p></noscript>
+  </main>
+  <footer class="site-footer"><p>Los Niños · Con Sueños</p><p>Good things start with a dream.</p></footer>
+</body>
+</html>

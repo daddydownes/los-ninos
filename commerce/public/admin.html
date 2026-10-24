@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="same-origin">
+    <title>Orders · Los Niños</title>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css">
+    <link rel="stylesheet" href="./commerce.css">
+    <link rel="stylesheet" href="./admin.css">
+    <script type="module" src="./admin.js?v=6"></script>
+  </head>
+  <body class="admin-page">
+    <a class="admin-skip" href="#admin-main">Skip to orders</a>
+    <header class="site-header admin-header">
+      <a class="brand" href="/" aria-label="Los Niños home"><span>LOS</span><span>NIÑOS</span></a>
+      <span class="admin-header-label">Owner workspace</span>
+      <a class="admin-store-link" href="/">View store <span aria-hidden="true">↗</span></a>
+      <button class="button button-secondary button-small" id="owner-signout" type="button" hidden>Sign out</button>
+    </header>
+    <main id="admin-main" class="admin-main" tabindex="-1">
+      <a id="owner-signin" class="button button-secondary button-small" href="/owner-login" hidden>Sign in again</a>
+      <div id="preview-notice" class="notice admin-preview" hidden><strong>Local preview</strong><span>These are test orders. No customer emails or payments are sent. This preview has no owner sign-in.</span></div>
+      <div class="admin-title-row">
+        <div><p class="eyebrow">LOS NIÑOS / THE EVERYDAY DETAILS</p><h1>Your orders.</h1><p class="muted">Check the transfer. Pack the hat. Send it on its way.</p></div>
+        <div class="admin-title-actions"><button class="button button-small" id="test-purchase" type="button" aria-describedby="test-purchase-help" disabled>Test purchase</button><p class="admin-test-help" id="test-purchase-help">Checking test email setup…</p><a class="button button-secondary button-small" id="export-orders" href="/api/admin/export" download>Export orders</a></div>
+      </div>
+      <nav class="admin-nav" aria-label="Owner workspace">
+        <button class="admin-nav-button" id="orders-tab" type="button" aria-current="page" aria-controls="orders-view">Orders</button>
+        <button class="admin-nav-button" id="settings-tab" type="button" aria-controls="settings-view">Store settings</button>
+      </nav>
+      <div id="admin-message" class="notice" role="status" aria-live="polite" hidden></div>
+      <section id="orders-view" aria-labelledby="orders-tab">
+        <div class="admin-order-tools">
+          <div class="field admin-search"><label for="order-search">Find an order</label><input id="order-search" type="search" placeholder="Order number, name or email" autocomplete="off"></div>
+          <div class="field"><label for="order-status">Status</label><select id="order-status"><option value="">All orders</option><option value="awaiting_payment">Awaiting payment</option><option value="paid">Paid — ready to pack</option><option value="shipped">Shipped</option><option value="cancelled">Cancelled</option></select></div>
+          <button id="refresh-orders" type="button" class="button button-secondary button-small">Refresh</button>
+        </div>
+        <div class="admin-orders-layout">
+          <section class="admin-order-list-panel" aria-label="Order list" aria-busy="true" id="order-list-region"><div class="admin-list-heading"><h2>Orders <span id="order-count" class="muted"></span></h2><span class="muted">Newest first</span></div><div id="order-list" class="admin-order-list"><p class="admin-empty muted">Loading your orders…</p></div></section>
+          <section id="order-detail" class="admin-detail panel" aria-label="Order details" tabindex="-1"><div class="admin-detail-empty"><span class="eyebrow">A LITTLE ORDER</span><h2>Every hat has a home.</h2><p class="muted">Choose an order to see the delivery address, confirm payment and record dispatch.</p><p class="admin-small muted">Unpaid orders stay here until you decide what to do. No automatic reminders or cancellations.</p></div></section>
+        </div>
+      </section>
+      <section id="settings-view" hidden aria-labelledby="settings-tab">
+        <div class="admin-settings-intro"><h2>Ready when you are.</h2><p class="muted">Set the details customers will see. These settings do not switch on live checkout; launch is enabled separately once setup is complete.</p></div>
+        <div id="settings-setup" class="notice" hidden></div>
+        <form id="settings-form" class="admin-settings-form" hidden>
+          <fieldset class="panel"><legend>01 / The hat &amp; postage</legend><div class="field-grid">
+            <div class="field"><label for="setting-price">Hat price (AUD)</label><input id="setting-price" name="productPrice" type="number" min="0.01" max="10000" step="0.01" placeholder="To be set" inputmode="decimal"><p class="admin-field-help">Leave blank until the price is decided.</p></div>
+            <div class="field"><label for="setting-stock">Total stock on hand</label><input id="setting-stock" name="stockOnHand" type="number" min="0" max="100000" step="1" placeholder="To be counted" inputmode="numeric"><p class="admin-field-help">Include hats reserved for unpaid and paid orders. Leave blank until counted.</p></div>
+            <div class="field"><label for="setting-max">Maximum hats per order</label><input id="setting-max" name="maxQuantity" type="number" min="1" max="10" step="1" required inputmode="numeric"></div>
+            <div class="field"><label for="setting-shipping">Base shipping per order (AUD)</label><input id="setting-shipping" name="shipping" type="number" min="0" max="1000" step="0.01" placeholder="To be confirmed" inputmode="decimal"><p class="admin-field-help">Charged once per order below the quantity tier, or for all orders when no tier is set.</p></div>
+            <div class="field"><label for="setting-shipping-tier-quantity">Shipping tier starts at (hats)</label><input id="setting-shipping-tier-quantity" name="shippingTierFromQuantity" type="number" min="2" max="10" step="1" placeholder="No quantity tier" inputmode="numeric"><p class="admin-field-help">For example, 4 applies the tier charge to orders of four or more hats.</p></div>
+            <div class="field"><label for="setting-shipping-tier-fee">Shipping for that tier (AUD)</label><input id="setting-shipping-tier-fee" name="shippingTier" type="number" min="0" max="1000" step="0.01" placeholder="No quantity tier" inputmode="decimal"><p class="admin-field-help">The full shipping charge for the order, not an extra fee. Leave both tier fields blank for flat shipping.</p></div>
+          </div><label class="admin-checkbox"><input name="shippingConfirmed" id="setting-shipping-confirmed" type="checkbox"><span>I have confirmed these charges cover delivery for the packed size and weight of each order quantity.</span></label></fieldset>
+          <fieldset class="panel"><legend>02 / Bank transfer details</legend><p class="muted admin-small">These details go into customer payment instructions. Check every digit before saving. Existing orders keep the bank details they were given.</p><div class="field"><label for="setting-account-name">Account name</label><input id="setting-account-name" name="accountName" autocomplete="off" placeholder="Exact name on the bank account"></div><div class="field-grid"><div class="field"><label for="setting-bsb">BSB</label><input id="setting-bsb" name="bsb" autocomplete="off" inputmode="numeric" placeholder="To be set" pattern="[0-9]{3}-?[0-9]{3}" title="Enter six digits, with or without a hyphen" aria-describedby="bsb-help"><p id="bsb-help" class="admin-field-help">Six digits. Leading zeroes are preserved.</p></div><div class="field"><label for="setting-account-number">Account number</label><input id="setting-account-number" name="accountNumber" autocomplete="off" inputmode="numeric" placeholder="To be set" pattern="[0-9 ]+" title="Enter the account number using digits"></div></div></fieldset>
+          <fieldset class="panel"><legend>03 / Email &amp; ownership</legend><div class="field-grid"><div class="field"><label for="setting-owner-email">Owner notification email</label><input id="setting-owner-email" name="ownerEmail" type="email" autocomplete="off" placeholder="To be confirmed"><p class="admin-field-help">Receives new-order notifications. Email delivery problems are shown in the dashboard. Dashboard sign-in is configured separately.</p></div><div class="field"><label for="setting-support-email">Customer reply email</label><input id="setting-support-email" name="supportEmail" type="email" autocomplete="off" placeholder="To be confirmed"><p class="admin-field-help">Customers can reply here for help with their order.</p></div></div><p class="admin-small muted">Domain, verified sending email, owner sign-in and account ownership must be completed before launch.</p></fieldset>
+          <div class="admin-settings-save"><p class="admin-small muted">Payment instructions use these settings for new orders only.</p><button id="save-settings" class="button" type="submit">Save settings</button></div>
+        </form>
+      </section>
+    </main>
+    <footer class="site-footer admin-footer"><span>LOS NIÑOS</span><span>Orders dispatch within 1–3 business days after payment is confirmed.</span></footer>
+  </body>
+</html>

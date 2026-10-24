@@ -16,6 +16,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run test:commerce
       - run: npx playwright install --with-deps webkit chromium
       - run: npm test
       - uses: actions/upload-artifact@v4
