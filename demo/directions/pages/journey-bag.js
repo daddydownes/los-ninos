@@ -60,13 +60,13 @@
       <div class="journey-bag-content">
         <div class="journey-bag-empty">
           <p>Your bag<br>is empty.</p>
-          <span class="bag-empty-note">Start with the navy snapback.</span>
+          <span class="bag-empty-note">Start with the OG Snapback.</span>
           <button type="button" class="journey-bag-shop">Explore the snapback ${arrowIcon}</button>
         </div>
         <div class="journey-bag-item" hidden>
-          <img src="${thumbnail}" width="1254" height="1254" decoding="async" alt="Front concept render of the navy Los Niños snapback">
+          <img src="${thumbnail}" width="1254" height="1254" decoding="async" alt="Front concept render of the navy Los Niños OG Snapback">
           <div class="journey-bag-details">
-            <h3>Navy snapback</h3>
+            <h3>OG Snapback</h3>
             <div class="journey-bag-controls">
               <div class="journey-bag-quantity" role="group" aria-label="Hat quantity">
                 <button type="button" class="journey-bag-minus" aria-label="Decrease quantity">−</button>

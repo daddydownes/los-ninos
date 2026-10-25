@@ -115,7 +115,7 @@ function updateSummary() {
 function renderCatalog() {
   const preview = catalog.mode === 'preview';
   const limit = quantityLimit();
-  text($('product-name'), catalog.product.name || 'Navy snapback');
+  text($('product-name'), catalog.product.name || 'OG Snapback');
   quantityInput.max = Math.max(1, limit);
   if (getQuantity() > limit && limit > 0) quantityWasAdjusted = true;
   quantityInput.value = Math.min(Math.max(1, getQuantity()), Math.max(1, limit));

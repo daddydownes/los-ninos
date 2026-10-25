@@ -49,8 +49,8 @@ function renderDetail(){
   const h1=create('h1','',order.name);h1.id='order-title';title.append(h1,create('p','',order.id+' · Sample order'));
   heading.append(title,create('span','status '+order.status,labels[order.status]));panel.append(heading);
   const card=create('div','card'),product=create('div','product'),img=create('img');
-  img.src='/assets/hat-front-logo-v1.webp';img.alt='Los Niños navy snapback';img.width=82;img.height=82;
-  const description=create('div');description.append(create('h2','','Los Niños snapback'),create('p','',order.quantity+' × $30.00'));product.append(img,description);card.append(product);
+  img.src='/assets/hat-front-logo-v1.webp';img.alt='Los Niños OG Snapback';img.width=82;img.height=82;
+  const description=create('div');description.append(create('h2','','Los Niños OG Snapback'),create('p','',order.quantity+' × $30.00'));product.append(img,description);card.append(product);
   const prices=create('dl','price-lines');
   for(const [label,value,cl] of [['Hats',order.total-order.shipping,''],['Shipping',order.shipping,''],['Total',order.total,'total']]){const row=create('div',cl);row.append(create('dt','',label),create('dd','',money(value)));prices.append(row);}card.append(prices);
   const next=create('div','next-step');

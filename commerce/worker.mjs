@@ -2,7 +2,7 @@ import { authorizeAdmin, isLocalPreview } from './auth.mjs';
 import { renderEmail } from './emails.mjs';
 import { ownerAuthAction, ownerEmailAuthReady, cleanupOwnerAuth } from './email-auth.mjs';
 
-const PRODUCT = { id: 'navy-snapback', name: 'Navy snapback' };
+const PRODUCT = { id: 'navy-snapback', name: 'OG Snapback' };
 const STATES = new Set(['NSW', 'VIC', 'QLD', 'SA', 'WA', 'TAS', 'NT', 'ACT']);
 const STATUSES = new Set(['awaiting_payment', 'paid', 'shipped', 'cancelled']);
 const EMAIL_KINDS = new Set(['awaiting_payment', 'paid', 'shipped', 'owner_order']);

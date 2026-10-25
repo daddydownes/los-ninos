@@ -127,7 +127,7 @@ function renderOrderDetail() {
   const summary = section('The order');
   const product = element('div', 'admin-product-line');
   const productDescription = element('div');
-  productDescription.append(element('p', '', order.productName || 'Navy snapback'), element('p', 'muted', `Quantity ${order.quantity} · ${money(order.unitPriceCents)} each`));
+  productDescription.append(element('p', '', order.productName || 'OG Snapback'), element('p', 'muted', `Quantity ${order.quantity} · ${money(order.unitPriceCents)} each`));
   product.append(productDescription); summary.append(product);
   const facts = element('dl', 'admin-facts');
   facts.append(fact('Shipping', order.shippingCents === 0 ? 'Free' : money(order.shippingCents, 'To be determined')), fact('Total (AUD)', money(order.totalCents, typeof order.unitPriceCents === 'number' ? 'Pending shipping' : 'To be set'), true));

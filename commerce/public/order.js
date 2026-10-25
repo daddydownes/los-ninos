@@ -45,7 +45,7 @@ function render(order) {
   text($('order-date'), safeDate(order.createdAt));
   text($('order-status'), preview ? `Test order · ${statusLabel(order.status)}` : statusLabel(order.status));
   $('order-status').className = `pill pill-${['paid', 'shipped', 'cancelled'].includes(order.status) ? order.status : 'awaiting'}`;
-  text($('product-name'), order.productName || 'Navy snapback');
+  text($('product-name'), order.productName || 'OG Snapback');
   text($('product-quantity'), `Navy · Quantity ${order.quantity}`);
   text($('subtotal'), money(typeof order.unitPriceCents === 'number' ? order.unitPriceCents * order.quantity : null));
   text($('shipping-cost'), order.shippingCents === 0 ? 'Free' : money(order.shippingCents, 'To be determined'));
