@@ -139,7 +139,8 @@ function renderCatalog() {
   text(submitButton, submitting ? 'Saving your order…' : deletedCheckout ? 'Test order deleted' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : testCheckout ? 'Place test order & send emails' : preview ? 'Create test order' : 'Place order — pay by bank transfer');
   text(reviewButton, deletedCheckout ? 'Test order deleted' : !accepting ? testCheckout ? 'Test setup is not ready yet' : 'Orders are not open yet' : limit === 0 ? 'Sold out' : 'Review order');
   if (limit === 0) text($('stock-message'), 'This hat is currently sold out.');
-  else text($('stock-message'), quantityWasAdjusted ? `Your quantity was adjusted to ${getQuantity()}. Up to ${limit} ${limit === 1 ? 'hat can' : 'hats can'} currently be ordered.` : `Up to ${limit} ${limit === 1 ? 'hat' : 'hats'} per order.`);
+  else text($('stock-message'), quantityWasAdjusted ? `Your quantity was adjusted to ${getQuantity()} based on availability.` : '');
+  $('stock-message').hidden = !$('stock-message').textContent;
   if (deletedCheckout) announce($('checkout-message'), 'This test order was deleted. Start a fresh checkout to test again.');
   else if (!accepting) announce($('checkout-message'), testCheckout ? `Finish the test setup in the owner dashboard. ${testSetupMissing.join('. ')}` : preview ? 'Preview ordering is not available in this environment yet.' : 'We’re getting the shop ready. Ordering will open once the final details are confirmed.');
   updateSummary();
