@@ -97,7 +97,7 @@ function wording(kind, view) {
     next = 'No payment is required. This preview does not confirm a payment or a shipment.';
   } else if (kind === 'awaiting_payment') {
     introduction = `${greeting} Your Los Niños order is saved. To pay, open your banking app and make a bank transfer to the account below.`;
-    next = 'We’ll check our bank account and email you when your payment is confirmed. Your order will be dispatched within 1–3 business days after payment is confirmed.';
+    next = 'Your order will be dispatched within 1–3 business days after payment is confirmed.';
   } else if (kind === 'paid') {
     introduction = `${greeting} We’ve checked our bank account and confirmed your payment. No further payment is needed for this order.`;
     next = 'We’ll dispatch your order within 1–3 business days after this payment confirmation and email you when it ships.';
