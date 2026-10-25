@@ -303,50 +303,74 @@ test('duplicate submission creates one order, reservation and email pair; change
   assert.equal(changed.status, 409);
 });
 
-test('six-digit payment references retry collisions without extra stock or emails and survive checkout retries', async t => {
-  const env = await setup(t);
-  const values = [382731, 382731, 382732];
-  const random = t.mock.method(crypto, 'getRandomValues', array => { array[0] = values.shift() ?? 382733; return array; });
-  const body = checkout();
-  const first = await call(env, '/api/orders', 'POST', body);
-  const second = await call(env, '/api/orders', 'POST', checkout());
-  assert.equal(first.status, 201); assert.equal(second.status, 201);
-  assert.equal(first.data.order.reference, 'LN-482731');
-  assert.equal(second.data.order.reference, 'LN-482732');
-  const retry = await call(env, '/api/orders', 'POST', body);
+test('sequential references stay unique under concurrent checkout and retries preserve the number', async t => {
+  const env = await live(await setup(t));
+  const bodies = [checkout(), checkout()];
+  const results = await Promise.all(bodies.map(body => call(env, '/api/orders', 'POST', body)));
+  assert.deepEqual(results.map(result => result.status), [201, 201]);
+  assert.deepEqual(results.map(result => result.data.order.reference).sort(), ['001', '002']);
+  const first = results[0];
+  const reference = first.data.order.reference;
+  const retry = await call(env, '/api/orders', 'POST', bodies[0]);
   assert.equal(retry.status, 200);
-  assert.equal(retry.data.order.reference, first.data.order.reference);
+  assert.equal(retry.data.order.reference, reference);
   assert.equal(retry.data.token, first.data.token);
-  assert.equal(random.mock.callCount(), 3);
   assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n, 2);
   assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM order_history').first()).n, 2);
   assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM email_outbox').first()).n, 4);
-  assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 2);
+  assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='live'").first()).reserved, 2);
   const receipt = await call(env, '/api/orders/' + first.data.order.id, 'GET', undefined, {'X-Order-Token':first.data.token});
-  assert.equal(receipt.data.order.reference, 'LN-482731');
+  assert.equal(receipt.data.order.reference, reference);
   const messages = await env.DB.prepare('SELECT payload FROM email_outbox WHERE order_id=?').bind(first.data.order.id).all();
   for (const message of messages.results) {
     const payload = JSON.parse(message.payload);
-    assert.ok(payload.subject.includes('LN-482731'));
-    assert.ok(payload.text.includes('LN-482731'));
-    assert.ok(payload.html.includes('LN-482731'));
+    assert.ok(payload.subject.includes(reference));
+    assert.ok(payload.text.includes(reference));
+    assert.ok(payload.html.includes(reference));
   }
 });
 
-test('exhausted reference retries leave no partial order and do not disguise another database failure', async t => {
+async function seedOrderReference(env, sourceId, reference) {
+  await env.DB.prepare(`INSERT INTO orders(id,reference,status,mode,quantity,created_at,updated_at,idempotency_hash,request_hash,token_hash,snapshot)
+    SELECT ?,?,status,mode,quantity,created_at,updated_at,?,request_hash,token_hash,snapshot FROM orders WHERE id=?`)
+    .bind(crypto.randomUUID(), reference, crypto.randomUUID(), sourceId).run();
+}
+
+test('legacy and test references do not consume live numbers and failed orders do not advance them', async t => {
   const env = await setup(t);
-  t.mock.method(crypto, 'getRandomValues', array => { array[0] = 382731; return array; });
-  assert.equal((await call(env, '/api/orders', 'POST', checkout())).status, 201);
-  const second = await call(env, '/api/orders', 'POST', checkout());
-  assert.equal(second.status, 503);
-  assert.equal(second.data.code, 'reference_unavailable');
-  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n, 1);
-  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM order_history').first()).n, 1);
-  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM email_outbox').first()).n, 2);
-  assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 1);
+  const sample = await call(env, '/api/orders', 'POST', checkout());
+  assert.equal(sample.data.order.reference, 'TEST-001');
+  await live(env);
+  const first = await call(env, '/api/orders', 'POST', checkout());
+  assert.equal(first.data.order.reference, '001');
+  await seedOrderReference(env, first.data.order.id, 'LN-999999');
   const batch = t.mock.method(env.DB, 'batch', async () => { throw new Error('unrelated database failure'); });
   assert.equal((await call(env, '/api/orders', 'POST', checkout())).status, 500);
   assert.equal(batch.mock.callCount(), 1);
+  batch.mock.restore();
+  const next = await call(env, '/api/orders', 'POST', checkout());
+  assert.equal(next.data.order.reference, '002');
+  assert.ok(await env.DB.prepare("SELECT id FROM orders WHERE reference='LN-999999'").first());
+});
+
+test('reference 999 is the final number and exhausted checkout cannot wrap or change stock', async t => {
+  const env = await live(await setup(t));
+  const first = await call(env, '/api/orders', 'POST', checkout());
+  await seedOrderReference(env, first.data.order.id, '998');
+  const lastBody = checkout();
+  const last = await call(env, '/api/orders', 'POST', lastBody);
+  assert.equal(last.status, 201);
+  assert.equal(last.data.order.reference, '999');
+  const before = await env.DB.prepare("SELECT * FROM inventory WHERE mode='live'").first();
+  const rejected = await call(env, '/api/orders', 'POST', checkout());
+  assert.equal(rejected.status, 503);
+  assert.equal(rejected.data.code, 'reference_range_exhausted');
+  assert.deepEqual(await env.DB.prepare("SELECT * FROM inventory WHERE mode='live'").first(), before);
+  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM orders').first()).n, 3);
+  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS n FROM email_outbox').first()).n, 4);
+  const retry = await call(env, '/api/orders', 'POST', lastBody);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.data.order.reference, '999');
 });
 
 test('concurrent last-hat orders cannot oversell; failed inserts leave no partial history or email', async t => {

@@ -304,10 +304,19 @@ async function placeOrder(request, env, ctx, testDelivery = false) {
   const order = { ...snapshot, id, reference: '', status: 'awaiting_payment', quantity: body.quantity, preview,
     createdAt, updatedAt: createdAt, trackingNumber: '' };
   for (let attempt = 0; attempt < 8; attempt++) {
-    // A short bank reference is an identifier, not an access token. The UUID
-    // and secret receipt token stay unchanged. The UNIQUE constraint is the
-    // authority: retry a collision only after the whole transaction rolls back.
-    order.reference = `LN-${100000 + crypto.getRandomValues(new Uint32Array(1))[0] % 900000}`;
+    // Live references count from 001 to 999. Test orders have their own prefix
+    // and sequence, so rehearsals never consume a customer's number. Existing
+    // longer references are retained and excluded from this numeric sequence.
+    const prefix = preview ? 'TEST-' : '';
+    const last = await stmt(env, `SELECT MAX(CAST(substr(reference, ?) AS INTEGER)) AS number
+      FROM orders WHERE mode=? AND reference GLOB ?`, prefix.length + 1, mode, `${prefix}[0-9][0-9][0-9]`).first();
+    const nextNumber = Number(last?.number || 0) + 1;
+    if (nextNumber > 999) {
+      const duplicate = await stmt(env, 'SELECT * FROM orders WHERE idempotency_hash=?', idempotencyHash).first();
+      if (duplicate) return existingOrderResponse(env, duplicate, body, requestHash, local);
+      fail(503, 'Ordering is temporarily paused. Please contact the shop for help.', 'reference_range_exhausted');
+    }
+    order.reference = prefix + String(nextNumber).padStart(3, '0');
     try {
       // A failed insert or a competing last-item purchase rolls back every statement.
       await env.DB.batch([
@@ -322,6 +331,8 @@ async function placeOrder(request, env, ctx, testDelivery = false) {
       const duplicate = await stmt(env, 'SELECT * FROM orders WHERE idempotency_hash=?', idempotencyHash).first();
       if (duplicate) return existingOrderResponse(env, duplicate, body, requestHash, local);
       if (/UNIQUE constraint failed:\s*orders\.reference/i.test(String(error.message))) {
+        // Another checkout claimed this number. The failed batch rolled back;
+        // read the next number and retry without duplicating stock or emails.
         if (attempt < 7) continue;
         fail(503, 'We could not create your payment reference. Please try placing the order again.', 'reference_unavailable');
       }

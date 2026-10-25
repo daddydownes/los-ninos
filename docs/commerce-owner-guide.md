@@ -48,7 +48,7 @@ return to the list. **Tools** holds test and export actions.
    status filter. Select the order to see its items, total, contact details, and
    delivery address.
 2. An **Awaiting payment** order is saved, and its hats are reserved. The customer
-   is sent the account name, BSB, account number, exact total, and a unique `LN-` plus six-digit
+   is sent the account name, BSB, account number, exact total, and a unique three-digit
    reference. You receive a separate new-order notification.
 3. Check the actual receiving bank account. Match the amount and reference with
    the order. A customer's screenshot or statement that they paid is not a bank
@@ -67,9 +67,13 @@ The first email confirms receipt of the order. The second confirms receipt of
 money. Marking an order shipped is your record of dispatch; the shop does not
 purchase postage or book a pickup.
 
-New references use a short format such as `LN-482731`. Existing orders keep
-their original reference, even if it is longer. Match the complete reference
-printed on the order; the confirmation page has a **Copy** button for customers.
+New live references count upward: `001`, `002`, through `999`. Keep the leading
+zeroes when copying a reference. Existing orders retain their original reference,
+even if it is longer. Test orders use a separate `TEST-001` sequence. Match the
+complete reference printed on the order; the confirmation page has a **Copy**
+button for customers. Numbers are not recycled: once `999` is used, new orders
+pause until the maintainer and owner agree an extended range. Existing orders
+remain accessible and can still be processed.
 
 Status changes move forward. The dashboard does not undo paid or shipped states,
 edit an existing order's address, or issue refunds. For an incorrect address,

@@ -8,9 +8,9 @@ const action = (label,handler,className='primary') => {const node=create('button
 let orders,selected=null,filter='todo',pending=null;
 function reset(){
   orders=[
-    {id:'LN-482731',name:'Alex Example',quantity:4,total:14500,shipping:2500,status:'awaiting_payment',emails:['Payment instructions']},
-    {id:'LN-706254',name:'Sam Sample',quantity:1,total:5000,shipping:2000,status:'paid',emails:['Payment instructions','Payment confirmation']},
-    {id:'LN-913862',name:'Taylor Demo',quantity:3,total:11000,shipping:2000,status:'shipped',emails:['Payment instructions','Payment confirmation','Dispatch confirmation']}
+    {id:'001',name:'Alex Example',quantity:4,total:14500,shipping:2500,status:'awaiting_payment',emails:['Payment instructions']},
+    {id:'002',name:'Sam Sample',quantity:1,total:5000,shipping:2000,status:'paid',emails:['Payment instructions','Payment confirmation']},
+    {id:'003',name:'Taylor Demo',quantity:3,total:11000,shipping:2000,status:'shipped',emails:['Payment instructions','Payment confirmation','Dispatch confirmation']}
   ];
   selected=null;filter='todo';pending=null;
   $('confirm-dialog').close();feedback('');show('list');renderList();
