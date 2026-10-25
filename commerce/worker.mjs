@@ -294,7 +294,6 @@ async function placeOrder(request, env, ctx, testDelivery = false) {
   const id = crypto.randomUUID();
   const token = await orderToken(env, id, body.idempotencyKey, local);
   const createdAt = nowISO();
-  const reference = `LN-${id.replace(/-/g, '').slice(0, 12).toUpperCase()}`;
   const snapshot = { productName: PRODUCT.name, unitPriceCents: config.productPriceCents,
     shippingCents,
     totalCents: Number.isSafeInteger(config.productPriceCents) && Number.isSafeInteger(shippingCents)
@@ -302,24 +301,35 @@ async function placeOrder(request, env, ctx, testDelivery = false) {
     customer: body.customer, shippingAddress: body.shippingAddress,
     bank: preview && !testDelivery ? { accountName: '', bsb: '', accountNumber: '' } : { ...config.bank },
     ...(testDelivery ? { testDelivery: true, testEmailRecipient: testEmailRecipient(env) } : {}) };
-  const order = { ...snapshot, id, reference, status: 'awaiting_payment', quantity: body.quantity, preview,
+  const order = { ...snapshot, id, reference: '', status: 'awaiting_payment', quantity: body.quantity, preview,
     createdAt, updatedAt: createdAt, trackingNumber: '' };
-  try {
-    // A failed insert or a competing last-item purchase rolls back every statement.
-    await env.DB.batch([
-      stmt(env, `INSERT INTO orders(id, reference, status, mode, quantity, created_at, updated_at, idempotency_hash, request_hash, token_hash, snapshot)
-        SELECT ?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM settings WHERE id=1 AND revision=?)`,
-      id, reference, order.status, mode, body.quantity, createdAt, createdAt, idempotencyHash, requestHash, await sha256(token), JSON.stringify(snapshot), config.revision),
-      stmt(env, 'INSERT INTO order_history(id, order_id, status, created_at, actor, note) VALUES (?,?,?,?,?,?)', crypto.randomUUID(), id, order.status, createdAt, 'customer', ''),
-      outboxInsert(env, order, 'awaiting_payment', config), outboxInsert(env, order, 'owner_order', config),
-    ]);
-  } catch (error) {
-    const duplicate = await stmt(env, 'SELECT * FROM orders WHERE idempotency_hash=?', idempotencyHash).first();
-    if (duplicate) return existingOrderResponse(env, duplicate, body, requestHash, local);
-    if (String(error.message).includes('test_order_deleted')) fail(409, 'This test order was deleted. Start a new checkout to test again.', 'test_order_deleted');
-    if (String(error.message).includes('insufficient_stock')) fail(409, 'That quantity is no longer available. Please update your bag.', 'insufficient_stock');
-    if (String(error.message).includes('FOREIGN KEY')) fail(409, 'Price or delivery options changed. Please review your order again.', 'catalog_changed');
-    throw error;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    // A short bank reference is an identifier, not an access token. The UUID
+    // and secret receipt token stay unchanged. The UNIQUE constraint is the
+    // authority: retry a collision only after the whole transaction rolls back.
+    order.reference = `LN-${100000 + crypto.getRandomValues(new Uint32Array(1))[0] % 900000}`;
+    try {
+      // A failed insert or a competing last-item purchase rolls back every statement.
+      await env.DB.batch([
+        stmt(env, `INSERT INTO orders(id, reference, status, mode, quantity, created_at, updated_at, idempotency_hash, request_hash, token_hash, snapshot)
+          SELECT ?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM settings WHERE id=1 AND revision=?)`,
+        id, order.reference, order.status, mode, body.quantity, createdAt, createdAt, idempotencyHash, requestHash, await sha256(token), JSON.stringify(snapshot), config.revision),
+        stmt(env, 'INSERT INTO order_history(id, order_id, status, created_at, actor, note) VALUES (?,?,?,?,?,?)', crypto.randomUUID(), id, order.status, createdAt, 'customer', ''),
+        outboxInsert(env, order, 'awaiting_payment', config), outboxInsert(env, order, 'owner_order', config),
+      ]);
+      break;
+    } catch (error) {
+      const duplicate = await stmt(env, 'SELECT * FROM orders WHERE idempotency_hash=?', idempotencyHash).first();
+      if (duplicate) return existingOrderResponse(env, duplicate, body, requestHash, local);
+      if (/UNIQUE constraint failed:\s*orders\.reference/i.test(String(error.message))) {
+        if (attempt < 7) continue;
+        fail(503, 'We could not create your payment reference. Please try placing the order again.', 'reference_unavailable');
+      }
+      if (String(error.message).includes('test_order_deleted')) fail(409, 'This test order was deleted. Start a new checkout to test again.', 'test_order_deleted');
+      if (String(error.message).includes('insufficient_stock')) fail(409, 'That quantity is no longer available. Please update your bag.', 'insufficient_stock');
+      if (String(error.message).includes('FOREIGN KEY')) fail(409, 'Price or delivery options changed. Please review your order again.', 'catalog_changed');
+      throw error;
+    }
   }
   if (canSendOrderEmail(env, order)) ctx?.waitUntil?.(processOutbox(env));
   return response({ order: await presentOrder(env, await stmt(env, 'SELECT * FROM orders WHERE id=?', id).first()), token }, 201);
