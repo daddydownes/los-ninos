@@ -1,0 +1,31 @@
+/* 06: upright, filled ExtraBold type. A moving mask reveals the same sequence. */
+.price-lettering.written-mark{transform:none}
+.price-lettering .price-glyph{fill:#fff;stroke:none;stroke-dasharray:none;stroke-dashoffset:0}
+.price-lettering .price-reveal{fill:none;stroke:#fff;stroke-width:18;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0}
+.price-lettering .dollar-stem{stroke-width:9}
+.price-lettering .written-zero{stroke-width:16}
+
+/* 03 is the selected storefront size; the other sizes remain review options. */
+html[data-price-size="01"]{--price-mark-height:28px}
+html[data-price-size="02"]{--price-mark-height:33px}
+html[data-price-size="03"]{--price-mark-height:38px}
+html[data-price-size="04"]{--price-mark-height:43px}
+html[data-price-size="05"]{--price-mark-height:48px}
+html[data-price-treatment=written] .purchase-price{width:132px;height:50px;margin:1px 0 0 -7px;transform:none}
+html[data-price-treatment=written] .price-outline{display:none}
+html[data-price-treatment=written] .purchase-price .price-lettering{position:absolute;display:none;width:132px;height:var(--price-mark-height,58px);left:0;top:calc((50px - var(--price-mark-height,58px)) / 2);overflow:visible;transform:none;transition:transform 550ms var(--ease)}
+html[data-price-treatment=written] .purchase-price[data-hand-price=true] .price-lettering{display:block}
+html[data-price-treatment=written] .purchase-price[data-hand-price=true] .price-value{visibility:hidden;animation:none}
+html[data-price-treatment=written] .purchase-action:has(.add-button:is(.is-pointing,:focus-visible)) .purchase-price{transform:none}
+
+/* The four-second hat opening owns the stage first. The invitation settles,
+   then the bold numerals reveal; the arrow follows without locking the page. */
+html[data-price-treatment=written] .intro-complete .purchase-price[data-hand-price=true] .written-dollar{animation:written-price-draw 400ms 240ms cubic-bezier(.35,.05,.35,1) both}
+html[data-price-treatment=written] .intro-complete .purchase-price[data-hand-price=true] .dollar-stem{animation:written-price-draw 180ms 440ms ease-out both}
+html[data-price-treatment=written] .intro-complete .purchase-price[data-hand-price=true] .written-three{animation:written-price-draw 440ms 540ms cubic-bezier(.35,.05,.35,1) both}
+html[data-price-treatment=written] .intro-complete .purchase-price[data-hand-price=true] .written-zero{animation:written-price-draw 440ms 850ms cubic-bezier(.35,.05,.35,1) both}
+html[data-price-treatment=written] .intro-complete .buy-pointer-stem{animation:draw-buy-pointer 650ms 1050ms var(--ease) both}
+html[data-price-treatment=written] .intro-complete .buy-pointer-tip{animation:draw-buy-pointer 260ms 1450ms var(--ease) both}
+@keyframes written-price-draw{0%{opacity:0;stroke-dashoffset:1}1%{opacity:1}100%{opacity:1;stroke-dashoffset:0}}
+@media(hover:hover) and (pointer:fine){html[data-price-treatment=written] .purchase-action:has(.add-button:is(.is-pointing,:focus-visible)) .price-lettering,.price-written:has(.sample-button:hover) .price-lettering.written-mark{transform:translateY(-1px)}}
+@media(prefers-reduced-motion:reduce){html[data-price-treatment=written] .price-lettering,html[data-price-treatment=written] .price-lettering path,html[data-price-treatment=written] .buy-pointer path{animation:none!important;transition:none!important;transform:none!important;stroke-dashoffset:0!important;opacity:1!important}}

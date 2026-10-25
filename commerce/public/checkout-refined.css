@@ -1,0 +1,27 @@
+.checkout-page{--paper:#fff}
+.checkout-page .order-summary{border-radius:20px;padding:30px;background:#0b1522;border-color:#ffffff20;animation:checkout-summary-in 450ms ease both}
+.checkout-page .summary-product-image{background:transparent;border-radius:12px}
+.checkout-page .summary-product h2{font-weight:500;color:#fff}
+.checkout-page .quantity-control{border-radius:9px;overflow:hidden}
+.checkout-page .quantity-control button{min-width:36px;min-height:40px;transition:background 180ms ease}
+.checkout-page .quantity-control button:hover:not(:disabled){background:#ffffff0b}
+.checkout-page .summary-total{margin-top:26px;padding-top:22px;align-items:center;border-color:#ffffff20;gap:16px}
+.checkout-page .summary-total>span{font-size:13px;color:#fff;line-height:1.6}
+.checkout-page .summary-total small{display:block;margin-top:3px;font-size:10px;letter-spacing:0;color:#a7b1bf}
+.checkout-page .summary-total strong{color:#fff;line-height:1;font-size:44px;font-weight:800;font-family:'Barlow Condensed',sans-serif;letter-spacing:-.5px;white-space:nowrap}
+.checkout-page .summary-total strong[data-amount=false]{font:400 15px/1.5 'DM Sans',sans-serif;white-space:normal}
+.checkout-price-character{display:inline-block;animation:checkout-price-in 520ms var(--character-delay,0ms) cubic-bezier(.22,1,.36,1) both}
+.checkout-page .summary-shipping-note{margin:14px 0 0;font-size:11px;line-height:1.7;color:#a7b1bf}
+.checkout-page .summary-lines{padding:24px 0 0;border-color:#ffffff20}
+.checkout-page .summary-line{font-size:12px}
+.checkout-page .summary-line dd{color:#fff}
+.checkout-payment-note{margin-top:26px;padding-top:22px;border-top:1px solid #ffffff20}
+.checkout-payment-note p{margin:0 0 7px;font-size:14px;font-weight:500;color:#fff}
+.checkout-payment-note>span{display:block;font-size:12px;line-height:1.8;color:#a7b1bf;max-width:320px}
+.checkout-page .button{border-radius:12px}
+.checkout-page .field input,.checkout-page .field select{border-radius:9px}
+@keyframes checkout-price-in{from{opacity:0;transform:translateY(7px);clip-path:inset(100% 0 0)}to{opacity:1;transform:translateY(0);clip-path:inset(0)}}
+@keyframes checkout-summary-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.checkout-page .order-summary{padding:24px}.checkout-page .summary-total strong{font-size:38px}.checkout-payment-note{margin-top:22px;padding-top:18px}}
+@media(max-width:350px){.checkout-page .order-summary{padding:20px}.checkout-page .summary-total strong{font-size:34px}}
+@media(prefers-reduced-motion:reduce){.checkout-page .order-summary,.checkout-price-character{animation:none!important;opacity:1;transform:none;clip-path:none}.checkout-page .quantity-control button{transition:none}}

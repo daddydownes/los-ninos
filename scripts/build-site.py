@@ -1,5 +1,6 @@
 """Package the maintained storefront at the Pages root, including only used assets."""
 import json
+import argparse
 import re
 import shutil
 from pathlib import Path
@@ -35,7 +36,7 @@ def source_files():
     return sorted(files)
 
 
-def build():
+def build(commerce_enabled=False):
     files = source_files()
     OUTPUT.mkdir(exist_ok=True)
     expected = set()
@@ -47,9 +48,37 @@ def build():
             text = source.read_text(encoding='utf-8').replace('../../../assets/', 'assets/')
             if source.name == 'index.html':
                 text = text.replace('<head>', '<head>\n  <meta name="robots" content="noindex,nofollow">')
+                if commerce_enabled:
+                    text = text.replace('<head>', '<head>\n  <meta name="los-ninos-commerce" content="enabled">')
             destination.write_text(text, encoding='utf-8')
         else:
             shutil.copyfile(source, destination)
+    # Checkout/admin assets share the storefront origin so requests and auth
+    # stay same-origin. Runtime secrets and database files are never packaged.
+    commerce = ROOT / 'commerce/public'
+    if commerce.is_dir():
+        for source in sorted(commerce.rglob('*')):
+            if source.is_file() and source.suffix in {'.html', '.css', '.js'}:
+                destination = OUTPUT / source.relative_to(commerce)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, destination)
+                expected.add(destination)
+    # A design review uses the maintained shop, rather than a second hand-edited
+    # copy. Keep the real four-second intro, product layout and checkout behavior.
+    opening = (OUTPUT / 'index.html').read_text(encoding='utf-8')
+    opening = opening.replace('data-price-size="03"', 'data-price-size="original"')
+    opening = opening.replace('<title>Los Niños — Con Sueños</title>', '<title>Los Niños — Bold 06 opening preview</title>')
+    opening_path = OUTPUT / 'opening-06.html'
+    opening_path.write_text(opening, encoding='utf-8')
+    expected.add(opening_path)
+    # Five smaller versions share the exact storefront and post-intro reveal.
+    # Only this review route includes the size switcher; the shop stays intact.
+    sizes = opening.replace('data-price-size="original"', 'data-price-size="03"')
+    sizes = sizes.replace('</head>', '  <link rel="stylesheet" href="price-sizes.css?v=2">\n  <script defer src="price-sizes.js?v=1"></script>\n</head>')
+    sizes = sizes.replace('<title>Los Niños — Bold 06 opening preview</title>', '<title>Los Niños — Five smaller price options</title>')
+    sizes_path = OUTPUT / 'price-sizes.html'
+    sizes_path.write_text(sizes, encoding='utf-8')
+    expected.add(sizes_path)
     (OUTPUT / '.nojekyll').write_text('', encoding='utf-8')
     expected.add(OUTPUT / '.nojekyll')
     # Refuse stale output rather than accidentally publishing an unrelated file.
@@ -61,4 +90,6 @@ def build():
 
 
 if __name__ == '__main__':
-    build()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--commerce', action='store_true', help='Enable the Worker-backed checkout entry point')
+    build(parser.parse_args().commerce)

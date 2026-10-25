@@ -64,9 +64,9 @@ html.intro-pending,html.intro-pending body{overflow:hidden;overscroll-behavior:n
    the large viewport, since translucent browser chrome can reveal content below
    its edge. Matching height and padding additions leave the controls in place. */
 @media(max-width:700px){.hero{min-height:calc(100lvh - var(--header-height) + 96px);padding-bottom:calc(max(24px,env(safe-area-inset-bottom,0px)) + max(0px,100lvh - 100svh) + 96px)}}
-/* The single-column invitation, explore link and button need 225px. Let the
+/* The price mark, invitation, explore link and button need 247px. Let the
    hat shrink on shorter screens before the buying action falls below the bar. */
-@media(max-width:559px){:root{--hat-size:min(96vw,80svh,calc(100vw - 20px),max(100px,calc((100svh - var(--header-height) - var(--hero-top) - max(24px,env(safe-area-inset-bottom,0px)) - 225px) / .84)))}}
+@media(max-width:559px){:root{--hat-size:min(96vw,80svh,calc(100vw - 20px),max(100px,calc((100svh - var(--header-height) - var(--hero-top) - max(24px,env(safe-area-inset-bottom,0px)) - 247px) / .84)))}}
 @media(max-height:500px) and (min-width:701px){:root{--header-height:calc(64px + env(safe-area-inset-top,0px))}.journey-header{--header-height:calc(64px + env(safe-area-inset-top,0px));height:var(--header-height);padding-block:calc(10px + env(safe-area-inset-top,0px)) 10px}}
 @media(hover:none){.journey-mark:hover{opacity:1}.quiet-link:hover:after{transform:scaleX(0)}.quiet-link:hover>span,.journey-bag-trigger:hover .bag-count,.story-cue:hover .cue-arrow,.closing-shop:hover .closing-arrow,.closing-shop:hover .closing-arrow svg,.instagram-link:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.intro-pending .viewer-frame{transform:none}.skip-intro{display:none!important}.quiet-link>span,.bag-count,.cue-arrow,.closing-arrow,.closing-arrow svg,.instagram-link,.buy-pointer{transform:none!important}}

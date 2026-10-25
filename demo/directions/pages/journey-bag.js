@@ -4,7 +4,7 @@
   const source = document.currentScript?.src || location.href;
   const thumbnail = new URL('../../../assets/hat-front-logo-v1.webp', source).href;
   const storageKey = 'los-ninos-preview-bag-v1';
-  const limit = 10;
+  let limit = 10;
   // Leave the completed button feedback readable before opening the drawer.
   const confirmationDuration = 1000;
   const closeDuration = 240;
@@ -29,6 +29,10 @@
     let queuedOpen = null;
     let expectedCloseEvents = 0;
     let backdropPointer = null;
+    let checkoutCatalog = null;
+    const commerceEnabled = Boolean(document.querySelector('meta[name="los-ninos-commerce"][content="enabled"]'));
+    let catalogPhase = commerceEnabled ? 'loading' : 'idle';
+    let catalogRequest = null;
 
     function loadQuantity() {
       try {
@@ -56,13 +60,13 @@
       <div class="journey-bag-content">
         <div class="journey-bag-empty">
           <p>Your bag<br>is empty.</p>
-          <span class="bag-empty-note">Start with the navy snapback.</span>
+          <span class="bag-empty-note">Start with the OG Snapback.</span>
           <button type="button" class="journey-bag-shop">Explore the snapback ${arrowIcon}</button>
         </div>
         <div class="journey-bag-item" hidden>
-          <img src="${thumbnail}" width="1254" height="1254" decoding="async" alt="Front concept render of the navy Los Niños snapback">
+          <img src="${thumbnail}" width="1254" height="1254" decoding="async" alt="Front concept render of the navy Los Niños OG Snapback">
           <div class="journey-bag-details">
-            <h3>Navy snapback</h3>
+            <h3>OG Snapback</h3>
             <div class="journey-bag-controls">
               <div class="journey-bag-quantity" role="group" aria-label="Hat quantity">
                 <button type="button" class="journey-bag-minus" aria-label="Decrease quantity">−</button>
@@ -76,7 +80,11 @@
         <p class="journey-bag-limit" hidden>Maximum quantity: 10.</p>
         <p class="journey-bag-status" role="status" aria-live="polite" aria-atomic="true"></p>
       </div>
-      <div class="journey-bag-footer"><button type="button" class="journey-bag-continue">Continue exploring ${arrowIcon}</button></div>`;
+      <div class="journey-bag-footer">
+        <button type="button" class="journey-bag-shop journey-bag-checkout" hidden>Checkout ${arrowIcon}</button>
+        <p class="journey-bag-checkout-note" hidden></p>
+        <button type="button" class="journey-bag-continue">Continue exploring ${arrowIcon}</button>
+      </div>`;
     document.body.append(dialog);
 
     // This live region is available during the brief confirmation before the dialog opens.
@@ -96,6 +104,34 @@
     const status = dialog.querySelector('.journey-bag-status');
     const closeButton = dialog.querySelector('.journey-bag-close');
     const shopButton = dialog.querySelector('.journey-bag-shop');
+    const checkoutButton = dialog.querySelector('.journey-bag-checkout');
+    const checkoutNote = dialog.querySelector('.journey-bag-checkout-note');
+    const bagTotals = document.createElement('div');
+    bagTotals.className = 'journey-bag-pricing';
+    bagTotals.hidden = true;
+    bagTotals.innerHTML = '<dl class="journey-bag-totals"><div><dt>Subtotal <small>AUD</small></dt><dd data-bag-subtotal></dd></div></dl>';
+    dialog.querySelector('.journey-bag-footer').prepend(bagTotals);
+    const formatMoney = value => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(value / 100);
+
+    function renderPrices() {
+      const unit = checkoutCatalog?.product?.priceCents;
+      const hasPrice = Number.isInteger(unit);
+      bagTotals.hidden = !commerceEnabled || quantity === 0 || !hasPrice || catalogPhase !== 'ready';
+      if (!bagTotals.hidden) {
+        bagTotals.querySelector('[data-bag-subtotal]').textContent = formatMoney(unit * quantity);
+      }
+      if (commerceEnabled) document.querySelectorAll('[data-product-price]').forEach(slot => {
+        const ready = catalogPhase === 'ready' && hasPrice;
+        const amount = ready ? formatMoney(unit).replace(/\.00$/, '') : null;
+        const label = catalogPhase === 'loading' ? 'Checking price…' : ready ? amount : 'Price unavailable';
+        if (slot.textContent !== label) slot.textContent = label;
+        const mark = slot.closest('.purchase-price');
+        if (mark) {
+          mark.dataset.priceState = ready ? amount.length > 4 ? 'wide' : 'ready' : catalogPhase === 'loading' ? 'loading' : 'error';
+          mark.setAttribute('aria-label', ready ? `Price: ${formatMoney(unit)} Australian dollars each` : label);
+        }
+      });
+    }
 
     function isBagState(state) {
       const marker = state?.lnBag;
@@ -150,6 +186,23 @@
       minus.disabled = quantity <= 1;
       plus.disabled = quantity >= limit;
       limitNote.hidden = quantity < limit;
+      limitNote.textContent = `Maximum quantity: ${limit}.`;
+      renderPrices();
+      checkoutButton.hidden = !commerceEnabled || quantity === 0;
+      checkoutNote.hidden = checkoutButton.hidden;
+      if (catalogPhase === 'loading') {
+        checkoutButton.disabled = true;
+        checkoutButton.firstChild.textContent = 'Loading checkout… ';
+        checkoutNote.textContent = 'Checking availability.';
+      } else if (catalogPhase === 'error') {
+        checkoutButton.disabled = false;
+        checkoutButton.firstChild.textContent = 'Retry checkout ';
+        checkoutNote.textContent = 'Checkout could not load. Check your connection and try again.';
+      } else if (checkoutCatalog) {
+        checkoutButton.disabled = !checkoutCatalog.acceptingOrders || quantity > checkoutCatalog.product.available;
+        checkoutButton.firstChild.textContent = checkoutCatalog.mode === 'preview' ? 'Preview checkout ' : 'Checkout ';
+        checkoutNote.textContent = !checkoutCatalog.acceptingOrders ? 'Checkout is not open yet.' : quantity > checkoutCatalog.product.available ? 'This quantity is not available.' : checkoutCatalog.mode === 'preview' ? 'Test orders only. No payments or emails.' : 'Pay by bank transfer after placing your order.';
+      }
       document.querySelectorAll('[data-bag-count]').forEach(slot => { slot.textContent = String(quantity); });
       document.querySelectorAll('[data-bag-open]').forEach(trigger => {
         trigger.setAttribute('aria-label', `Open bag, ${quantity} ${quantity === 1 ? 'item' : 'items'}`);
@@ -228,6 +281,7 @@
       lockPage(position);
       dialog.classList.remove('journey-bag-closing');
       dialog.showModal();
+      if (catalogPhase === 'error') loadCatalog();
       phase = 'open';
       closeButton.focus({ preventScroll: true });
     }
@@ -332,6 +386,14 @@
     });
     closeButton.addEventListener('click', () => close());
     dialog.querySelector('.journey-bag-continue').addEventListener('click', () => close());
+    checkoutButton.addEventListener('click', () => {
+      if (!quantity || checkoutButton.disabled) return;
+      if (catalogPhase === 'error') { loadCatalog(); return; }
+      if (catalogPhase !== 'ready') return;
+      const url = new URL('checkout.html', source);
+      url.searchParams.set('quantity', String(quantity));
+      close({ navigate: () => location.assign(url.href) });
+    });
     shopButton.addEventListener('click', () => close({ navigate: () => {
       if (window.LosNinosJourney?.navigateToShop) window.LosNinosJourney.navigateToShop();
       else location.hash = 'shop';
@@ -367,7 +429,7 @@
       saveQuantity();
       render();
       if (plus.disabled) minus.focus({ preventScroll: true });
-      announce(quantity === limit ? 'Quantity 10. Maximum quantity reached.' : `Quantity ${quantity}.`);
+      announce(quantity === limit ? `Quantity ${limit}. Maximum quantity reached.` : `Quantity ${quantity}.`);
     });
     dialog.querySelector('.journey-bag-remove').addEventListener('click', () => {
       quantity = 0;
@@ -387,7 +449,7 @@
       if (pendingAdd) return;
       if (quantity >= limit) {
         open(addTrigger);
-        announce('Maximum quantity: 10.');
+        announce(`Maximum quantity: ${limit}.`);
         return;
       }
       quantity += 1;
@@ -418,6 +480,7 @@
       loadQuantity();
       render();
       if (!event.persisted) return;
+      if (catalogPhase === 'error') loadCatalog();
       if (isBagState(history.state)) {
         if (phase === 'closed') displayBag(fallbackOpener(), true);
       } else if (phase !== 'closed') {
@@ -435,6 +498,38 @@
     cleanMalformedMarker();
     render();
     window.LosNinosBag = { open, close, render, getQuantity: () => quantity };
+    async function loadCatalog() {
+      if (!commerceEnabled || catalogRequest) return;
+      const controller = new AbortController();
+      catalogRequest = controller;
+      catalogPhase = 'loading';
+      render();
+      // A network switch or a request that never returns must not make checkout
+      // disappear for the rest of this visit. Cover the response body as well.
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(new URL('api/catalog', source), {
+          credentials: 'same-origin', signal: controller.signal, cache: 'no-store'
+        });
+        if (!response.ok) throw new Error('Checkout unavailable');
+        const catalog = await response.json();
+        if (!catalog || !Number.isInteger(catalog.product?.maxQuantity) || !Number.isInteger(catalog.product?.available)) throw new Error('Checkout unavailable');
+        checkoutCatalog = catalog;
+        catalogPhase = 'ready';
+        limit = Math.max(1, Math.min(10, catalog.product.maxQuantity));
+        if (quantity > limit) { quantity = limit; saveQuantity(); announce(`The order limit is now ${limit}. Your bag has been updated.`); }
+      } catch (_) {
+        catalogPhase = 'error';
+      } finally {
+        clearTimeout(timeout);
+        catalogRequest = null;
+        render();
+      }
+    }
+    // The original static preview stays usable when no checkout API is hosted.
+    // Retry only on a deliberate retry/reopen or a restored connection.
+    window.addEventListener('online', () => { if (catalogPhase === 'error') loadCatalog(); });
+    loadCatalog();
     // Let the page finish its own initial section alignment before restoring an overlay.
     if (isBagState(history.state)) requestAnimationFrame(() => {
       if (isBagState(history.state) && phase === 'closed') displayBag(fallbackOpener(), true);
