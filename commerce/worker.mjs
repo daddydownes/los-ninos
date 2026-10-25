@@ -365,9 +365,10 @@ async function adminOrders(request, env) {
   const url = new URL(request.url);
   const status = url.searchParams.get('status') || '';
   const query = text(url.searchParams.get('q') || '', 'Search', { max: 100 });
-  if (status && !STATUSES.has(status)) fail(400, 'Unknown order status.', 'invalid_input');
+  if (status && status !== 'active' && !STATUSES.has(status)) fail(400, 'Unknown order status.', 'invalid_input');
   const conditions = ['1=1']; const values = [];
-  if (status) { conditions.push('status=?'); values.push(status); }
+  if (status === 'active') conditions.push("status IN ('awaiting_payment','paid')");
+  else if (status) { conditions.push('status=?'); values.push(status); }
   if (query) {
     conditions.push("(reference LIKE ? ESCAPE '\\' OR json_extract(snapshot,'$.customer.name') LIKE ? ESCAPE '\\' OR json_extract(snapshot,'$.customer.email') LIKE ? ESCAPE '\\')");
     const pattern = `%${query.replace(/[\\%_]/g, '\\$&')}%`; values.push(pattern, pattern, pattern);

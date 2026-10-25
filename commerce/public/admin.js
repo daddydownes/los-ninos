@@ -73,19 +73,18 @@ function renderOrderList() {
   list.replaceChildren();
   $('#order-count').textContent = `(${state.orders.length})`;
   if (!state.orders.length) {
-    list.append(element('p', 'admin-empty muted', $('#order-search').value || $('#order-status').value ? 'No orders match these filters.' : 'No orders yet. New orders will appear here.'));
+    list.append(element('p', 'admin-empty muted', !$('#order-search').value && $('#order-status').value === 'active' ? 'All caught up. New orders that need payment or packing will appear here.' : $('#order-search').value || $('#order-status').value ? 'No orders match these filters.' : 'No orders yet. New orders will appear here.'));
     return;
   }
   for (const order of state.orders) {
     const card = button('', () => loadOrder(order.id), 'admin-order-card');
     card.setAttribute('aria-pressed', String(state.selectedId === order.id));
-    const top = element('div', 'admin-order-card-top');
-    top.append(element('strong', '', order.reference || order.id), pill(order.status));
-    const bottom = element('div', 'admin-order-card-bottom');
-    bottom.append(element('span', '', date(order.createdAt)), element('strong', '', money(order.totalCents, 'Pending shipping')));
-    card.append(top, element('p', 'admin-order-card-name', order.customer?.name || 'Customer'));
+    const person = element('div', 'admin-order-person');
+    person.append(element('strong', 'admin-order-card-name', order.customer?.name || 'Customer'), element('span', 'admin-order-meta', `${order.quantity} ${order.quantity === 1 ? 'hat' : 'hats'} · ${order.reference || order.id}`));
+    const amount = element('strong', 'admin-order-amount', money(order.totalCents, 'Pending shipping'));
+    const arrow = element('span', 'admin-order-arrow', '→'); arrow.setAttribute('aria-hidden', 'true');
+    card.append(person, pill(order.status), amount, arrow);
     if (order.preview) card.append(element('p', 'admin-order-card-preview', order.testDelivery ? 'Email test order' : 'Preview order'));
-    card.append(bottom);
     if (Array.isArray(order.emails) && order.emails.some(emailNeedsAttention)) card.append(element('p', 'admin-email-warning', 'Email needs attention'));
     list.append(card);
   }
@@ -105,7 +104,7 @@ async function loadOrder(id, { focus = true } = {}) {
     renderOrderList();
     renderOrderDetail();
     $('#admin-main').classList.add('is-reading-order');
-    if (focus) { panel.focus({ preventScroll: true }); if (window.matchMedia('(max-width: 800px)').matches) panel.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
+    if (focus) { panel.focus({ preventScroll: true }); panel.scrollIntoView({ behavior: 'auto', block: 'start' }); }
   } catch (error) { if (request === state.detailRequest) notice(error.message, true); }
   finally { if (request === state.detailRequest) panel.removeAttribute('aria-busy'); }
 }
@@ -133,7 +132,7 @@ function renderOrderDetail() {
   const facts = element('dl', 'admin-facts');
   facts.append(fact('Shipping', order.shippingCents === 0 ? 'Free' : money(order.shippingCents, 'To be determined')), fact('Total (AUD)', money(order.totalCents, typeof order.unitPriceCents === 'number' ? 'Pending shipping' : 'To be set'), true));
   summary.append(facts); panel.append(summary);
-  const contact = section(''); contact.firstElementChild.remove();
+  const contact = element('details', 'admin-detail-disclosure'); contact.append(element('summary', '', 'Customer & delivery'));
   const columns = element('div', 'admin-contact-columns');
   const customer = element('div'); customer.append(element('h3', '', 'Customer'), element('p', '', order.customer?.name || 'Not provided'));
   if (order.customer?.email) { const p = element('p'); const link = element('a', '', order.customer.email); link.href = `mailto:${order.customer.email}`; p.append(link); customer.append(p); }
@@ -156,7 +155,7 @@ function renderOrderDetail() {
   const emailRecords = Array.isArray(order.emails) ? order.emails : Object.entries(order.emails || {}).map(([kind, value]) => typeof value === 'object' && value ? { ...value, kind: value.kind || kind } : { kind, status: value });
   const problems = emailRecords.filter(emailNeedsAttention).length;
   const emailHeading = element('summary');
-  emailHeading.append(element('span', '', 'Emails'), element('span', problems ? 'admin-email-warning' : 'muted', problems ? `${problems} need attention` : `${emailRecords.length} messages`));
+  emailHeading.append(element('span', '', 'Emails'), element('span', problems ? 'admin-email-warning' : 'muted', problems ? `${problems} need attention` : `${emailRecords.length} ${emailRecords.length === 1 ? 'message' : 'messages'}`));
   emails.append(emailHeading);
   emails.open = problems > 0;
   for (const email of emailRecords) { const row = element('div', `admin-email-item${emailNeedsAttention(email) ? ' has-error' : ''}`); row.append(element('span', '', emailKinds[email.kind] || email.kind || 'Email'), element('span', '', emailStatusLabels[email.status] || email.status || 'Queued')); emailList.append(row); }
@@ -356,9 +355,19 @@ $('#settings-tab').addEventListener('click', () => switchView('settings'));
 $('#test-purchase').addEventListener('click', () => { if (!state.busy && state.testCheckout?.enabled) location.assign('/checkout.html?test=1'); });
 $('#refresh-orders').addEventListener('click', async () => {
   if (state.busy) return;
-  if (await loadOrders() && state.selectedId) await loadOrder(state.selectedId, { focus: false });
+  const reading = $('#admin-main').classList.contains('is-reading-order');
+  if (await loadOrders() && state.selectedId && reading) await loadOrder(state.selectedId, { focus: false });
 });
-$('#order-status').addEventListener('change', () => loadOrders());
+function syncOrderFilters() {
+  document.querySelectorAll('[data-order-filter]').forEach(node => node.setAttribute('aria-pressed', String(node.dataset.orderFilter === $('#order-status').value)));
+}
+document.querySelectorAll('[data-order-filter]').forEach(node => node.addEventListener('click', () => {
+  if (state.busy) return;
+  $('#order-status').value = node.dataset.orderFilter;
+  $('#order-search').value = '';
+  syncOrderFilters(); loadOrders();
+}));
+$('#order-status').addEventListener('change', () => { syncOrderFilters(); loadOrders(); });
 let searchTimer;
 $('#order-search').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadOrders(), 250); });
 api('/api/catalog').then((catalog) => {

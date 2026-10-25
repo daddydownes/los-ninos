@@ -73,6 +73,25 @@ test('new checkout requires a usable mobile number for manually texted tracking'
   assert.equal((await call(env, '/api/orders', 'POST', body)).status, 201);
 });
 
+test('owner To do filter includes unpaid and paid orders, supports search and excludes completed orders', async t => {
+  const env = await setup(t); await configure(env);
+  const unpaid = (await call(env, '/api/orders', 'POST', checkout())).data.order;
+  const paid = (await call(env, '/api/orders', 'POST', checkout())).data.order;
+  const shipped = (await call(env, '/api/orders', 'POST', checkout())).data.order;
+  const cancelled = (await call(env, '/api/orders', 'POST', checkout())).data.order;
+  await call(env, `/api/admin/orders/${paid.id}/status`, 'POST', {status:'paid'});
+  await call(env, `/api/admin/orders/${shipped.id}/status`, 'POST', {status:'paid'});
+  await call(env, `/api/admin/orders/${shipped.id}/status`, 'POST', {status:'shipped'});
+  await call(env, `/api/admin/orders/${cancelled.id}/status`, 'POST', {status:'cancelled', note:'Test cancellation'});
+  const active = await call(env, '/api/admin/orders?status=active');
+  assert.equal(active.status, 200);
+  assert.deepEqual(active.data.orders.map(o => o.id).sort(), [unpaid.id, paid.id].sort());
+  const searched = await call(env, `/api/admin/orders?status=active&q=${paid.reference}`);
+  assert.deepEqual(searched.data.orders.map(o => o.id), [paid.id]);
+  assert.equal((await call(env, '/api/admin/orders')).data.orders.length, 4);
+  assert.equal((await call(env, '/api/admin/orders?status=unexpected')).status, 400);
+});
+
 async function live(env) {
   await configure(env);
   Object.assign(env, { STORE_MODE: 'live', LOCAL_PREVIEW: 'false', LAUNCH_CONFIRMED: 'true',

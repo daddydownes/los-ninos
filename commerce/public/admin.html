@@ -9,8 +9,8 @@
     <title>Orders · Los Niños</title>
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="./commerce.css">
-    <link rel="stylesheet" href="./admin.css?v=20261025">
-    <script type="module" src="./admin.js?v=8"></script>
+    <link rel="stylesheet" href="./admin.css?v=20261025b">
+    <script type="module" src="./admin.js?v=9"></script>
   </head>
   <body class="admin-page">
     <a class="admin-skip" href="#admin-main">Skip to orders</a>
@@ -24,7 +24,7 @@
       <a id="owner-signin" class="button button-secondary button-small" href="/owner-login" hidden>Sign in again</a>
       <div id="preview-notice" class="notice admin-preview" hidden><strong>Local preview</strong><span>These are test orders. No customer emails or payments are sent. This preview has no owner sign-in.</span></div>
       <div class="admin-title-row">
-        <div><h1>Orders</h1><p class="muted">Payments, packing and delivery. One order at a time.</p></div>
+        <div><h1>Orders</h1><p class="muted">Your orders, one step at a time.</p></div>
         <details class="admin-tools"><summary>Tools</summary><div class="admin-title-actions"><button class="button button-small" id="test-purchase" type="button" aria-describedby="test-purchase-help" disabled>Test purchase</button><p class="admin-test-help" id="test-purchase-help">Checking test email setup…</p><a class="button button-secondary button-small" id="export-orders" href="/api/admin/export" download>Export orders</a></div></details>
       </div>
       <nav class="admin-nav" aria-label="Owner workspace">
@@ -33,11 +33,16 @@
       </nav>
       <div id="admin-message" class="notice" role="status" aria-live="polite" hidden></div>
       <section id="orders-view" aria-labelledby="orders-tab">
-        <div class="admin-order-tools">
-          <div class="field admin-search"><label for="order-search">Find an order</label><input id="order-search" type="search" placeholder="Order number, name or email" autocomplete="off"></div>
-          <div class="field"><label for="order-status">Status</label><select id="order-status"><option value="">All orders</option><option value="awaiting_payment">Awaiting payment</option><option value="paid">Paid — ready to pack</option><option value="shipped">Shipped</option><option value="cancelled">Cancelled</option></select></div>
+        <div class="admin-list-controls">
+          <div class="admin-order-tabs" aria-label="Filter orders"><button type="button" data-order-filter="active" aria-pressed="true">To do</button><button type="button" data-order-filter="" aria-pressed="false">All orders</button></div>
           <button id="refresh-orders" type="button" class="button button-secondary button-small">Refresh</button>
         </div>
+        <details class="admin-search-disclosure"><summary>Find an order</summary>
+        <div class="admin-order-tools">
+          <div class="field admin-search"><label for="order-search">Find an order</label><input id="order-search" type="search" placeholder="Order number, name or email" autocomplete="off"></div>
+          <div class="field"><label for="order-status">Status</label><select id="order-status"><option value="active">To do</option><option value="">All orders</option><option value="awaiting_payment">Awaiting payment</option><option value="paid">Paid — ready to pack</option><option value="shipped">Shipped</option><option value="cancelled">Cancelled</option></select></div>
+        </div>
+        </details>
         <div class="admin-orders-layout">
           <section class="admin-order-list-panel" aria-label="Order list" aria-busy="true" id="order-list-region"><div class="admin-list-heading"><h2>Orders <span id="order-count" class="muted"></span></h2><span class="muted">Newest first</span></div><div id="order-list" class="admin-order-list"><p class="admin-empty muted">Loading your orders…</p></div></section>
           <section id="order-detail" class="admin-detail panel" aria-label="Order details" tabindex="-1"><div class="admin-detail-empty"><h2>Select an order</h2><p class="muted">Its payment, delivery details and next step will appear here.</p></div></section>

@@ -136,7 +136,7 @@ test('email problems remain visible and mobile detail has a clear return to orde
   await dashboard(page, orders);
   await expect(page.locator('.admin-order-card')).toContainText('Email needs attention');
   await page.getByRole('button', { name: /LN-TEST-001/ }).click();
-  await expect(page.locator('.admin-detail-disclosure').first()).toHaveAttribute('open', '');
+  await expect(page.locator('.admin-detail-disclosure').filter({ has: page.locator('.admin-email-list') })).toHaveAttribute('open', '');
   await expect(page.locator('.admin-email-item')).toContainText('Bounced');
   await expect(page.getByRole('button', { name: 'Confirm payment', exact: true })).toBeVisible();
   if (page.viewportSize().width <= 800) {
@@ -150,6 +150,38 @@ test('email problems remain visible and mobile detail has a clear return to orde
     await expect(page.locator('.admin-email-item')).toContainText('Delivered');
     await expect(page.locator('.admin-order-card')).not.toContainText('Email needs attention');
   }
+});
+
+test('simple owner workspace filters orders and keeps list and detail separate on every screen', async ({page}) => {
+  const orders = [order({id:'unpaid',reference:'001',preview:false}), order({id:'paid',reference:'002',status:'paid',preview:false}), order({id:'shipped',reference:'003',status:'shipped',preview:false})];
+  await page.route('**/api/catalog', route => route.fulfill({json:{mode:'live'}}));
+  await page.route('**/api/admin/settings', route => route.fulfill({json:{settingsEditable:false,ownerAuthMode:'email',testCheckout:{enabled:false}}}));
+  await page.route('**/api/admin/orders**', route => {
+    const url = new URL(route.request().url());
+    if (url.pathname === '/api/admin/orders') {
+      const filter = url.searchParams.get('status');
+      return route.fulfill({json:{orders:orders.filter(o => filter === 'active' ? ['awaiting_payment','paid'].includes(o.status) : !filter || filter === o.status)}});
+    }
+    return route.fulfill({json:{order:orders.find(o => url.pathname.endsWith('/' + o.id))}});
+  });
+  await page.goto('/admin.html');
+  await expect(page.locator('.admin-order-card')).toHaveCount(2);
+  await expect(page.getByRole('button',{name:'Store settings',exact:true})).toBeHidden();
+  await expect(page.locator('#order-detail')).toBeHidden();
+  await page.getByRole('button',{name:'All orders',exact:true}).click();
+  await expect(page.locator('.admin-order-card')).toHaveCount(3);
+  await page.getByRole('button',{name:/003/}).click();
+  await expect(page.locator('#order-list-region')).toBeHidden();
+  await expect(page.getByRole('heading',{name:'003',exact:true})).toBeVisible();
+  await page.getByText('Customer & delivery',{exact:true}).click();
+  await expect(page.locator('address')).toContainText('1 Test Street');
+  await page.getByRole('button',{name:'← Back to orders',exact:true}).click();
+  await page.getByRole('button',{name:'Refresh',exact:true}).click();
+  await expect(page.locator('#order-list-region')).toBeVisible();
+  await expect(page.locator('#order-detail')).toBeHidden();
+  await page.getByRole('button',{name:'To do',exact:true}).click();
+  await expect(page.locator('.admin-order-card')).toHaveCount(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test('payment confirmation still requires the owner to check the bank before sending confirmation', async ({ page }) => {
