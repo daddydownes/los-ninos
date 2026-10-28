@@ -1,0 +1,5 @@
+- Build a navy gallery around one large cream photographic sleeve, keeping the gesture central.
+- Reveal a physical photo by dragging its exposed edge upward; settle into open or tucked positions.
+- Provide next/previous prints, an explicit pull/tuck button, and arrow-key controls.
+- Add a restrained animated pull cue and accommodate touch screens and reduced motion.
+- Check JavaScript syntax and all local asset paths; leave browser verification to parent.

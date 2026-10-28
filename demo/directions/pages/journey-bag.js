@@ -1,9 +1,12 @@
-(() => {
+(async () => {
   'use strict';
 
   const source = document.currentScript?.src || location.href;
   const thumbnail = new URL('../../../assets/hat-front-logo-v1.webp', source).href;
   const storageKey = 'los-ninos-preview-bag-v1';
+  if (document.querySelector('meta[name="los-ninos-commerce"][content="enabled"]')) {
+    try { await import(new URL('bag-state.js', source)); } catch (_) { /* Static previews retain their original storage path. */ }
+  }
   let limit = 10;
   // Leave the completed button feedback readable before opening the drawer.
   const confirmationDuration = 1000;
@@ -35,6 +38,7 @@
     let catalogRequest = null;
 
     function loadQuantity() {
+      if (window.LosNinosBagState) { quantity = window.LosNinosBagState.read().quantity; return; }
       try {
         // The previous demo stored a plain number under this same tab-local key.
         const saved = Number(sessionStorage.getItem(storageKey));
@@ -43,7 +47,16 @@
     }
 
     function saveQuantity() {
+      if (window.LosNinosBagState) { window.LosNinosBagState.setQuantity(quantity); return; }
       try { sessionStorage.setItem(storageKey, String(quantity)); } catch (_) {}
+    }
+
+    function allowedQuantity() {
+      return commerceEnabled && checkoutCatalog ? Math.max(0, Math.min(limit, checkoutCatalog.product.available)) : limit;
+    }
+
+    function getState() {
+      return { quantity, limit, available: checkoutCatalog?.product.available ?? null, catalog: checkoutCatalog, catalogPhase, pending: Boolean(pendingAdd) };
     }
 
     loadQuantity();
@@ -184,8 +197,8 @@
       count.value = String(quantity);
       count.textContent = String(quantity);
       minus.disabled = quantity <= 1;
-      plus.disabled = quantity >= limit;
-      limitNote.hidden = quantity < limit;
+      plus.disabled = quantity >= allowedQuantity() || (commerceEnabled && catalogPhase !== 'ready');
+      limitNote.hidden = quantity < limit || Boolean(document.querySelector('[data-film-storefront]'));
       limitNote.textContent = `Maximum quantity: ${limit}.`;
       renderPrices();
       checkoutButton.hidden = !commerceEnabled || quantity === 0;
@@ -199,9 +212,9 @@
         checkoutButton.firstChild.textContent = 'Retry checkout ';
         checkoutNote.textContent = 'Checkout could not load. Check your connection and try again.';
       } else if (checkoutCatalog) {
-        checkoutButton.disabled = !checkoutCatalog.acceptingOrders || quantity > checkoutCatalog.product.available;
+        checkoutButton.disabled = !checkoutCatalog.acceptingOrders || quantity > allowedQuantity();
         checkoutButton.firstChild.textContent = checkoutCatalog.mode === 'preview' ? 'Preview checkout ' : 'Checkout ';
-        checkoutNote.textContent = !checkoutCatalog.acceptingOrders ? 'Checkout is not open yet.' : quantity > checkoutCatalog.product.available ? 'This quantity is not available.' : checkoutCatalog.mode === 'preview' ? 'Test orders only. No payments or emails.' : 'Pay by bank transfer after placing your order.';
+        checkoutNote.textContent = !checkoutCatalog.acceptingOrders ? 'Checkout is not open yet.' : quantity > allowedQuantity() ? 'Please reduce your quantity to match availability.' : checkoutCatalog.mode === 'preview' ? 'Test orders only. No payments or emails.' : 'Pay by bank transfer after placing your order.';
       }
       document.querySelectorAll('[data-bag-count]').forEach(slot => { slot.textContent = String(quantity); });
       document.querySelectorAll('[data-bag-open]').forEach(trigger => {
@@ -211,10 +224,11 @@
       });
       document.querySelectorAll('[data-add-to-bag]').forEach(trigger => {
         const label = trigger.querySelector('[data-add-label]') || trigger;
-        label.textContent = pendingAdd?.trigger === trigger ? 'Added to bag' : quantity >= limit ? 'View bag' : 'Add to bag';
+        if (!trigger.hasAttribute('data-add-quantity')) label.textContent = pendingAdd?.trigger === trigger ? 'Added to bag' : quantity >= limit ? 'View bag' : 'Add to bag';
         trigger.setAttribute('aria-haspopup', 'dialog');
         trigger.setAttribute('aria-controls', dialog.id);
       });
+      document.dispatchEvent(new CustomEvent('ln:bag-render', { detail: getState() }));
     }
 
     function lockPage(savedPosition) {
@@ -283,6 +297,7 @@
       dialog.showModal();
       if (catalogPhase === 'error') loadCatalog();
       phase = 'open';
+      document.dispatchEvent(new CustomEvent('ln:bag-visibility', { detail: { open: true } }));
       closeButton.focus({ preventScroll: true });
     }
 
@@ -309,6 +324,7 @@
         dialog.close();
       }
       unlockPage();
+      document.dispatchEvent(new CustomEvent('ln:bag-visibility', { detail: { open: false } }));
       overlayId = null;
       overlayURL = null;
       const navigate = pendingNavigate;
@@ -396,7 +412,7 @@
     });
     shopButton.addEventListener('click', () => close({ navigate: () => {
       if (window.LosNinosJourney?.navigateToShop) window.LosNinosJourney.navigateToShop();
-      else location.hash = 'shop';
+      else location.hash = document.querySelector('[data-film-storefront]') ? 'top' : 'shop';
     } }));
 
     function outsidePanel(event) {
@@ -424,12 +440,12 @@
       announce(`Quantity ${quantity}.`);
     });
     plus.addEventListener('click', () => {
-      if (quantity >= limit) return;
+      if (quantity >= allowedQuantity() || (commerceEnabled && catalogPhase !== 'ready')) return;
       quantity += 1;
       saveQuantity();
       render();
       if (plus.disabled) minus.focus({ preventScroll: true });
-      announce(quantity === limit ? `Quantity ${limit}. Maximum quantity reached.` : `Quantity ${quantity}.`);
+      announce(quantity === limit && !document.querySelector('[data-film-storefront]') ? `Quantity ${limit}. Maximum quantity reached.` : `Quantity ${quantity}.`);
     });
     dialog.querySelector('.journey-bag-remove').addEventListener('click', () => {
       quantity = 0;
@@ -446,25 +462,31 @@
       const addTrigger = event.target.closest('[data-add-to-bag]');
       if (!addTrigger) return;
       event.preventDefault();
-      if (pendingAdd) return;
-      if (quantity >= limit) {
+      if (pendingAdd || addTrigger.disabled || addTrigger.closest('[inert]')) return;
+      if (commerceEnabled && catalogPhase !== 'ready') { if (catalogPhase === 'error') loadCatalog(); return; }
+      if (quantity >= allowedQuantity() && quantity > 0) {
         open(addTrigger);
-        announce(`Maximum quantity: ${limit}.`);
         return;
       }
-      quantity += 1;
+      if (commerceEnabled && (!checkoutCatalog?.acceptingOrders || allowedQuantity() <= 0)) return;
+      const requested = Number(addTrigger.dataset.addQuantity || 1);
+      if (!Number.isInteger(requested) || requested < 1 || requested > allowedQuantity() - quantity) {
+        announce('Please review the quantity before adding your hats.'); render(); return;
+      }
+      quantity += requested;
       saveQuantity();
       addTrigger.setAttribute('aria-disabled', 'true');
       addTrigger.setAttribute('data-bag-pending', '');
       const confirmation = { trigger: addTrigger, timer: null };
       pendingAdd = confirmation;
+      document.dispatchEvent(new CustomEvent('ln:bag-added', { detail: { quantity: requested } }));
       render();
-      announce(`Added one hat. Bag contains ${quantity} ${quantity === 1 ? 'item' : 'items'}.`);
+      announce(`Added ${requested} ${requested === 1 ? 'hat' : 'hats'}. Bag contains ${quantity} ${quantity === 1 ? 'item' : 'items'}.`);
       confirmation.timer = setTimeout(() => {
         if (pendingAdd !== confirmation) return;
         cancelPendingAdd();
         open(addTrigger);
-      }, reducedMotion.matches ? 0 : confirmationDuration);
+      }, reducedMotion.matches ? 0 : addTrigger.hasAttribute('data-add-quantity') ? 220 : confirmationDuration);
     });
 
     window.addEventListener('hashchange', cancelPendingAdd);
@@ -497,7 +519,12 @@
 
     cleanMalformedMarker();
     render();
-    window.LosNinosBag = { open, close, render, getQuantity: () => quantity };
+    function setQuantity(value) {
+      if (pendingAdd || !Number.isInteger(value) || value < 1 || (value > allowedQuantity() && value >= quantity)) return false;
+      if (commerceEnabled && (catalogPhase !== 'ready' || !checkoutCatalog?.acceptingOrders)) return false;
+      quantity = value; saveQuantity(); render(); announce(`Quantity ${quantity}.`); return true;
+    }
+    window.LosNinosBag = { open, close, render, setQuantity, getQuantity: () => quantity, getState, retry: () => loadCatalog() };
     async function loadCatalog() {
       if (!commerceEnabled || catalogRequest) return;
       const controller = new AbortController();
@@ -513,11 +540,11 @@
         });
         if (!response.ok) throw new Error('Checkout unavailable');
         const catalog = await response.json();
-        if (!catalog || !Number.isInteger(catalog.product?.maxQuantity) || !Number.isInteger(catalog.product?.available)) throw new Error('Checkout unavailable');
+        if (!catalog || !Number.isInteger(catalog.product?.maxQuantity) || !Number.isInteger(catalog.product?.available) || !Number.isSafeInteger(catalog.product?.priceCents) || catalog.product.priceCents < 0) throw new Error('Checkout unavailable');
         checkoutCatalog = catalog;
         catalogPhase = 'ready';
         limit = Math.max(1, Math.min(10, catalog.product.maxQuantity));
-        if (quantity > limit) { quantity = limit; saveQuantity(); announce(`The order limit is now ${limit}. Your bag has been updated.`); }
+        if (quantity > allowedQuantity()) announce('Availability changed. Please review the quantity in your bag.');
       } catch (_) {
         catalogPhase = 'error';
       } finally {

@@ -1,0 +1,5 @@
+- Compose an intimate editorial photo print with a lifted lower-right corner and navy/cream typography.
+- Clip the top photo diagonally as the corner is dragged inward, exposing the next real photograph beneath.
+- Add a triangular paper reverse, commit sufficiently long peels, and return short gestures to rest.
+- Provide explicit next/previous buttons, corner tap fallback, arrow-key controls, and reduced-motion support.
+- Verify inline JavaScript syntax and referenced local assets without browser use.

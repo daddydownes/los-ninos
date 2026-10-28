@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#08121d"><title>06 — The Reveal / Los Niños</title>
+<style>
+@font-face{font-family:Barlow;src:url('../assets/fonts/barlow-condensed-800-latin.woff2') format('woff2');font-weight:800;font-display:swap}@font-face{font-family:DM;src:url('../assets/fonts/dm-sans-latin.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{--navy:#08121d;--cream:#f1eee6;--ice:#b8daef;--ease:cubic-bezier(.23,1,.32,1)}*{box-sizing:border-box}body{margin:0;background:var(--navy);color:var(--cream);font-family:DM,Arial,sans-serif}button{font:inherit;color:inherit}button:focus-visible,a:focus-visible{outline:3px solid var(--ice);outline-offset:-5px}header{padding:23px 3.5vw;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ffffff28}.wordmark{font-family:Barlow,Arial,sans-serif;font-size:26px;line-height:.83;letter-spacing:-.7px}.location{font-size:10px;text-transform:uppercase;letter-spacing:1.7px;text-align:right;color:var(--ice)}.intro{padding:40px 3.5vw 30px;display:grid;grid-template-columns:1fr auto;align-items:end;gap:20px}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ice);margin:0 0 15px}h1{font-family:Barlow,Arial,sans-serif;font-size:clamp(70px,10.5vw,170px);line-height:.76;letter-spacing:-.025em;font-weight:800;margin:0}.intro p:last-child{font-size:12px;line-height:1.6;max-width:230px;margin:0}.shutters{display:flex;width:100%;height:clamp(490px,58vw,680px);overflow:hidden;background:var(--cream)}.shutter{position:relative;flex:1 1 0;min-width:0;overflow:hidden;isolation:isolate;border-right:1px solid #08121d55;transition:flex-grow 900ms var(--ease)}.shutter:last-child{border:0}.shutter.active{flex-grow:5.1}.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 44%;filter:saturate(.65) brightness(.75);transform:scale(1.07);transition:filter 850ms var(--ease),transform 1300ms var(--ease)}.active .photo{filter:saturate(.9) brightness(1);transform:scale(1)}.shutter:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#08121d30,transparent 35%,#08121d05 50%,#08121dc9);z-index:0;pointer-events:none}.select{position:absolute;inset:0;border:0;background:transparent;cursor:pointer;z-index:1;text-align:left;padding:0}.index{position:absolute;left:24px;top:22px;font-size:12px;font-weight:700;color:var(--cream);display:flex;align-items:center;gap:10px}.index:before{content:'';height:5px;width:5px;background:var(--ice);border-radius:100%;opacity:0;transition:opacity .3s}.active .index:before{opacity:1}.vertical{position:absolute;left:23px;bottom:30px;writing-mode:vertical-rl;transform:rotate(180deg);font-family:Barlow,sans-serif;font-size:clamp(26px,3.3vw,48px);text-transform:uppercase;white-space:nowrap;letter-spacing:-.02em;transition:opacity .25s,translate .5s}.active .vertical{opacity:0;translate:0 25px}.caption{position:absolute;left:30px;bottom:30px;right:25px;pointer-events:none;overflow:hidden;z-index:2}.caption-inner{transform:translateY(115%);opacity:0;transition:transform 700ms var(--ease),opacity .25s;white-space:nowrap}.active .caption-inner{transform:translateY(0);opacity:1;transition-delay:180ms}.caption small{display:block;letter-spacing:1.7px;font-size:9px;text-transform:uppercase;margin-bottom:12px;color:var(--ice)}.caption h2{font-family:Barlow,sans-serif;font-size:clamp(50px,5.8vw,92px);line-height:.85;margin:0;letter-spacing:-.02em}.caption p{font-size:11px;margin:15px 0 0}.enlarge{position:absolute;top:18px;right:18px;z-index:3;width:44px;height:44px;border:1px solid #f1eee685;background:#08121d50;backdrop-filter:blur(10px);border-radius:50%;font-size:23px;cursor:pointer;opacity:0;visibility:hidden;transform:rotate(-45deg);transition:opacity .3s,background .3s}.active .enlarge{opacity:1;visibility:visible}.enlarge:hover{background:var(--ice);color:var(--navy)}.endnote{display:flex;justify-content:space-between;gap:15px;padding:20px 3.5vw;font-size:10px;color:var(--ice);letter-spacing:.4px}.endnote span:last-child{text-align:right}.footer-line{padding:35px 3.5vw 40px;display:flex;align-items:end;justify-content:space-between;border-top:1px solid #ffffff20}.footer-line strong{font-family:Barlow,sans-serif;font-size:clamp(30px,4vw,52px);line-height:.9}.footer-line span{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;max-width:130px;line-height:1.5;text-align:right}dialog{border:0;padding:0;background:var(--navy);color:var(--cream);max-width:100vw;max-height:100dvh;width:100vw;height:100dvh;margin:0;overflow:hidden}dialog::backdrop{background:var(--navy)}.viewer{height:100%;display:grid;grid-template-rows:62px minmax(0,1fr) 60px}.viewer-head,.viewer-foot{display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:11px}.viewer-head button,.viewer-foot button{background:transparent;border:1px solid #f1eee650;padding:11px 16px;cursor:pointer}.viewer img{width:100%;height:100%;object-fit:contain}.viewer-foot div{display:flex;gap:8px}.mobile-hint{display:none}@media(min-width:1500px){.shutters{height:720px}}@media(max-width:650px){header{padding:20px}.intro{padding:33px 20px 24px;display:block}.intro p:last-child{max-width:260px;margin-top:22px;font-size:11px}.eyebrow{font-size:9px}h1{font-size:83px}.location{font-size:8px}.shutters{height:720px;flex-direction:column}.shutter{min-height:0;min-width:100%;border-right:0;border-bottom:1px solid #08121d65;flex:1 1 0;transition:flex-grow 750ms var(--ease)}.shutter.active{flex-grow:6}.photo{object-position:50% 40%;transform:scale(1.03)}.index{left:20px;top:18px;font-size:10px}.vertical{writing-mode:initial;transform:none;left:65px;bottom:auto;top:12px;font-size:25px}.active .vertical{translate:30px 0}.caption{left:20px;bottom:22px}.caption h2{font-size:clamp(44px,14vw,64px)}.caption small{font-size:8px}.caption p{font-size:10px}.enlarge{top:13px;right:14px}.endnote{padding:17px 20px;font-size:9px;line-height:1.5}.desktop-hint{display:none}.mobile-hint{display:inline}.footer-line{padding:25px 20px 30px}.footer-line span{font-size:8px;max-width:100px}.viewer-head,.viewer-foot{padding:0 15px}.viewer-head{font-size:10px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
+/* Refined shutters: selected state stays legible before, during and after motion. */
+.intro{padding-top:45px;padding-bottom:34px}.intro p:last-child{color:#c2c7cb;font-size:12px}h1{font-size:clamp(80px,11vw,164px);letter-spacing:-.018em;line-height:.84}.shutters{background:var(--navy);touch-action:pan-y}.shutter{transition:flex-grow 850ms cubic-bezier(.22,.8,.22,1)}.shutter:before{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;border-top:4px solid var(--ice);box-shadow:inset 0 0 0 1px #b8daef60;opacity:0;transition:opacity .3s}.shutter.active:before{opacity:1}.photo{filter:saturate(.35) brightness(.68);transform:scale(1.12);transition:filter 800ms var(--ease),transform 1400ms var(--ease);will-change:transform}.active .photo{filter:saturate(1) brightness(1);transform:scale(1.015)}.select{cursor:ew-resize}.index{left:22px;top:20px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #f1eee67a;border-radius:50%;font-size:11px;letter-spacing:.03em;background:#08121d22;transition:background .35s,color .35s,border-color .35s}.index:before{display:none}.active .index{background:var(--ice);border-color:var(--ice);color:var(--navy)}.caption{bottom:30px;left:28px;padding-top:6px}.caption-inner{transition:transform 850ms var(--ease),opacity .3s}.active .caption-inner{transition-delay:150ms}.caption small{letter-spacing:.17em}.caption h2{font-size:clamp(48px,5.6vw,88px);line-height:.94;font-weight:800}.caption p{color:#e0e3e4;line-height:1.5;font-size:11px;margin-top:12px}.enlarge{width:auto;height:42px;min-width:128px;display:flex;align-items:center;justify-content:center;gap:14px;border-radius:24px;padding:0 17px;font-size:10px;letter-spacing:.02em;transform:translateY(-6px);background:#08121d99;transition:opacity .35s,transform .5s var(--ease),background .25s;backdrop-filter:blur(14px)}.enlarge span{font-size:19px}.active .enlarge{transform:translateY(0);transition-delay:120ms}.archive-controls{padding:24px 3.5vw 16px;display:flex;align-items:flex-end;justify-content:space-between}.control-label{font-size:8px;letter-spacing:1.5px;color:#a9b7c3;display:block;margin-bottom:12px}.frame-nav{display:flex;gap:7px}.frame-nav button{height:44px;width:52px;background:transparent;border:1px solid #f1eee633;font-size:11px;cursor:pointer;transition:background .25s,color .25s,border-color .25s}.frame-nav button:hover{border-color:var(--ice)}.frame-nav button[aria-pressed="true"]{background:var(--ice);border-color:var(--ice);color:var(--navy)}#position{font-family:Barlow,sans-serif;font-size:29px;letter-spacing:.02em;color:var(--ice);line-height:44px}.endnote{padding-top:0;padding-bottom:28px;color:#a9b7c3;font-size:9px}.viewer img{animation:reveal-photo .4s var(--ease)}.viewer-head button:hover,.viewer-foot button:hover{background:var(--ice);color:var(--navy)}@keyframes reveal-photo{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+@media(max-width:650px){header{padding:18px 20px}.intro{padding:28px 20px 24px}.intro p:last-child{margin-top:17px;font-size:11px}h1{font-size:clamp(68px,19vw,116px);white-space:nowrap}.eyebrow{margin-bottom:14px}.shutters{height:710px}.shutter.active{flex-grow:6.3}.shutter:before{border-top:0;border-left:4px solid var(--ice)}.photo{object-position:50% 40%}.index{top:13px;left:17px;width:30px;height:30px;font-size:10px}.vertical{left:61px;top:13px;font-size:25px;line-height:30px}.caption{left:21px;right:20px;bottom:22px}.caption h2{font-size:clamp(44px,13vw,66px)}.caption p{font-size:10px}.enlarge{top:13px;right:15px;height:36px;min-width:118px;padding:0 13px;gap:12px;font-size:10px}.select{cursor:pointer}.archive-controls{padding:22px 20px 16px}.frame-nav{gap:6px}.frame-nav button{width:43px}#position{font-size:24px}.endnote{padding:0 20px 23px;font-size:8px;gap:15px}.endnote span{max-width:160px}.endnote span:last-child{text-align:right}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.photo,.active .photo{transform:none}}
+</style></head>
+<body>
+<header><div class="wordmark" aria-label="Los Niños">LOS<br>NIÑOS</div><div class="location">Selected photographs<br>Los Niños</div></header>
+<main><div class="intro"><div><p class="eyebrow">06 / The reveal</p><h1>THE ARCHIVE.</h1></div><p>Portraits, street scenes &amp; details.<br>Five frames from Los Niños.</p></div>
+<section class="shutters" aria-label="Photo archive. Select a frame to reveal it."></section>
+<div class="archive-controls"><div><span class="control-label">SELECT A FRAME</span><nav class="frame-nav" aria-label="Select archive photograph"></nav></div><span id="position" aria-live="polite">01 / 05</span></div>
+<div class="endnote"><span class="desktop-hint">Hover or drag to reveal · Arrow keys to explore</span><span class="mobile-hint">Tap a row or swipe across the photo</span><span>View photo ↗ for the full frame</span></div></main>
+<dialog aria-label="Enlarged archive photograph"><div class="viewer"><div class="viewer-head"><span id="viewer-title"></span><button id="close" aria-label="Close enlarged photograph">Close ×</button></div><img id="viewer-image" alt=""><div class="viewer-foot"><span id="viewer-count"></span><div><button id="previous" aria-label="Previous photograph">←</button><button id="next" aria-label="Next photograph">→</button></div></div></div></dialog>
+<script>
+
+const frames = [
+  {file:'portrait.webp', title:'THE PORTRAIT', short:'Portrait', note:'Black & white / Los Niños', alt:'Black and white portrait of a man wearing a Los Niños cap and holding a microphone'},
+  {file:'street.webp', title:'ON THE STREET', short:'Street', note:'Natural light / Los Niños', alt:'Man in a white shirt and navy cap standing beside sunlit concrete and a metal gate'},
+  {file:'hat-detail.webp', title:'THE DETAIL', short:'Detail', note:'Embroidery / Los Niños', alt:'Close black and white photograph of a Los Niños embroidered cap'},
+  {file:'caps.webp', title:'THE CAPS', short:'Caps', note:'From the collection / Los Niños', alt:'Los Niños caps from the collection'},
+  {file:'photo-04.webp', title:'ANOTHER ANGLE', short:'Another angle', note:'Los niños con sueños / Los Niños', alt:'Overhead view of a navy cap embroidered with los niños con sueños, worn with a white shirt'}
+];
+const root = document.querySelector('.shutters');
+const dialog = document.querySelector('dialog');
+const nav = document.querySelector('.frame-nav');
+let active = 0, hoverTimer, gesture = null, suppressClickUntil = 0;
+frames.forEach((frame, i) => {
+  const panel = document.createElement('article');
+  panel.className = 'shutter' + (i === 0 ? ' active' : '');
+  panel.dataset.frame = i;
+  panel.innerHTML = `<img class="photo" src="../assets/photos/${frame.file}" alt="${frame.alt}" draggable="false"><button class="select" aria-label="Reveal ${frame.short}" aria-pressed="${i===0}"><span class="index">0${i+1}</span><span class="vertical">${frame.short}</span></button><div class="caption"><div class="caption-inner"><small>Frame 0${i+1} / Photo archive</small><h2>${frame.title}</h2><p>${frame.note}</p></div></div><button class="enlarge" aria-label="Enlarge ${frame.short}" ${i!==0?'tabindex="-1"':''}>View photo <span aria-hidden="true">↗</span></button>`;
+  root.appendChild(panel);
+  const select = panel.querySelector('.select');
+  panel.addEventListener('pointerenter', e => {
+    if (e.pointerType === 'mouse' && !gesture) {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => activate(i), 95);
+    }
+  });
+  panel.addEventListener('pointerleave', () => clearTimeout(hoverTimer));
+  select.addEventListener('focus', () => activate(i));
+  select.addEventListener('click', () => { if (Date.now() > suppressClickUntil) activate(i); });
+  panel.querySelector('.enlarge').addEventListener('click', () => openViewer(i));
+  select.addEventListener('keydown', e => keyboardSelect(e, i, '.select'));
+  const number = document.createElement('button');
+  number.textContent = '0' + (i+1);
+  number.setAttribute('aria-label', 'Select '+frame.short);
+  number.setAttribute('aria-pressed', String(i===0));
+  number.addEventListener('click', () => activate(i));
+  number.addEventListener('keydown', e => keyboardSelect(e, i, 'nav'));
+  nav.appendChild(number);
+});
+function keyboardSelect(e, i, source) {
+  const movement = {ArrowRight:1, ArrowDown:1, ArrowLeft:-1, ArrowUp:-1}[e.key];
+  let target;
+  if (movement) target = (i + movement + frames.length) % frames.length;
+  else if (e.key === 'Home') target = 0;
+  else if (e.key === 'End') target = frames.length - 1;
+  else return;
+  e.preventDefault(); activate(target);
+  (source === 'nav' ? nav.children[target] : root.children[target].querySelector('.select')).focus();
+}
+function activate(i) {
+  active = i;
+  [...root.children].forEach((panel,j) => {
+    panel.classList.toggle('active', i===j);
+    panel.querySelector('.select').setAttribute('aria-pressed', String(i===j));
+    panel.querySelector('.enlarge').tabIndex = i===j ? 0 : -1;
+    nav.children[j].setAttribute('aria-pressed', String(i===j));
+  });
+  document.querySelector('#position').textContent = `0${i+1} / 05`;
+}
+root.addEventListener('pointerdown', e => {
+  if (e.target.closest('.enlarge') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  clearTimeout(hoverTimer);
+  gesture = {x:e.clientX, y:e.clientY, start:active, type:e.pointerType, id:e.pointerId};
+});
+root.addEventListener('pointermove', e => {
+  if (!gesture || gesture.type !== 'mouse' || !e.buttons) return;
+  const panel = e.target.closest('.shutter');
+  if (panel) activate(Number(panel.dataset.frame));
+});
+window.addEventListener('pointerup', e => {
+  if (!gesture || e.pointerId !== gesture.id) return;
+  const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+  if (gesture.type !== 'mouse' && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)*1.5) {
+    suppressClickUntil = Date.now()+350;
+    activate((gesture.start + (dx < 0 ? 1 : -1) + frames.length) % frames.length);
+  }
+  gesture = null;
+});
+window.addEventListener('pointercancel', () => {gesture=null;});
+function paintViewer() {
+  const f = frames[active], image = document.querySelector('#viewer-image');
+  image.src = '../assets/photos/' + f.file;
+  image.alt = f.alt;
+  document.querySelector('#viewer-title').textContent = 'LOS NIÑOS / ' + f.short.toUpperCase();
+  document.querySelector('#viewer-count').textContent = `0${active+1} / 05`;
+}
+function openViewer(i) {
+  clearTimeout(hoverTimer); activate(i); paintViewer(); dialog.showModal();
+  document.body.style.overflow = 'hidden';
+  document.querySelector('#close').focus();
+}
+function changeFrame(step) {activate((active+step+frames.length)%frames.length); paintViewer();}
+ document.querySelector('#close').onclick = () => dialog.close();
+ document.querySelector('#previous').onclick = () => changeFrame(-1);
+ document.querySelector('#next').onclick = () => changeFrame(1);
+ dialog.addEventListener('close', () => {
+  document.body.style.overflow = '';
+  root.children[active].querySelector('.enlarge').focus();
+ });
+ dialog.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {e.preventDefault(); changeFrame(e.key==='ArrowLeft' ? -1 : 1);}
+ });
+</script></body></html>

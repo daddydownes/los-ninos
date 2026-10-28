@@ -1,5 +1,35 @@
 # Los Niños
 
+## Continue the latest work on another computer
+
+The current film + photographic rotation + zoom-through-photo demo is on branch
+`codex/latest-film-zoom-demo`. It is separate from the deployed storefront.
+
+```sh
+git clone --branch codex/latest-film-zoom-demo https://github.com/daddydownes/los-ninos.git
+cd los-ninos
+npm run preview:latest
+```
+
+Use Node.js 24+ and Python 3.11+. The launcher finds `python3`, `python`, or Windows
+`py -3`; set `PYTHON` if your Python executable is elsewhere. No Cloudflare login,
+API keys, image-generation tools, or raw video master is needed for this preview.
+
+Open **http://127.0.0.1:8796/**. Stop both local servers with Ctrl+C.
+The photo concepts are at **http://127.0.0.1:8796/ideas/**.
+For an existing clone, fetch and switch to `codex/latest-film-zoom-demo` first.
+
+- `demo/zoom-storefront/`: latest integrated page, photo rotation, and final purchase card.
+- `demo/film-storefront/`: original film journey and opening comparisons.
+- `demo/archive-ideas/`: all 28 interactive photo concepts, plans, and photographs.
+- `assets/film/`: selected HD/phone campaign videos, alternate cuts, posters, and edit timings.
+- `commerce/`: checkout, owner dashboard, bank-transfer order flow, and tests.
+- [Handoff notes](docs/latest-demo-handoff.md): verification, optional media source, and remaining work.
+
+This branch uploads the work; it does not deploy the new design to losninos.com.au.
+Local orders stay on this computer and local preview sends no emails.
+
+
 Storefront with the stitched opening, photography, interactive hat views, and an
 optional bank-transfer checkout. The checkout saves orders, collects Australian
 delivery details, and queues payment instructions. A private owner dashboard
@@ -89,3 +119,4 @@ Keep the domain, hosting, email account, database, and recovery methods in the
 owner's accounts. The owner must choose any project-code license before granting
 reuse rights; this work does not assign a license. Preserve the existing font
 license notices and confirm rights to photography and brand assets separately.
+

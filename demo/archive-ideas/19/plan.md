@@ -1,0 +1,5 @@
+- Arrange eight physical photo prints on a flat radial wheel, with a clear top selection.
+- Rotate the wheel through horizontal pointer dragging, restrained inertia, and snap-to-print settling.
+- Enlarge the selected print in a modal and offer previous/next and keyboard equivalents.
+- Use cream paper, navy typography, responsive touch dimensions, and reduced-motion support.
+- Verify JavaScript syntax and local assets without using the browser or editing other concepts.

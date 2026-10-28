@@ -1,0 +1,5 @@
+- Build Photo Atlas as a quiet cream exhibition canvas with a bold condensed title, navy typography, and icy blue wayfinding.
+- Arrange a curated set of photographs at varied sizes in a deliberate two-dimensional composition, with short catalogue labels and generous space.
+- Support pointer/touch panning, keyboard arrows, focal zoom buttons, reset-to-fit, and a live position overview.
+- Open each photograph in an accessible clean full-screen viewer, with previous/next navigation, Escape, and restored focus.
+- Keep the experiment standalone, responsive at 375px, dependency-free, and verify local assets and inline JavaScript syntax before handoff.

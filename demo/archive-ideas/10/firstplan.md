@@ -1,0 +1,5 @@
+- Build an editorial photo wall with navy, warm paper, oversized condensed typography, and ice-blue selection details.
+- Use eight locally hosted images in a deliberate asymmetric desktop grid and a two-column mobile mosaic.
+- On selection, recompose the wall around a larger hero using interruptible FLIP animation and a reduced-motion alternative.
+- Add reset, an accessible fullscreen photo dialog, keyboard controls, and a clear interaction hint.
+- Check JavaScript syntax and every referenced local asset; keep the prototype isolated from the main site.

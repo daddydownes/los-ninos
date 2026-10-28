@@ -1,0 +1,44 @@
+{
+  "fps": 30,
+  "frames": 421,
+  "duration": 14.033333333333333,
+  "posterSourceFrame": 1742,
+  "sourceRanges": [
+    [
+      1563,
+      1658
+    ],
+    [
+      1696,
+      1734
+    ],
+    [
+      1773,
+      2061
+    ]
+  ],
+  "removedSourceRanges": [
+    [
+      1658,
+      1696
+    ],
+    [
+      1734,
+      1773
+    ]
+  ],
+  "removedSeconds": 2.566666666666667,
+  "joinOutputFrames": [
+    95,
+    133
+  ],
+  "joinSeconds": [
+    3.1666666666666665,
+    4.433333333333334
+  ],
+  "phoneNativeCrop": [
+    1000,
+    2160
+  ],
+  "crf": 18
+}

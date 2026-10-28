@@ -1,0 +1,5 @@
+- Compose a cream editorial spread with a full portrait, oversized condensed typography, and a same-frame detail crop.
+- Use the photograph itself for the movable magnifier; calculate positions from the rendered image dimensions.
+- Add three selectable photographs, lens visibility control, and a full-image dialog.
+- Support pointer drag, touch, keyboard arrows, small screens, and reduced motion.
+- Check inline JavaScript syntax and every referenced local asset; keep all files inside concept 08.

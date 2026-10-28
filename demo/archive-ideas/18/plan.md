@@ -1,0 +1,5 @@
+- Create a premium navy photographic stage with a warm-paper identity header and oversized editorial typography.
+- Place real archive photos on a fine connected bottom rail beneath a large hero aperture.
+- Support pointer dragging upward: move a tile with the finger, highlight the target, and commit on release above the threshold.
+- Offer click, tap, Enter, and Space selection, plus reduced-motion handling and a compact phone layout.
+- Verify JavaScript syntax and referenced assets while leaving all other concepts untouched.

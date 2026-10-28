@@ -1,0 +1,38 @@
+/* Refinements to the existing journey, not a replacement layout. */
+.brandbar{position:fixed;z-index:30;pointer-events:none}
+.brandbar a,.brandbar button{pointer-events:auto}
+.brandbar .brand,.brandbar .concept-link{transition:opacity 250ms ease}
+.past-film .brandbar .brand,.past-film .brandbar .concept-link{opacity:0;visibility:hidden;pointer-events:none}
+.bag-open{background:#14202ee8;color:#fff;box-shadow:0 3px 18px #080f1915;transition:transform 240ms ease,background 240ms ease,box-shadow 240ms ease;min-height:44px}
+.bag-open:hover{transform:translateY(-2px);background:#223448;box-shadow:0 6px 22px #080f1926}
+.bag-open:active{transform:scale(.96)}
+.bag-open:focus-visible{outline:2px solid #fff;outline-offset:4px;box-shadow:0 0 0 5px #14202e}
+.product-meta h2{font-family:Barlow,Arial,sans-serif;font-size:27px;font-weight:800;line-height:1;letter-spacing:.005em;text-transform:uppercase;white-space:nowrap}
+.product-name-ink{display:inline-block;transform-origin:left center}
+.price{position:relative;display:flex;flex-direction:column;align-items:flex-end;flex:none;line-height:1;overflow:hidden;padding:2px 0 4px}
+.price [data-product-price]{display:block;font-size:29px;font-weight:700;letter-spacing:-.065em;font-variant-numeric:tabular-nums;line-height:1.05}
+.price small{display:block;margin:4px 0 0;font-size:10px;font-weight:500;letter-spacing:.06em;color:#d6dee7;line-height:1}
+.price::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,#fff5 45%,transparent 62%);transform:translateX(-150%) skewX(-18deg);pointer-events:none}
+.shop-card.is-ready .product-name-ink{animation:product-ink-in 650ms cubic-bezier(.16,1,.3,1) both}
+.shop-card.is-ready .price [data-product-price]{animation:price-ink-in 700ms 100ms cubic-bezier(.16,1,.3,1) both}
+.shop-card.is-ready .price::after{animation:price-light-pass 1000ms 600ms ease-out both}
+@keyframes product-ink-in{from{opacity:0;transform:translateY(8px);letter-spacing:.055em}to{opacity:1;transform:none;letter-spacing:.005em}}
+@keyframes price-ink-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes price-light-pass{to{transform:translateX(150%) skewX(-18deg)}}
+.worn-heading h2{font-weight:500;line-height:.98}
+.place-line{display:block;overflow:hidden;padding-bottom:.07em;margin-bottom:-.07em}
+.place-ink{display:block;will-change:auto}
+.worn-heading.is-visible .place-ink{animation:place-arrive 1100ms cubic-bezier(.16,1,.3,1) both}
+.worn-heading.is-visible .place-line:last-child .place-ink{animation-delay:130ms}
+.place-line:last-child .place-ink{background:linear-gradient(110deg,#122031 25%,#59758e 44%,#122031 61%);background-size:240% 100%;color:#122031;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.worn-heading.is-visible .place-line:last-child .place-ink{animation:place-arrive 1100ms 130ms cubic-bezier(.16,1,.3,1) both,place-light-pass 2200ms 600ms ease-out both}
+@keyframes place-arrive{from{opacity:0;transform:translateY(65%)}to{opacity:1;transform:none}}
+@keyframes place-light-pass{from{background-position:100% 0}to{background-position:0 0}}
+.bag-controller-unavailable .card-order{display:none}
+.bag-controller-unavailable .film-fallback-link{display:flex;grid-column:1/-1;grid-row:2}
+.bag-controller-unavailable .bag-open{display:none}
+@media(min-width:701px){.product-meta{gap:8px}.shop-card{padding-inline:18px}.product-meta h2{font-size:26px}.photos.journey-worn{padding-bottom:110px}}
+@media(max-width:700px){.product-meta h2{font-size:23px;letter-spacing:0}.price [data-product-price]{font-size:27px}.price small{font-size:10px}.product-meta{gap:8px}.brandbar{padding-top:max(18px,env(safe-area-inset-top))}}
+@media(max-width:375px){.product-meta h2{font-size:21px}.price [data-product-price]{font-size:24px}}
+@media(max-width:350px){.product-meta h2{font-size:19px}.price [data-product-price]{font-size:23px}.price small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.shop-card.is-ready .product-name-ink,.shop-card.is-ready .price [data-product-price],.shop-card.is-ready .price::after,.worn-heading.is-visible .place-ink,.worn-heading.is-visible .place-line:last-child .place-ink{animation:none;transform:none;opacity:1}.price::after{display:none}.bag-open{transition:none}}

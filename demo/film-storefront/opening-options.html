@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Los Niños — opening frames</title><link rel="stylesheet" href="opening-options.css"></head>
+<body><main>
+<header><a class="brand" href="./">LOS<br>NIÑOS</a><a class="back" href="./">Back to the demo ↗</a></header>
+<p class="eyebrow">THE FIRST MOMENT</p><h1>Find the first frame.</h1>
+<p class="intro">The previous portrait opening is preserved here. Compare its frames, or <a href="model-openings.html">compare the current model-led openings</a>. The main demo now uses a model portrait and the original sequence.</p>
+<div class="comparisons">
+<button class="reference" id="previous-opening" type="button"><img src="assets/film/opening-02-mobile.jpg" alt="The previous opening frame" width="720" height="1560"><span class="reference-title">Previous opening</span><span class="detail">Frame 15 · 0.500s · restored</span></button>
+<button class="reference" id="newer-opening" type="button"><img src="assets/film/opening-01-mobile.jpg" alt="The newer opening at the start of the shot" width="720" height="1560"><span class="reference-title">Newer start</span><span class="detail">Frame 00 · 0.000s</span></button>
+<figure class="selected-frame"><img id="selected-image" src="assets/film/opening-frame-15-mobile.jpg" alt="Selected opening, frame 15" width="720" height="1560"><figcaption><span class="reference-title">Your comparison</span><output id="frame-readout" class="detail">Frame 15 · 0.500s</output></figcaption></figure>
+</div>
+<div class="scrubber"><button id="previous-frame" type="button" aria-label="Previous frame">←</button><div><label for="frame-picker">Move one frame at a time</label><input id="frame-picker" type="range" min="0" max="38" step="1" value="15"><div class="range-labels"><span>Start · 0.000s</span><span>End of shot · 1.267s</span></div></div><button id="next-frame" type="button" aria-label="Next frame">→</button></div>
+<div class="actions"><button id="play" type="button">Play frame 15 with the intro <span aria-hidden="true">↗</span></button><a id="full" href="./?opening=frame-15" target="_blank" rel="noopener">Open this version full-screen ↗</a></div>
+<p id="status" role="status">Selecting a frame only changes this preview. The main demo keeps the continuous portrait-led sequence.</p>
+<section id="live" hidden aria-label="Full opening preview"><h2 id="live-title">Live preview</h2><iframe id="preview-frame" title="Los Niños hat animation and selected video opening" allow="autoplay"></iframe></section>
+<section class="all-frames" aria-labelledby="frames-title"><h2 id="frames-title">Every frame in the opening shot</h2><p class="detail">39 original frames, in order. Tap any one to compare it above.</p><div class="choices" id="choices" aria-label="All 39 opening frames"></div></section>
+</main><script src="film-openings.js"></script><script src="opening-options.js"></script></body></html>

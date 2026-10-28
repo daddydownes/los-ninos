@@ -1,0 +1,5 @@
+- Compose a cream editorial worktable with oversized condensed title, compact metadata, and four overlapping photographic prints.
+- Make each print directly draggable, raise the active print, and settle it with a restrained spring on release.
+- Add explicit view controls, a full-screen image dialog, reset, and keyboard movement for a complete accessible alternative.
+- Adapt the print arrangement and controls to narrow touch screens; honor reduced-motion preferences.
+- Verify referenced local assets and JavaScript syntax without touching the existing shop or parent chooser.

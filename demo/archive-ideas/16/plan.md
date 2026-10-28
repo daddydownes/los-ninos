@@ -1,0 +1,5 @@
+- Arrange three tall photographic panels beneath an editorial heading, each covered by navy paper with subtle folds.
+- Let a visible pull tab lift each cover vertically using pointer drag, touch, or keyboard controls.
+- Provide individual reveal buttons, a global reset, and full-photo enlargement.
+- Stack panels comfortably on narrow screens and respect reduced-motion preferences.
+- Check JavaScript syntax and local assets; confine changes to concept 16.

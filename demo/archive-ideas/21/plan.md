@@ -1,0 +1,5 @@
+- Place a large, tactile four-sided photo cube in a quiet navy editorial composition.
+- Map real local photographs to CSS 3D faces, with responsive geometry and restrained perspective.
+- Support continuous horizontal dragging with quarter-turn settling, plus previous/next and arrow keys.
+- Provide a separate view-photograph action and accessible full-image dialog with focus restoration.
+- Verify inline JavaScript syntax and local assets; leave visual browser QA to the parent.

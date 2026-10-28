@@ -1,0 +1,5 @@
+- Build a continuous photograph rail whose nearest pointer or touch-drag position controls a smooth wave of expanding and compressing widths.
+- Keep the rail visibly movable with clipped continuation, drag scrolling, accessible previous/next controls and a draggable position slider.
+- Use local photography, navy and cream framing, concise descriptive labels and a clear selected-photo enlargement button.
+- Support tap-to-select, tap-again-to-view, keyboard navigation and a native full-frame modal with focus restoration.
+- Respect reduced motion by snapping the wave, check inline JavaScript and local assets, and leave browser QA to the parent.

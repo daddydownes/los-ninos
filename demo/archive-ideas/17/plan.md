@@ -1,0 +1,5 @@
+- Build a large photographic flip file on a navy field with cream editorial typography and local brand fonts.
+- Stack two full photographic leaves around a lower hinge, allowing an upward or downward drag to reveal the adjacent photograph in restrained 3D.
+- Provide a clear pull handle, previous/next buttons, numbered index, and keyboard navigation without requiring gestures.
+- Add an accessible fullscreen photograph dialog with Escape and focus return.
+- Adapt the composition to 375px touch screens, respect reduced motion, and validate JavaScript syntax and local assets.

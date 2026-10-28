@@ -1,0 +1,5 @@
+- Frame a sculptural, close-range photo cylinder with editorial typography and ample navy negative space.
+- Use CSS 3D portrait planes and responsive geometry so foreground images stay substantial on desktop and mobile.
+- Implement pointer dragging, momentum and snap with visible previous/next buttons and keyboard equivalents.
+- Add an accessible full-image dialog with explicit close, Escape support and focus restoration.
+- Verify JavaScript syntax, local asset references and reduced-motion handling; leave visual QA to the integrating parent.

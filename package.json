@@ -5,11 +5,18 @@
     "build": "python3 scripts/build-site.py",
     "build:shop": "python3 scripts/build-site.py --commerce",
     "preview:shop": "npm run build:shop && node scripts/commerce-local.mjs",
+    "build:film-demo": "python3 scripts/build-film-demo.py",
+    "preview:film-demo": "npm run build:film-demo && node scripts/commerce-local.mjs --film",
     "test:commerce": "node --test commerce/tests/*.test.mjs",
     "test": "playwright test",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "build:latest": "node scripts/preview-latest.mjs --build-only",
+    "preview:latest": "node scripts/preview-latest.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

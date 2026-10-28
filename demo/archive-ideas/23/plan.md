@@ -1,0 +1,5 @@
+- Create Magnetic Board as a cream studio pinboard with one large central photograph and five smaller prints arranged neatly around it.
+- Make every print draggable; moving a side print into the central target swaps it into focus and reorganizes the remaining photographs around the sides.
+- Provide tap/click and keyboard activation as equivalent alternatives, plus a reset button that restores the original arrangement.
+- Adapt the arrangement to a narrow screen with three prints above and two below the central photograph, preserving comfortable touch targets.
+- Support full-photo viewing, reduced motion, and pointer cancellation; verify the standalone JavaScript and referenced assets.

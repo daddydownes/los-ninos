@@ -1,0 +1,5 @@
+- Present an editorial navy-and-cream archive around a physical concertina of photographs.
+- Build alternating CSS 3D hinged planes that progressively unfold through one clear range control.
+- Support direct horizontal dragging on the strip, range keyboard controls, and a reset action.
+- Open each photograph in a full-size accessible dialog with explicit close and focus restoration.
+- Check JavaScript syntax and all local image/font paths; leave browser visual QA to the parent.

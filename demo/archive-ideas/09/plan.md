@@ -1,0 +1,5 @@
+- Compose an airy photographic installation in cream and navy, designed as a section after the existing shopping content.
+- Suspend four substantial, differently proportioned photographs from a fine overhead rail in shallow CSS 3D space.
+- Allow direct dragging to tilt each panel with a restrained damped spring that stops when settled.
+- Open every photograph through an accessible button and modal with Escape, focus return, and backdrop dismissal.
+- Adapt the installation to 375px touch screens, respect reduced motion, and verify syntax and local asset references.

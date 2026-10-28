@@ -1,0 +1,5 @@
+- Compose a cream editorial archive around three stacked photographic drawers in a navy cabinet.
+- Pull each drawer sideways to reveal its full print, with smooth direct manipulation and subtle depth changes in the other drawers.
+- Provide prominent named handles, open/retract controls, arrow-key movement, and an accessible photograph viewer.
+- Keep the cabinet inside the viewport at 375px, allow ordinary vertical scrolling, and disable animated settling for reduced motion.
+- Validate inline JavaScript syntax and every local image/font reference without browser tooling.

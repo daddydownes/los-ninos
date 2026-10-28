@@ -1,0 +1,5 @@
+- Build a quiet photographic edition on warm paper, with oversized condensed typography and small blue editorial marks.
+- Pair full-bleed photography with restrained inset image pages; keep the physical book, paper edges, and centre binding convincing.
+- Animate a two-sided CSS 3D leaf around the spine, with shaded paper and a tactile corner control.
+- Present a full-size single-page edition on phones; support buttons, arrow keys, touch swipes, and reduced motion.
+- Keep everything local and standalone, validate script syntax and referenced assets, and leave browser visual QA to the parent.

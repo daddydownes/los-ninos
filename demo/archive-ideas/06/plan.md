@@ -1,0 +1,5 @@
+- Preserve the five photographic shutters as a focused archive section, and replace promotional filler with descriptive photograph labels.
+- Strengthen the selected frame with an icy edge, numbered badge and clear enlargement pill, while keeping inactive photo strips visible.
+- Refine image scale, color and masked caption transitions; support hover intent, keyboard selection and dragging across desktop strips.
+- Make mobile rows touch-first with generous targets, horizontal swipes between frames and a persistent numbered selector below the gallery.
+- Retain native modal focus handling, arrows and Escape, respect reduced motion, and verify JavaScript syntax plus every local asset without browser use.

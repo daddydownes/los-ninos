@@ -1,0 +1,5 @@
+- Join concept 27’s endless, fractional photo movement with concept 14’s overlapping paper-card fan.
+- Wrap the full 43-photo archive beyond the visible edges, letting drag, horizontal wheel, buttons and keyboard move forever in either direction.
+- Flow cards continuously along a smooth fan arc with centre lift, tilt, depth and velocity-driven spreading; retain a gentle momentum-and-spring finish.
+- Apply final pointer-up coordinates so fast or coalesced drags still move, preserve vertical page scrolling, and respect reduced motion.
+- Preserve the large photo viewer and existing visual identity; verify looping, input handling, spring settling, syntax and assets without touching other concepts.
