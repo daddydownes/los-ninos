@@ -21,26 +21,20 @@ purchase card flow. The live Cloudflare shop has not been redeployed.
 
 ## Source media
 
-The original `Los Ninos FINAL.MP4` is 307,901,644 bytes, too large for an ordinary
-GitHub Git blob. It is saved separately as the source-master asset in the draft
-GitHub release `working-media-2026-10-29`. Repository collaborators can download
-it in GitHub Releases when signed in, or use:
+Jacob will transfer the original HD video separately from his email. The raw
+master is not included in GitHub. The edited videos used by the demo are included,
+so the preview runs without that original master.
+
+Optional re-encode after downloading the original (requires FFmpeg on PATH):
 
 ```sh
-gh release download working-media-2026-10-29 --repo daddydownes/los-ninos --pattern 'Los.Ninos.FINAL.MP4'
+python scripts/encode-film-campaign.py --source 'Los Ninos FINAL.MP4'
 ```
 
-Optional re-encode (requires FFmpeg on PATH):
-
-```sh
-python scripts/encode-film-campaign.py --source 'Los.Ninos.FINAL.MP4'
-```
-
-The served videos are committed normally, so this download is unnecessary for
-running or editing the website. Original untouched camera-photo files remain
-on Jacob's computer; their web-ready copies are included. Downloaded tool
-binaries, neural model caches, intermediate render frames, customer databases,
-credentials, and private email logs are not part of this source snapshot.
+Original untouched camera-photo files remain on Jacob's computer; their
+web-ready copies are included. Downloaded tool binaries, neural model caches,
+intermediate render frames, customer databases, credentials, and private email
+logs are not part of this source snapshot.
 
 ## Verification and limits
 
@@ -53,4 +47,5 @@ were not performed as part of this GitHub handoff.
 
 Preserve the exact existing page flow when refining it. The user rejected the
 actual Three.js reconstruction and wants the realistic photographic hat.
+
 
