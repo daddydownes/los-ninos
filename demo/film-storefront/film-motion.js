@@ -138,11 +138,11 @@
   let layout={width:0,height:0,startSize:0};
   const hold=350, duration=1900;
   let settling=false, startedAt=0, fallback=0;
-  function finishOpening(){settling=false;progress=1;clearTimeout(fallback);document.documentElement.classList.remove('opening-settling');scene.dataset.openingPhase='complete';header.inert=false;clearTimeout(window.lnFilmGuard);schedule();}
+  function finishOpening(){settling=false;progress=1;clearTimeout(fallback);document.documentElement.classList.remove('opening-settling');scene.dataset.openingPhase='complete';card.classList.add('hat-docked');product.hidden=true;header.inert=false;clearTimeout(window.lnFilmGuard);schedule();}
   function beginOpening(){
     ready=true;
     if(motion.matches||document.hidden||window.lnSkipIntro){finishOpening();return;}
-    settling=true;startedAt=performance.now();progress=0;
+    settling=true;card.classList.remove('hat-docked');product.hidden=false;startedAt=performance.now();progress=0;
     document.documentElement.classList.add('opening-settling');
     scene.dataset.openingPhase='moving';header.inert=true;
     fallback=setTimeout(finishOpening,hold+duration+500);
@@ -190,6 +190,7 @@
   function paint(now){scheduled=false;
     if(settling){progress=clamp((now-startedAt-hold)/duration);if(progress>=1)finishOpening();}
     const move=ease((progress-.08)/.66),reveal=ease((progress-.015)/.48),land=ease((progress-.45)/.30),details=ease((progress-.60)/.23);
+    if(!product.hidden){
     const target=slot.getBoundingClientRect(),w=layout.width,h=layout.height,size=layout.startSize;
     const startX=w/2,startY=h*.46;
     const x=lerp(startX,target.left+target.width/2,move)-size/2;
@@ -197,6 +198,7 @@
     const scale=lerp(1,target.width/size,move);
     product.style.transform=`translate3d(${x}px,${y}px,0) scale(${scale})`;
     const campaignBounds=campaign.getBoundingClientRect();product.style.visibility=campaignBounds.bottom<0?'hidden':'visible';
+    }
     plane.style.opacity=reveal;plane.style.transform=`scale(${1.035-.035*reveal})`;
     shell.style.opacity=land;shell.style.transform=`translateY(${12*(1-land)}px)`;
     copies.forEach(el=>{el.style.opacity=details;el.style.transform=`translateY(${9*(1-details)}px)`});
