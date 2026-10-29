@@ -148,20 +148,7 @@
     fallback=setTimeout(finishOpening,hold+duration+500);
     measure();
   }
-  let mobileCardWidth=0;
-  function anchorMobileCard(){
-    const width=document.documentElement.clientWidth;
-    if(!mobile.matches){mobileCardWidth=0;card.style.removeProperty('--mobile-card-top');return;}
-    if(width===mobileCardWidth)return;
-    // Resolve the small-viewport inset once. Safari can change its viewport
-    // and safe-area values while scrolling; neither should move the card.
-    // Width/orientation changes remeasure, but toolbar-only resizes do not.
-    card.style.removeProperty('--mobile-card-top');
-    const top=getComputedStyle(card).top;
-    if(!Number.isFinite(parseFloat(top)))return;
-    card.style.setProperty('--mobile-card-top',top);mobileCardWidth=width;
-  }
-  function measure(){anchorMobileCard();layout.width=scene.clientWidth;layout.height=scene.clientHeight;layout.startSize=Math.min(mobile.matches?layout.width*.98:layout.width*.57,layout.height*(mobile.matches?.70:.80),720);product.style.width=layout.startSize+'px';product.style.height=layout.startSize+'px';schedule();}
+  function measure(){layout.width=scene.clientWidth;layout.height=scene.clientHeight;layout.startSize=Math.min(mobile.matches?layout.width*.98:layout.width*.57,layout.height*(mobile.matches?.70:.80),720);product.style.width=layout.startSize+'px';product.style.height=layout.startSize+'px';schedule();}
   function playback(){
     const active=ready&&visible&&!document.hidden&&!bagOpen&&!motion.matches;
     if(!active){requested=false;playAttempt++;clearTimeout(stallTimer);preview.pause();return;}
@@ -223,7 +210,6 @@
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(paint)}}
   addEventListener('scroll',schedule,{passive:true});addEventListener('resize',measure,{passive:true});
-  screen.orientation?.addEventListener('change',()=>{mobileCardWidth=0;measure()});
   const observer=new ResizeObserver(measure);observer.observe(scene);observer.observe(card);
   motion.addEventListener('change',()=>{if(motion.matches&&ready)finishOpening();measure()});mobile.addEventListener('change',measure);
   portraitFilm.addEventListener('change',()=>{
