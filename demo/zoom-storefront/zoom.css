@@ -112,8 +112,16 @@
 .brandbar .bag-open .bag-count{position:absolute;right:-4px;top:-4px;display:grid;place-items:center;min-width:21px;height:21px;padding:0 4px;box-sizing:border-box;border-radius:50%;background:#c3def0;color:#142b3d;font-size:11px;line-height:1;border:2px solid #172331}
 .brandbar .bag-open .bag-count[hidden]{display:none}
 
-/* Freeze the mobile sticky inset so scrolling/browser-toolbar height changes
-   do not reposition the card. Native containment still stops below the hat. */
+/* The mobile controller fixes the travelling card to the visible viewport,
+   then parks it at the existing track boundary. Sticky is the no-JS fallback. */
 @media(max-width:700px){
-  .shop-card{top:var(--mobile-card-top,calc(100svh - var(--card-height) - 14px - env(safe-area-inset-bottom)))}
+  .shop-card{top:calc(100svh - var(--card-height) - 14px - env(safe-area-inset-bottom))}
+  .shop-card[data-mobile-position]{margin:0 14px;width:calc(100% - 28px);left:0;right:0}
+  .shop-card[data-mobile-position="floating"]{position:fixed;top:var(--mobile-card-top);bottom:auto}
+  .shop-card[data-mobile-position="parked"]{position:absolute;top:auto;bottom:0}
+  .shop-card[data-mobile-position="before"]{position:absolute;top:0;bottom:auto}
+}
+/* Touch scrolling must not leave the corner bag in a raised hover state. */
+@media(hover:none),(pointer:coarse){
+  .brandbar .bag-open:hover,.brandbar .bag-open:active{transform:none}
 }
