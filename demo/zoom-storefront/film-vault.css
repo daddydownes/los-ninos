@@ -1,0 +1,43 @@
+.film-vault{--vault-paper:#f8f7f3;--vault-muted:#aab2bd;background:#080f19;color:var(--vault-paper);padding:clamp(68px,10vw,150px) clamp(24px,6vw,100px);position:relative;isolation:isolate}
+.vault-layout{max-width:1240px;margin-inline:auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);column-gap:clamp(48px,10vw,154px);row-gap:36px;align-items:start}
+.vault-heading{grid-column:2;grid-row:1;padding-top:clamp(14px,3vw,40px)}
+.vault-heading h2{font-family:Barlow,"Arial Narrow",Arial,sans-serif;font-weight:800;font-size:clamp(70px,8.5vw,124px);line-height:.87;letter-spacing:-.025em;margin:0}
+.vault-heading h2 span{display:inline-block}
+.vault-heading p{font-size:13px;line-height:1.6;color:var(--vault-muted);margin:25px 0 0;max-width:24ch}
+.vault-feature{grid-column:1;grid-row:1 / span 2;margin:0;min-width:0}
+.vault-stage{display:block;position:relative;width:100%;aspect-ratio:2 / 3;border:0;padding:0;background:#101925;overflow:hidden;cursor:zoom-in;touch-action:pan-y pinch-zoom}
+.vault-image,.vault-ghost{display:block;width:100%;height:100%;object-fit:contain;object-position:center;user-select:none;-webkit-user-select:none}
+.vault-image{position:relative;z-index:0}
+.vault-ghost{position:absolute;inset:0;z-index:1;pointer-events:none}
+.vault-expand{position:absolute;z-index:2;right:14px;bottom:14px;width:38px;height:38px;display:grid;place-items:center;background:#080f19b3;border:1px solid #ffffff45;border-radius:50%;transition:background .25s,transform .35s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.vault-expand svg{width:20px;height:20px}
+.vault-caption{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;font-size:13px;line-height:1.5;color:#d1d5dc}
+.vault-navigation{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.vault-count{font-size:11px;letter-spacing:.09em;color:var(--vault-muted);min-width:40px;text-align:center;font-variant-numeric:tabular-nums}
+.vault-arrow{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border:1px solid transparent;padding:0;background:transparent;color:var(--vault-paper);border-radius:50%;transition:background .2s,border-color .2s,transform .25s}
+.vault-arrow svg{width:23px;height:23px}
+.vault-contact{grid-column:2;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 18px;max-width:320px;padding-bottom:58px}
+.vault-thumbnail{display:block;width:100%;min-width:0;position:relative;background:transparent;border:0;padding:0;color:var(--vault-muted);text-align:left;transition:color .25s,transform .35s cubic-bezier(.22,1,.36,1)}
+.vault-thumbnail img{display:block;width:100%;height:auto;aspect-ratio:2 / 3;object-fit:contain;filter:brightness(.69);transition:filter .3s;border-radius:1px}
+.vault-thumbnail span{display:block;margin-top:10px;font-size:11px;line-height:1.4;letter-spacing:.015em}
+.vault-thumbnail::after{content:"";position:absolute;top:0;left:0;right:0;aspect-ratio:2 / 3;border:1px solid transparent;pointer-events:none;transition:border-color .25s}
+.vault-thumbnail[aria-pressed="true"]{color:var(--vault-paper)}
+.vault-thumbnail[aria-pressed="true"] img{filter:brightness(1)}
+.vault-thumbnail[aria-pressed="true"]::after{border-color:#f8f7f3;box-shadow:0 0 0 4px #080f19,0 0 0 5px #ffffff40}
+.vault-feedback{max-width:1240px;margin:16px auto 0;min-height:1.5em;color:#c4ccd6;font-size:12px;line-height:1.5}
+.vault-feedback:empty{margin:0;min-height:0}
+.vault-feedback:not(.is-error){position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.film-vault button:focus-visible{outline:2px solid var(--vault-paper);outline-offset:6px}
+dialog.vault-dialog{width:min(100vw - 32px,1120px);height:calc(100svh - 32px);max-width:none;max-height:none;border:1px solid #ffffff24;border-radius:10px;background:#080f19;color:var(--vault-paper);padding:0;overflow:hidden;box-shadow:0 30px 100px #0008}
+.vault-dialog[open]{display:flex;flex-direction:column}
+.vault-dialog::backdrop{background:#03070df2;backdrop-filter:blur(12px)}
+.vault-dialog-toolbar{height:66px;flex:0 0 66px;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 24px;font-size:13px}
+.vault-dialog-feedback.is-error{margin:0 24px 12px;flex-shrink:0}
+.vault-dialog-close{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 0 8px 14px;border:0;background:none;font-size:12px}
+.vault-dialog-close svg{width:22px;height:22px}
+.vault-dialog-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 24px;touch-action:pan-y pinch-zoom;overflow:hidden}
+.vault-dialog-stage img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-select:none}
+.vault-dialog-bottom{display:flex;align-items:center;justify-content:center;gap:25px;flex:0 0 66px;padding:8px 24px}
+@media(hover:hover){.vault-thumbnail:hover img{filter:brightness(1)}.vault-thumbnail:hover{transform:translateY(-4px);color:var(--vault-paper)}.vault-arrow:hover{border-color:#ffffff40;background:#ffffff0b}.vault-stage:hover .vault-expand{background:#080f19;transform:scale(1.08)}.vault-dialog-close:hover{color:#c4ccd6}}
+@media(max-width:760px){.film-vault{padding:64px 24px 72px}.vault-layout{grid-template-columns:minmax(0,1fr);gap:28px;max-width:500px}.vault-heading{grid-column:1;grid-row:1;padding-top:0;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.vault-heading h2{font-size:clamp(62px,16vw,90px)}.vault-heading p{font-size:11px;margin:0 0 3px;max-width:15ch}.vault-feature{grid-column:1;grid-row:2}.vault-contact{grid-column:1;grid-row:3;grid-template-columns:repeat(4,minmax(0,1fr));max-width:none;gap:12px;padding:0}.vault-thumbnail span{font-size:10px;margin-top:9px}.vault-caption{gap:8px;font-size:12px;padding-top:10px}.vault-navigation{gap:0}.vault-arrow{width:40px;flex-basis:40px}.vault-count{min-width:33px;font-size:10px}.vault-feedback{max-width:500px}.vault-dialog-toolbar{padding:0 16px;font-size:12px}.vault-dialog-stage{padding:0 12px}.vault-dialog-bottom{flex-basis:62px}dialog.vault-dialog{width:calc(100vw - 16px);height:calc(100svh - 16px);border-radius:8px}}
+@media(prefers-reduced-motion:reduce){.film-vault *,.film-vault *::before,.film-vault *::after{animation:none!important;transition:none!important}.vault-thumbnail:hover{transform:none}}

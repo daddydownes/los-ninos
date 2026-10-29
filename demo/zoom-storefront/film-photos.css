@@ -1,0 +1,22 @@
+/* The original photo story, with purchasing handled by the floating card. */
+.photos.journey-worn,.journey-footer{--journey-paper:#eeece5;--journey-ink:#080f19;background:var(--journey-paper);color:var(--journey-ink)}
+.photos.journey-worn{padding:clamp(48px,8vw,112px) clamp(24px,6vw,100px) 70px;scroll-margin-top:24px}
+.worn-heading{max-width:1240px;margin:0 auto 45px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px}
+.worn-heading .eyebrow{margin:0 0 22px;color:#5e666c;font-size:11px;letter-spacing:.09em}
+.worn-heading h2{margin:0;font-weight:400;font-size:clamp(52px,7.8vw,112px);line-height:.94;letter-spacing:-.055em}
+.chapter-label{font-size:11px;letter-spacing:.09em;line-height:1.65;text-align:right;padding-bottom:6px}
+.photo-slot{position:relative;margin:0;background:#deded6;overflow:hidden}.photo-slot>img{display:block;width:100%;height:auto;object-fit:cover}
+.worn-lead{max-width:1240px;margin:0 auto;aspect-ratio:1.5}.worn-lead>img{height:100%;object-position:center top}
+.worn-pair{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1fr .82fr;gap:clamp(28px,7vw,100px);padding-top:clamp(40px,7vw,100px);align-items:start}
+.worn-pair .photo-slot:last-child{margin-top:22%}.worn-pair .photo-slot{aspect-ratio:1067/1600}.worn-pair img{height:100%;object-position:center top}
+.journey-worn [data-reveal]{transition:opacity 900ms var(--ease),transform 1100ms var(--ease)}.journey-worn .reveal-pending{opacity:0;transform:translateY(32px)}.journey-worn .reveal-pending.is-visible{opacity:1;transform:none}
+.journey-worn .hat-orbit{margin-top:clamp(72px,12vw,160px)}.journey-worn .orbit-stage{height:clamp(360px,52vw,570px)}
+.photo-error{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:12px;padding:24px;text-align:center;background:#deded6;font-size:14px}.photo-error button{min-height:44px;padding:10px 20px;border:1px solid #080f1940;background:none;border-radius:24px}
+.journey-footer{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:32px clamp(24px,6vw,100px) max(28px,env(safe-area-inset-bottom))}
+.footer-brand{font-size:21px;font-weight:600;line-height:.95;letter-spacing:-.7px;display:flex;flex-direction:column;gap:7px;min-height:44px;justify-content:center}.footer-brand span{font-size:9px;letter-spacing:.15em;font-weight:400}
+.instagram-link{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:50%;transition:background 220ms ease,transform 320ms var(--ease)}.instagram-link svg{width:25px;height:25px}.instagram-link:hover{background:#080f190a;transform:translateY(-2px)}
+.journey-footer a:focus-visible,.journey-worn button:focus-visible{outline-color:#080f19}
+@media(max-width:700px){.photos.journey-worn{padding:52px 24px calc(215px + env(safe-area-inset-bottom))}.worn-heading{display:block;margin-bottom:30px}.worn-heading .eyebrow{font-size:10px;margin-bottom:18px}.worn-heading h2{font-size:60px}.chapter-label{display:none}.worn-lead{width:calc(100% + 48px);max-width:none;margin-left:-24px;aspect-ratio:1.05}.worn-pair{grid-template-columns:1fr;gap:36px;padding-top:36px}.worn-pair .photo-slot:last-child{margin-top:0;width:88%;margin-left:auto}.journey-worn .hat-orbit{margin-top:76px}.journey-worn .orbit-stage{height:clamp(300px,90vw,430px)}.journey-footer{padding:28px 24px max(28px,env(safe-area-inset-bottom))}.footer-brand{font-size:19px}}
+@media(min-width:560px) and (max-width:700px){.worn-heading h2{font-size:76px}}
+@media(max-width:350px){.worn-heading h2{font-size:50px}}
+@media(prefers-reduced-motion:reduce){.journey-worn [data-reveal]{transition:none;opacity:1;transform:none}.instagram-link{transition:none}}
