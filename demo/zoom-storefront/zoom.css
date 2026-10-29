@@ -68,3 +68,41 @@
   .shop-card.is-ready .product-name-ink,.shop-card.is-ready .price [data-product-price],
   .zoom-buy.is-visible .zoom-product-meta h3,.zoom-buy.is-visible .zoom-price b{animation:none}
 }
+
+/* Porcelain controls with a quiet satin sweep, matching the silver typography. */
+.shop-card .add[data-add-to-bag],.zoom-product .add[data-add-to-bag]{
+  position:relative;isolation:isolate;overflow:hidden;border:1px solid #fff;
+  border-radius:50px;background:#faf9f6;color:#182735;
+  box-shadow:inset 0 2px 0 #fff,inset 0 -3px 0 #d8dbda,0 5px 12px #07101b30;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.shop-card .add[data-add-to-bag]::after,.zoom-product .add[data-add-to-bag]::after{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(110deg,transparent 20%,#bccbd02b 38%,#fff 50%,#bccbd020 62%,transparent 80%);
+  transform:translateX(-120%);animation:ln-satin-pass 7.8s ease-in-out infinite;
+}
+.shop-card .add[data-add-to-bag]:disabled::after,.zoom-product .add[data-add-to-bag]:disabled::after{animation:none}
+@media(hover:hover){
+  .shop-card .add[data-add-to-bag]:hover:not(:disabled),.zoom-product .add[data-add-to-bag]:hover:not(:disabled){
+    transform:translateY(-1px);box-shadow:inset 0 2px 0 #fff,inset 0 -3px 0 #d8dbda,0 8px 15px #07101b40;
+  }
+}
+.shop-card .add[data-add-to-bag]:active:not(:disabled),.zoom-product .add[data-add-to-bag]:active:not(:disabled){
+  transform:translateY(1px) scale(.99);box-shadow:inset 0 1px 0 #fff,inset 0 -1px 0 #d8dbda,0 2px 5px #07101b25;
+}
+.shop-card .stepper,.zoom-product .stepper{border:0;background:none;overflow:visible}
+.shop-card .stepper button,.zoom-product .stepper button{
+  border-radius:50%;background:#ffffff0b;color:#f7f4ee;box-shadow:inset 0 1px 0 #ffffff16;
+  transition:background .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.shop-card .stepper button:hover:not(:disabled),.zoom-product .stepper button:hover:not(:disabled){background:#ffffff18}
+.shop-card .stepper button:active:not(:disabled),.zoom-product .stepper button:active:not(:disabled){transform:scale(.9);box-shadow:inset 0 1px 4px #080f1940}
+.shop-card .stepper button:focus-visible,.zoom-product .stepper button:focus-visible{outline:2px solid #b2d4ef;outline-offset:2px}
+.add .bag-confirm-icon{display:none}
+.add[data-bag-pending] .bag-confirm-icon{display:block}
+.add[data-bag-pending] svg:not(.bag-confirm-icon){display:none}
+@keyframes ln-satin-pass{0%,66%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@media(prefers-reduced-motion:reduce){
+  .shop-card .add[data-add-to-bag]::after,.zoom-product .add[data-add-to-bag]::after{animation:none}
+  .shop-card .add[data-add-to-bag],.zoom-product .add[data-add-to-bag],.shop-card .stepper button,.zoom-product .stepper button{transition:none}
+}
