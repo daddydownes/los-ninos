@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/configure-pages@v5
       - name: Package storefront
-        run: python3 scripts/build-site.py
+        run: python3 scripts/build-zoom-demo.py --output _site
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
