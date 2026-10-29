@@ -59,11 +59,11 @@
 }
 .shop-card.is-ready .product-name-ink,.shop-card.is-ready .price [data-product-price],
 .zoom-buy.is-visible .zoom-product-meta h3,.zoom-buy.is-visible .zoom-price b{
-  animation:ln-silver-sweep 2.6s ease-in-out both;
+  animation:ln-silver-sweep 5.6s ease-in-out infinite both;
 }
 .shop-card.is-ready .price [data-product-price],.zoom-buy.is-visible .zoom-price b{animation-delay:.18s}
 .price::after{display:none}
-@keyframes ln-silver-sweep{from{background-position:100% 50%}to{background-position:0% 50%}}
+@keyframes ln-silver-sweep{0%{background-position:100% 50%}46.4286%,100%{background-position:0% 50%}}
 @media(prefers-reduced-motion:reduce){
   .shop-card.is-ready .product-name-ink,.shop-card.is-ready .price [data-product-price],
   .zoom-buy.is-visible .zoom-product-meta h3,.zoom-buy.is-visible .zoom-price b{animation:none}
