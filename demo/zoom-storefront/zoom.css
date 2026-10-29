@@ -42,7 +42,6 @@
 .refined-hat-status:not([hidden]){padding:12px 16px}
 
 /* Raise only the campaign shots after the phone shot, until the boot cut. */
-.film-plane video.film-raised-framing{object-position:50% 100%;transform:scale(1.08);transform-origin:50% 100%}
 @media(max-width:700px) and (orientation:portrait){
   .film-plane video.film-raised-framing{object-position:50% 100%;transform:scale(1.20);transform-origin:50% 100%}
 }
