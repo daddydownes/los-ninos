@@ -1,0 +1,1356 @@
+{
+  "status": "refined-candidate-set",
+  "expectedFrames": 52,
+  "availableCandidateCount": 52,
+  "baselineFrames": 48,
+  "replacedSourceIndices": [
+    5,
+    22,
+    35,
+    41
+  ],
+  "insertedAfterIndices": [
+    6,
+    14,
+    33,
+    42
+  ],
+  "frames": [
+    {
+      "index": 0,
+      "angle": 0.0,
+      "src": "rotation-assets/refined-hat-00.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        625,
+        204
+      ],
+      "crownBottomY": 895,
+      "registration": {
+        "scale": 0.723589001447178,
+        "x": 315.75687409551375,
+        "y": 52.38784370477569
+      },
+      "sha256": "192c4df279e1cb45e0e09f9f14526de7c3faa850ce5c41ad3f9c34d3cca0fa7b",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 0
+    },
+    {
+      "index": 1,
+      "angle": 7.5,
+      "src": "rotation-assets/refined-hat-01.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        626,
+        204
+      ],
+      "crownBottomY": 893,
+      "registration": {
+        "scale": 0.7256894049346879,
+        "x": 313.71843251088535,
+        "y": 51.95936139332366
+      },
+      "sha256": "582bbf67ba8b5f88e481c4e653c535950dd87c8e52e7644a1e42c0fe56f3b9e2",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 1
+    },
+    {
+      "index": 2,
+      "angle": 15.0,
+      "src": "rotation-assets/refined-hat-02.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        648,
+        204
+      ],
+      "crownBottomY": 900,
+      "registration": {
+        "scale": 0.7183908045977011,
+        "x": 302.4827586206897,
+        "y": 53.44827586206898
+      },
+      "sha256": "ab711e2490d54318aa63f67526da824a0f63e793d304cb376df2a69adb741f90",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 2
+    },
+    {
+      "index": 3,
+      "angle": 22.5,
+      "src": "rotation-assets/refined-hat-03.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        712,
+        211
+      ],
+      "crownBottomY": 886,
+      "registration": {
+        "scale": 0.7407407407407407,
+        "x": 240.5925925925926,
+        "y": 43.703703703703724
+      },
+      "sha256": "c4aaa8f1f7e68b7a64fd98e4fd51d9170c7552d0544b32fad4800bef1ec80a21",
+      "notes": "Between02 and04 but closer to04, angular spacing uneven. Front text modestly wider than04, brim projection and LN consistent. No structural failure. Use only as provisional visual frame, not measured22.5degrees.",
+      "poseVerified": false,
+      "sourceIndex": 3
+    },
+    {
+      "index": 4,
+      "angle": 30.0,
+      "src": "rotation-assets/refined-hat-04.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        731,
+        209
+      ],
+      "crownBottomY": 891,
+      "registration": {
+        "scale": 0.7331378299120235,
+        "x": 232.0762463343109,
+        "y": 46.7741935483871
+      },
+      "sha256": "af9690bb6c9f66df772101d6e099c0297b5ae1eaa3dd67955f3ffec1fff203a3",
+      "notes": "Visually advances from15 toward logo-side90. Full broad brim, cream edge, LOS/NI\u00d1OS and LN intact. Crown narrower by perspective; no clipping. Fine embroidery texture differs; exact angle not verified. Coarse parent check pending.",
+      "poseVerified": false,
+      "sourceIndex": 4
+    },
+    {
+      "sourceIndex": 5,
+      "angle": 37.5,
+      "src": "rotation-assets/refined-hat-05.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        711,
+        230
+      ],
+      "crownBottomY": 899,
+      "registration": {
+        "scale": 0.7473841554559043,
+        "x": 236.60986547085201,
+        "y": 28.101644245142012
+      },
+      "sha256": "7dc367dc5055e8f7be3919427f7bafd37f3d3f8213b66afea6b2e84029cd3861",
+      "notes": "Narrowly accepted as local improvement: normalized NI\u00d1OS width now lies between04 and06 (rough visual ratios .51,.50,.49) instead of current05 .48 below06. Brim complete and branding retained. Parent motion QA should confirm before selection.",
+      "poseVerified": false,
+      "index": 5
+    },
+    {
+      "index": 6,
+      "angle": 45.0,
+      "src": "rotation-assets/refined-hat-06.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        888,
+        141
+      ],
+      "crownBottomY": 790,
+      "registration": {
+        "scale": 0.7704160246533128,
+        "x": 83.87057010785816,
+        "y": 91.37134052388289
+      },
+      "sha256": "b30d01ea2ab43ff135f5bdd45744e410259b334dd16ba4f2e8d62c7a4ab6bb74",
+      "notes": "Front lettering contraction and LN movement intermediate04/08 after crown registration. Broad full brim preserved. Slight seam variability remains. White background and branding intact.",
+      "poseVerified": false,
+      "sourceIndex": 6
+    },
+    {
+      "sourceIndex": null,
+      "angle": 48.75,
+      "src": "rotation-assets/refined-hat-07.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        895,
+        144
+      ],
+      "crownBottomY": 794,
+      "registration": {
+        "scale": 0.7692307692307693,
+        "x": 79.53846153846155,
+        "y": 89.23076923076923
+      },
+      "sha256": "4ec3bd3b7bd8f4e85af8a9821b21aaefabf3ef5bf8aeade17f2792832c3f67c3",
+      "notes": "Modest visible progression from06 toward07: front wordmark narrows and LN moves left, brim contracts naturally in perspective. Preserves broad full brim and cap identity. Accepted as an additional smaller step rather than exact midpoint; parent motion review should confirm benefit.",
+      "poseVerified": false,
+      "index": 7
+    },
+    {
+      "index": 8,
+      "angle": 52.5,
+      "src": "rotation-assets/refined-hat-08.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        893,
+        153
+      ],
+      "crownBottomY": 796,
+      "registration": {
+        "scale": 0.7776049766718507,
+        "x": 73.59875583203734,
+        "y": 81.02643856920685
+      },
+      "sha256": "9e0960f900617c475b372d5730edcafde3b3be97ca9ceba8d481f9cb96b2a3ec",
+      "notes": "Between06/08 front wordmark widths; closer08 in shape. LN position almost unchanged versus08, so small yaw uneven. Brim and crown intact, no structural failure, requires sequence motion assessment.",
+      "poseVerified": false,
+      "sourceIndex": 7
+    },
+    {
+      "index": 9,
+      "angle": 60.0,
+      "src": "rotation-assets/refined-hat-09.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        885,
+        153
+      ],
+      "crownBottomY": 794,
+      "registration": {
+        "scale": 0.7800312012480499,
+        "x": 77.67238689547582,
+        "y": 80.65522620904837
+      },
+      "sha256": "3d16d6ba797d996a60aa2610833867d757405871a0bc12d80c96402bf2903113",
+      "notes": "Visually between30 and90: narrower front typography, more logo-side visible. Full broad brim and cream edge, no crop. Letterforms retained. Crown scale differs in pixel canvas, display registration needed. Fine seam position and shape still approximate; parent check pending.",
+      "poseVerified": false,
+      "sourceIndex": 8
+    },
+    {
+      "index": 10,
+      "angle": 67.5,
+      "src": "rotation-assets/refined-hat-10.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        879,
+        151
+      ],
+      "crownBottomY": 797,
+      "registration": {
+        "scale": 0.7739938080495357,
+        "x": 87.65944272445813,
+        "y": 83.12693498452012
+      },
+      "sha256": "36d06a50fb7f7f1f1b573f9c8b60821b162a6c1500adc344b6e80c245914e8f7",
+      "notes": "Visible monotonic advancement08\u219209\u219210: front wordmark widths approximately218\u2192180\u2192149px and LN moves left. Complete brim unchanged, white background, no structural defect. Exactyaw remains unverified.",
+      "poseVerified": false,
+      "sourceIndex": 9
+    },
+    {
+      "index": 11,
+      "angle": 75.0,
+      "src": "rotation-assets/refined-hat-11.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        867,
+        144
+      ],
+      "crownBottomY": 800,
+      "registration": {
+        "scale": 0.7621951219512195,
+        "x": 107.17682926829264,
+        "y": 90.2439024390244
+      },
+      "sha256": "bd844b3459759089acc6288f99e498c73557ed676865d62bfc40cbf7bc95ff6f",
+      "notes": "Front text noticeably narrower than08 and larger than12, LN shifts left toward profile. Full brim present, physical embroidery scale consistent. Exact targetyaw unverified.",
+      "poseVerified": false,
+      "sourceIndex": 10
+    },
+    {
+      "index": 12,
+      "angle": 82.5,
+      "src": "rotation-assets/refined-hat-12.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        865,
+        143
+      ],
+      "crownBottomY": 804,
+      "registration": {
+        "scale": 0.75642965204236,
+        "x": 113.68835098335865,
+        "y": 91.83055975794252
+      },
+      "sha256": "29eb6bbf05b54b4367cdaf3b54f18d5199da9ea40d3a25f0d8a5449479c95e43",
+      "notes": "Visible monotonic movement10\u219211\u219212. Front lettering narrower but more visible thanprofile12. LN movesleft towardprofilecentre. Brim remainsfull and broad; no missing elements, exactyaw unverified.",
+      "poseVerified": false,
+      "sourceIndex": 11
+    },
+    {
+      "index": 13,
+      "angle": 90.0,
+      "src": "rotation-assets/refined-hat-13.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        853.5,
+        189
+      ],
+      "crownBottomY": 811,
+      "registration": {
+        "scale": 0.8038585209003215,
+        "x": 81.90675241157555,
+        "y": 48.07073954983923
+      },
+      "sha256": "432648438bf6bf15d32063ae138bd612c9d6701f142097e2a2d474db65a099fd",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 12
+    },
+    {
+      "index": 14,
+      "angle": 97.5,
+      "src": "rotation-assets/refined-hat-14.png",
+      "status": "needs-review",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        943,
+        154
+      ],
+      "crownBottomY": 832,
+      "registration": {
+        "scale": 0.7374631268436578,
+        "x": 72.57227138643077,
+        "y": 86.4306784660767
+      },
+      "sha256": "5cc942cdc140a9e7ccc42abab55b699a72f4d6370b0810f03c19381b952e5836",
+      "notes": "Very close to105-degree candidate; no production acceptance. Brim intact and openingwhite, but angularprogression uncertain.",
+      "poseVerified": false,
+      "sourceIndex": 13
+    },
+    {
+      "index": 15,
+      "angle": 105.0,
+      "src": "rotation-assets/refined-hat-15.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        935,
+        151
+      ],
+      "crownBottomY": 833,
+      "registration": {
+        "scale": 0.7331378299120235,
+        "x": 82.51612903225805,
+        "y": 89.29618768328446
+      },
+      "sha256": "34d0034596665a0ae1c9f81d227bd455897a4f8e512adcbb01ae40bcab68a3b8",
+      "notes": "Narrow rearopening compared120, full connected brim; plausible coarse105 target. Angle unverified.",
+      "poseVerified": false,
+      "sourceIndex": 14
+    },
+    {
+      "sourceIndex": null,
+      "angle": 108.75,
+      "src": "rotation-assets/refined-hat-16.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        935,
+        151
+      ],
+      "crownBottomY": 835,
+      "registration": {
+        "scale": 0.7309941520467836,
+        "x": 84.52046783625724,
+        "y": 89.61988304093568
+      },
+      "sha256": "2ccae5bbd8b57d37d1a35fe83a599c27537bd8ab5381c37bdf90434f45f76587",
+      "notes": "Useful intermediate: LN centre about790 between850/680, side seam and rear opening advance together. Full attached brim preserved. First attempt overshot15 and was rejected.",
+      "poseVerified": false,
+      "index": 16
+    },
+    {
+      "index": 17,
+      "angle": 112.5,
+      "src": "rotation-assets/refined-hat-17.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        920,
+        145
+      ],
+      "crownBottomY": 835,
+      "registration": {
+        "scale": 0.7246376811594203,
+        "x": 101.33333333333337,
+        "y": 94.92753623188406
+      },
+      "sha256": "06923abe9b023aa858b575433ecc0ed10518aac46ef50b8a4dfc92536e609b9a",
+      "notes": "Opening corrected to white. Local turn plausible; angular spacing unverified.",
+      "poseVerified": false,
+      "sourceIndex": 15
+    },
+    {
+      "index": 18,
+      "angle": 120.0,
+      "src": "rotation-assets/refined-hat-18.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        900,
+        160
+      ],
+      "crownBottomY": 846,
+      "registration": {
+        "scale": 0.7288629737609329,
+        "x": 112.0233236151604,
+        "y": 83.38192419825074
+      },
+      "sha256": "2843ebae734835f0e54949566fc4df4f24a1bf1fdcc861be4bcc44e01c77e4ad",
+      "notes": "Rearopening and logo visibility intermediate90/135, connectedbrim visibleleft. Coarse localpass only.",
+      "poseVerified": false,
+      "sourceIndex": 16
+    },
+    {
+      "index": 19,
+      "angle": 127.5,
+      "src": "rotation-assets/refined-hat-19.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        879,
+        161
+      ],
+      "crownBottomY": 858,
+      "registration": {
+        "scale": 0.7173601147776184,
+        "x": 137.4404591104734,
+        "y": 84.50502152080344
+      },
+      "sha256": "db6e04f3e93998bb8735a1ad36b0d4274a3f1c286c5cb5bd1003f6ad6ad8e584",
+      "notes": "White opening, rear landmarks advance between16 and18.",
+      "poseVerified": false,
+      "sourceIndex": 17
+    },
+    {
+      "index": 20,
+      "angle": 135.0,
+      "src": "rotation-assets/refined-hat-20.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        868,
+        168
+      ],
+      "crownBottomY": 863,
+      "registration": {
+        "scale": 0.7194244604316546,
+        "x": 143.5395683453238,
+        "y": 79.13669064748203
+      },
+      "sha256": "54f1ec475f1692f49092e12bbe2301ec8b5b123baf29e01f86179a48908fbcf4",
+      "notes": "Brim exposed imageleft behindcrown; rearopeningwhite and finewording preserved. Coarse localpass.",
+      "poseVerified": false,
+      "sourceIndex": 18
+    },
+    {
+      "index": 21,
+      "angle": 142.5,
+      "src": "rotation-assets/refined-hat-21.png",
+      "status": "needs-review",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        866,
+        157
+      ],
+      "crownBottomY": 862,
+      "registration": {
+        "scale": 0.7092198581560284,
+        "x": 153.8156028368794,
+        "y": 88.65248226950354
+      },
+      "sha256": "aa56f4e3da4b571a7066e238be77702eb55be654ff41ab44b819939dd5a5f2e0",
+      "notes": "Replacement improves crown and rear opening progression between18 and20. Brim projection remains too similar to18; exact angle unverified.",
+      "poseVerified": false,
+      "sourceIndex": 19
+    },
+    {
+      "index": 22,
+      "angle": 150.0,
+      "src": "rotation-assets/refined-hat-22.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        850,
+        164
+      ],
+      "crownBottomY": 859,
+      "registration": {
+        "scale": 0.7194244604316546,
+        "x": 156.48920863309354,
+        "y": 82.01438848920864
+      },
+      "sha256": "d0b095a0e309bffdc4082dcb31a18eb0eb0c4e70b12e908fed1998ab9f7e80f1",
+      "notes": "Less brimexposed than135, rearopeningmoves towardcentre, connectednavybrim andwhiteopening. Actualangle unverified.",
+      "poseVerified": false,
+      "sourceIndex": 20
+    },
+    {
+      "index": 23,
+      "angle": 157.5,
+      "src": "rotation-assets/refined-hat-23.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        841,
+        155
+      ],
+      "crownBottomY": 854,
+      "registration": {
+        "scale": 0.7153075822603719,
+        "x": 166.42632331902723,
+        "y": 89.12732474964236
+      },
+      "sha256": "d5b21a3839872328e7814570ceb3cf0fecf3df9783b830d060775c8e841c2bfb",
+      "notes": "Rear opening moves toward centre; attached left brim tip reduces; white opening.",
+      "poseVerified": false,
+      "sourceIndex": 21
+    },
+    {
+      "sourceIndex": 22,
+      "angle": 165.0,
+      "src": "rotation-assets/refined-hat-24.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        814,
+        152
+      ],
+      "crownBottomY": 857,
+      "registration": {
+        "scale": 0.7092198581560284,
+        "x": 190.69503546099293,
+        "y": 92.19858156028369
+      },
+      "sha256": "28227d25aa86927aa222010f532b8d4d9f26caabf21600162619f0357a06328d",
+      "notes": "Rear seam/opening now intermediate between21 and23; smaller residual jump. White opening preserved. LN and brim details still redraw subtly.",
+      "poseVerified": false,
+      "index": 24
+    },
+    {
+      "index": 25,
+      "angle": 172.5,
+      "src": "rotation-assets/refined-hat-25.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        792,
+        178
+      ],
+      "crownBottomY": 860,
+      "registration": {
+        "scale": 0.7331378299120235,
+        "x": 187.35483870967744,
+        "y": 69.50146627565982
+      },
+      "sha256": "3803dd1b7c07c22a84bc5411f7b420e298509ff7517e72ab5352d62d4be69aa8",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 23
+    },
+    {
+      "index": 26,
+      "angle": 180.0,
+      "src": "rotation-assets/refined-hat-26.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        768,
+        179
+      ],
+      "crownBottomY": 859,
+      "registration": {
+        "scale": 0.7352941176470589,
+        "x": 203.29411764705878,
+        "y": 68.38235294117646
+      },
+      "sha256": "4761772733845c0c19f5b08aec85c55e3e7dd63646df9b33082d9fe370370568",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 24
+    },
+    {
+      "index": 27,
+      "angle": 187.5,
+      "src": "rotation-assets/refined-hat-27.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        746,
+        176
+      ],
+      "crownBottomY": 867,
+      "registration": {
+        "scale": 0.723589001447178,
+        "x": 228.20260492040518,
+        "y": 72.64833574529668
+      },
+      "sha256": "b75547f9d069565008b5c865e7aca5086ee99d9fc739c46af3579716aebca0d2",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 25
+    },
+    {
+      "index": 28,
+      "angle": 195.0,
+      "src": "rotation-assets/refined-hat-28.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        711,
+        171
+      ],
+      "crownBottomY": 853,
+      "registration": {
+        "scale": 0.7331378299120235,
+        "x": 246.73900293255133,
+        "y": 74.63343108504398
+      },
+      "sha256": "a013263fe70ca0d1ed158b4ade7a92a5bf4045bd396af67f700fccf11ca632da",
+      "notes": [
+        "Rear aperture shifts left vs25, brim small40px emerging on right vs165px28. Plausible intermediate, all lettering/whitehole/navystrap maintained.",
+        "Crown consistent approx682px button-to-hem."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 26
+    },
+    {
+      "index": 29,
+      "angle": 202.5,
+      "src": "rotation-assets/refined-hat-29.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        685,
+        168
+      ],
+      "crownBottomY": 856,
+      "registration": {
+        "scale": 0.7267441860465116,
+        "x": 270.18023255813955,
+        "y": 77.90697674418605
+      },
+      "sha256": "262685c0d6a72b6696a0381b510a3452ce64c2db35b4c67504e4d08a3a4a32c0",
+      "notes": [
+        "Changed local-anchor approach produced real crown seam/eyelet/opening motion to left, not just brim extension.",
+        "Brim approximately75px beyond crown, between26 (~40px) and28 (~165px). Rear text/whitehole/navystrap preserved. Target yaw remains unproven.",
+        "Earlier held27 preserved in reviews/frame-27-held-v1.png/json."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 27
+    },
+    {
+      "index": 30,
+      "angle": 210.0,
+      "src": "rotation-assets/refined-hat-30.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        676,
+        175
+      ],
+      "crownBottomY": 858,
+      "registration": {
+        "scale": 0.7320644216691069,
+        "x": 273.12445095168374,
+        "y": 71.8887262079063
+      },
+      "sha256": "c85e18e38f4157ef145336442e2c2d447a47b4de62551ef7961194d266a4697d",
+      "notes": [
+        "Visual coarse-keyframe pass: rear aperture shifts left, plain side turns into view; no LN.",
+        "Rear opening white, strap navy, readable small rear text. Crown scale similar anchor25.",
+        "Brim protrudes about165px image-right versus none at187.5; intermediate frames26/27 must establish gradual emergence. Exact yaw not verified.",
+        "No pixel manipulation; built-in image generation."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 28
+    },
+    {
+      "index": 31,
+      "angle": 217.5,
+      "src": "rotation-assets/refined-hat-31.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        674,
+        173
+      ],
+      "crownBottomY": 851,
+      "registration": {
+        "scale": 0.7374631268436578,
+        "x": 270.94985250737466,
+        "y": 72.4188790560472
+      },
+      "sha256": "a39a4883f09575aca0013249c5682fba4993045a9552fc88005e7b4094e549cf",
+      "notes": [
+        "Reused overshoot candidate originally target27 as29 to reduce waste.",
+        "Opening and rear words farther left than28, brimabout190px versus165px28, plausible nextstep. Exact yaw notverified."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 29
+    },
+    {
+      "index": 32,
+      "angle": 225.0,
+      "src": "rotation-assets/refined-hat-32.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        654,
+        171
+      ],
+      "crownBottomY": 836,
+      "registration": {
+        "scale": 0.7518796992481203,
+        "x": 276.27067669172936,
+        "y": 71.42857142857144
+      },
+      "sha256": "e35492c0932ee223bafe2e1b99d0c0f325e93fee9170a990a11b1619219635aa",
+      "notes": [
+        "Visible advance vs29; rear hole narrower and left, brim more visible. Between29 and32, but angular spacing not proven/even.",
+        "Navyshape/whitehole/rearphrase maintained. Button-to-hem665px; displayregistration needed."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 30
+    },
+    {
+      "index": 33,
+      "angle": 232.5,
+      "src": "rotation-assets/refined-hat-33.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        649,
+        168
+      ],
+      "crownBottomY": 833,
+      "registration": {
+        "scale": 0.7518796992481203,
+        "x": 280.03007518796994,
+        "y": 73.6842105263158
+      },
+      "sha256": "9c8405256f8414aa273b3c62dc909c57fa2bb38644311f66f0ab2ef1d59c18ac",
+      "notes": [
+        "Small consistent advance30to32: rearhole rightedge512 between545and450; eyelets/seams/text move together.",
+        "Brim and rearstrap/whitehole consistent visually, noLN. Pose spacing approximate."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 31
+    },
+    {
+      "index": 34,
+      "angle": 240.0,
+      "src": "rotation-assets/refined-hat-34.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        640,
+        171
+      ],
+      "crownBottomY": 838,
+      "registration": {
+        "scale": 0.7496251874062968,
+        "x": 288.23988005997006,
+        "y": 71.81409295352324
+      },
+      "sha256": "829d062aad95cc94074175d77f10ace3b4e5ba923ac48d14d36e543a7a6aadcd",
+      "notes": [
+        "Coarse-keyframe visual pass: rear opening shifts left and narrows, plain side increases vs28; brim extension increases on image-right.",
+        "White rear empty arch preserved, navy strap and fine lettering present, no LN.",
+        "Target yaw is not proven; appears around rear threequarter rather than nearprofile. Intermediate transition to36 needs careful review for pose spacing.",
+        "Button-to-hem667px vs683px at28; modest display registration needed, no pixel edits."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 32
+    },
+    {
+      "index": 35,
+      "angle": 247.5,
+      "src": "rotation-assets/refined-hat-35.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        625,
+        170
+      ],
+      "crownBottomY": 830,
+      "registration": {
+        "scale": 0.7575757575757576,
+        "x": 294.5151515151515,
+        "y": 71.21212121212122
+      },
+      "sha256": "f8f665c07b40968f6e55a504a1a6dd549fb455da8e09edbb69800ca516503f10",
+      "notes": [
+        "Clear progression32to36: aperture narrows about200px/atleft, reartext starts wrapping left, plainpanel increases.",
+        "Brim connected and progressively exposed. Navystrap/whitehole intact. Camera/crownscale similar."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 33
+    },
+    {
+      "sourceIndex": null,
+      "angle": 251.25,
+      "src": "rotation-assets/refined-hat-36.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        608,
+        169
+      ],
+      "crownBottomY": 830,
+      "registration": {
+        "scale": 0.75642965204236,
+        "x": 308.09077155824514,
+        "y": 72.16338880484116
+      },
+      "sha256": "a01ea64818166dfca2030d45787303a7acb511afaa0ca061c3d341a253dffae3",
+      "notes": [
+        "Useful midpoint: rearhole width~145 between33~200 and34~90, mainseam~710 between775and650, eyelet~465 between515and425.",
+        "Rearphrase graduallyoccludes, small frontedge appears, brim remainsconnected. Whiteemptyopening/navystrap retained."
+      ],
+      "poseVerified": false,
+      "index": 36
+    },
+    {
+      "index": 37,
+      "angle": 255.0,
+      "src": "rotation-assets/refined-hat-37.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        612,
+        173
+      ],
+      "crownBottomY": 829,
+      "registration": {
+        "scale": 0.7621951219512195,
+        "x": 301.5365853658536,
+        "y": 68.14024390243901
+      },
+      "sha256": "4e92702ba1e3e31642da674fe664b78b7b63f710e00f73e023e55b3dd78fcf13",
+      "notes": [
+        "Rearhole nowabout90px wide atleft; rearphrase partiallyhidden asplainpanel grows. Smallfrontletteredge appearsright.",
+        "Progresses toward36, though33\u219234 visible rotation step is larger than30\u219231. Exact spacing unverified.",
+        "Brimconnected, whitehole/navystrap preserved."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 34
+    },
+    {
+      "sourceIndex": 35,
+      "angle": 262.5,
+      "src": "rotation-assets/refined-hat-38.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        611,
+        170
+      ],
+      "crownBottomY": 827,
+      "registration": {
+        "scale": 0.76103500761035,
+        "x": 303.0076103500761,
+        "y": 70.6240487062405
+      },
+      "sha256": "3c3314f58e0df8164569533bdcece83f33ce0c4f75155323182f0d28c15de081",
+      "notes": [
+        "Visible improvement: mainseam moves to~540px between34~650 and36~400; eyelet~775 between34~820 and36~650.",
+        "Old35 repeated34panel positions; candidate genuine panel/seam shift with connectedbrim, whiteemptyrearopening/navystrap."
+      ],
+      "poseVerified": false,
+      "index": 38
+    },
+    {
+      "index": 39,
+      "angle": 270.0,
+      "src": "rotation-assets/refined-hat-39.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        613.5,
+        173
+      ],
+      "crownBottomY": 836,
+      "registration": {
+        "scale": 0.7541478129713424,
+        "x": 305.33031674208144,
+        "y": 69.53242835595776
+      },
+      "sha256": "5e1cd2c4bc9fc15f5304dd070cae5cb7094a3cdb32062ec825d0768cc5952f90",
+      "notes": "Local candidate only; full-sequence consistency unproven.",
+      "poseVerified": false,
+      "sourceIndex": 36
+    },
+    {
+      "index": 40,
+      "angle": 277.5,
+      "src": "rotation-assets/refined-hat-40.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        628,
+        167
+      ],
+      "crownBottomY": 830,
+      "registration": {
+        "scale": 0.7541478129713424,
+        "x": 294.395173453997,
+        "y": 74.05731523378583
+      },
+      "sha256": "a8f0bb2ce8e9e98346459b2165e9823bddfe71226f017cfb39a070e8395cc23b",
+      "notes": [
+        "Small progress from36; still side dominant, wordmark narrow on right.",
+        "Pose close to38 but less front visible and brim narrower; exact spacing unverified.",
+        "No branding inversion, clipped brim or obvious structural failure."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 37
+    },
+    {
+      "index": 41,
+      "angle": 285.0,
+      "src": "rotation-assets/refined-hat-41.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        646,
+        171
+      ],
+      "crownBottomY": 831,
+      "registration": {
+        "scale": 0.7575757575757576,
+        "x": 278.6060606060606,
+        "y": 70.45454545454547
+      },
+      "sha256": "cb427eea95c4dca01ea5824fb4689776a7008a5934368e54d6865b432cdcfb2d",
+      "notes": [
+        "Pose lies between plain profile36 and forward40; lettering begins emerging on right.",
+        "Brim remains full, cream edge continuous, no LN on plain side.",
+        "Target yaw visually estimated only."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 38
+    },
+    {
+      "index": 42,
+      "angle": 292.5,
+      "src": "rotation-assets/refined-hat-42.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        645,
+        167
+      ],
+      "crownBottomY": 823,
+      "registration": {
+        "scale": 0.7621951219512195,
+        "x": 276.3841463414634,
+        "y": 72.71341463414635
+      },
+      "sha256": "b999babc2553190d88e584aa23a5405e50241f5bb67538440a62102a262bb2d5",
+      "notes": [
+        "Initial rejected because near-duplicate40 pose.",
+        "Targeted retry shifts front-side hem seam to about750, between38(~817) and40(~718); brim attachment between endpoints.",
+        "Progression visible but exact7.5-degree spacing unverified."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 39
+    },
+    {
+      "index": 43,
+      "angle": 300.0,
+      "src": "rotation-assets/refined-hat-43.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        643,
+        180
+      ],
+      "crownBottomY": 826,
+      "registration": {
+        "scale": 0.7739938080495357,
+        "x": 270.3219814241486,
+        "y": 60.68111455108357
+      },
+      "sha256": "347917a93557c261aeeebe4ea2156d15c345d9c2306e2546cbd34b939c1f050c",
+      "notes": [
+        "Distinct forward turn from plain profile; brim remains full length, now broadening naturally toward viewer.",
+        "White LOS/NI\u00d1OS remains legible and narrower front-master shape; far end appropriately foreshortened.",
+        "No LN on plain side. Clean white background and no clipping.",
+        "Target angle estimated visually; exact 3D pose not verified."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 40
+    },
+    {
+      "sourceIndex": 41,
+      "angle": 307.5,
+      "src": "rotation-assets/refined-hat-44.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        665,
+        174
+      ],
+      "crownBottomY": 809,
+      "registration": {
+        "scale": 0.7874015748031497,
+        "x": 244.37795275590543,
+        "y": 62.99212598425197
+      },
+      "sha256": "1a1772076d151840c6fc9f6799f5e394ae626278ceb6b8c6e8d3c68683814494",
+      "notes": [
+        "Visually improved intermediate: lower wordmark projectedwidth about235px between40(~210) and42(~270), unlike original41(~280).",
+        "Front-side seam/wordmark progression now monotonic; brim continuous, no LN wronglyadded.",
+        "Exact7.5degree yaw unverified; texture and crownwidth vary slightly; requires parent uniform registration review."
+      ],
+      "poseVerified": false,
+      "index": 44
+    },
+    {
+      "index": 45,
+      "angle": 315.0,
+      "src": "rotation-assets/refined-hat-45.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        698,
+        175
+      ],
+      "crownBottomY": 804,
+      "registration": {
+        "scale": 0.794912559618442,
+        "x": 213.15103338632753,
+        "y": 60.89030206677265
+      },
+      "sha256": "7e8ba4e1f46d1d1d7777383e42ddf68032d4d5a23734568a392a8087e46a10c9",
+      "notes": [
+        "Front wordmark broadens compared40, plain side still visible; usable progression toward44.",
+        "Crown optical height differs and needs uniform display registration.",
+        "Brim full, typography identity preserved; exact midpoint pose unverified."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 42
+    },
+    {
+      "sourceIndex": null,
+      "angle": 318.75,
+      "src": "rotation-assets/refined-hat-46.png",
+      "status": "refined-provisional",
+      "sourceDimensions": [
+        1536,
+        1024
+      ],
+      "buttonCenter": [
+        700,
+        168
+      ],
+      "crownBottomY": 797,
+      "registration": {
+        "scale": 0.794912559618442,
+        "x": 211.5612082670906,
+        "y": 66.45468998410175
+      },
+      "sha256": "e39642975c6f253ce0ab8eb2db0ac709ebb937736f063f113a16c9a37be6d925",
+      "notes": [
+        "Visibly intermediate front dominance: projected wordmark offset frombutton/crownheight about.36, between42~.51 and43~.29.",
+        "Brim turn and front-facing wordmark noticeably soften42\u219243 jump, no wrongside LN or clipping.",
+        "Not exact yaw; wordmark projectedwidth slightly generous versus43 after heightregistration, fabric detail differs; parent motionreview required."
+      ],
+      "poseVerified": false,
+      "index": 46
+    },
+    {
+      "index": 47,
+      "angle": 322.5,
+      "src": "rotation-assets/refined-hat-47.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        569,
+        212
+      ],
+      "crownBottomY": 898,
+      "registration": {
+        "scale": 0.7288629737609329,
+        "x": 353.2769679300292,
+        "y": 45.481049562682216
+      },
+      "sha256": "46a065152ce534e901ca04b034d118ea7e0c0ea2f3e82e80b56c4a475fb6d8de",
+      "notes": [
+        "Visible shallow turn away from44 toward plain side; wordmark narrows and movesright, correct direction.",
+        "Full brim maintained and exact branding legible. Per-frame pass provisional only; unequal yaw spacing remains possible."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 43
+    },
+    {
+      "index": 48,
+      "angle": 330.0,
+      "src": "rotation-assets/refined-hat-48.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        565,
+        208
+      ],
+      "crownBottomY": 897,
+      "registration": {
+        "scale": 0.7256894049346879,
+        "x": 357.98548621190133,
+        "y": 49.056603773584925
+      },
+      "sha256": "e30ce935cd23f5d70e763403ea84cf88c608d2365bd0f412458c7f77e21fb115",
+      "notes": [
+        "Initial attempt held: insufficient pose change toward front.",
+        "One targeted retry gives distinct front-dominant shallow three-quarter; approved master letters retained, brim full and uncropped.",
+        "No LN on plain side. Crown relative dimensions close to master; display registration needed.",
+        "Exact 30-degree pose estimated visually, not mathematically proven."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 44
+    },
+    {
+      "index": 49,
+      "angle": 337.5,
+      "src": "rotation-assets/refined-hat-49.png",
+      "status": "needs-review",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        583,
+        206
+      ],
+      "crownBottomY": 902,
+      "registration": {
+        "scale": 0.7183908045977011,
+        "x": 349.17816091954023,
+        "y": 52.011494252873575
+      },
+      "sha256": "96c60cae16828af0e8893972b32a6e5b4558da945d86619ee38e54494c223a6a",
+      "notes": [
+        "Initial nearly duplicated44; targeted retry yields modest advance with centre seam shiftleft.",
+        "Pose remains too close to44, exact increment unproven. Best available retained as needs-review per renewed authorization.",
+        "Typography and full brim remain intact."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 45
+    },
+    {
+      "index": 50,
+      "angle": 345.0,
+      "src": "rotation-assets/refined-hat-50.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        599,
+        206
+      ],
+      "crownBottomY": 902,
+      "registration": {
+        "scale": 0.7183908045977011,
+        "x": 337.68390804597703,
+        "y": 52.011494252873575
+      },
+      "sha256": "fc4ba01da86949df22d6b7d27c1e63eb2abf1255da8f14551f84aa6a9ca6bf14",
+      "notes": [
+        "Good visible progression towardfront; wordmark shifts towardcentre, side strip diminishes, brimapproaches symmetry.",
+        "LN begins tiny sliver on far imageRIGHT, same side as frontmaster.",
+        "Fullbrim, typography intact. Exact15degree pose unverified."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 46
+    },
+    {
+      "index": 51,
+      "angle": 352.5,
+      "src": "rotation-assets/refined-hat-51.png",
+      "status": "provisional",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "buttonCenter": [
+        626,
+        204
+      ],
+      "crownBottomY": 898,
+      "registration": {
+        "scale": 0.7204610951008645,
+        "x": 316.9913544668588,
+        "y": 53.02593659942363
+      },
+      "sha256": "bcc22a11557e07b49cb0c2aefc890d11c0bcdb531440bfdace39617befaac8ee",
+      "notes": [
+        "Progresses correctly from46 towardfront, slightrightward wordmarkoffset; LN peeks on imageRIGHT consistent withmaster.",
+        "47\u219200 seam inspected against approvedfront: nearfrontalpose closes withsmallremainingrotation; brim continuous and wordmark same basicshape.",
+        "Residual crown/brimwidth and fabrictexture variation versusmaster remain (especially left silhouette); not pixelidentical or proven7.5degree spacing."
+      ],
+      "poseVerified": false,
+      "sourceIndex": 47
+    }
+  ]
+}
