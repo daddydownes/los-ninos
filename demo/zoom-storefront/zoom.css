@@ -101,3 +101,6 @@
 
 /* Preserve identical ice-blue circles at quantity limits. */
 .shop-card .stepper button:disabled,.zoom-product .stepper button:disabled{opacity:1;background:#c3def0;color:#142b3d;border-color:#e4f2fc;cursor:default}
+
+/* Slightly translucent navy surfaces; contents retain full opacity. */
+.shop-card .card-shell,.zoom-product{background:rgba(23,35,49,.90);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
