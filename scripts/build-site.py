@@ -20,14 +20,10 @@ def source_files():
     for name in re.findall(r'url\(\./([\w.-]+)\)', fonts.read_text(encoding='utf-8')):
         assets.add('assets/fonts/' + name)
     assets.update({'assets/fonts/BarlowCondensed-OFL.txt', 'assets/fonts/DMSans-OFL.txt'})
-    manifest = json.loads((ROOT / 'assets/hat-spin/sequence.json').read_text(encoding='utf-8'))
+    manifest = json.loads((ROOT / 'assets/hat-refined/sequence.json').read_text(encoding='utf-8'))
+    assets.add('assets/hat-refined/sequence.json')
     for frame in manifest['frames']:
-        assets.add('assets/hat-spin/' + (frame if isinstance(frame, str) else frame['src']))
-        if isinstance(frame, dict) and frame.get('srcSmall'):
-            assets.add('assets/hat-spin/' + frame['srcSmall'])
-    for key in ('poster', 'posterSmall'):
-        if manifest.get(key):
-            assets.add('assets/hat-spin/' + manifest[key])
+        assets.add('assets/hat-refined/' + frame['src'])
     files.update(ROOT / path for path in assets)
     for path in files:
         if not path.is_file() or not path.resolve().is_relative_to(ROOT):

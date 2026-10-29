@@ -24,3 +24,16 @@
 
 .orbit-retry{position:absolute;z-index:2;bottom:20px;left:50%;transform:translateX(-50%);min-height:44px;padding:10px 20px;border:1px solid #080f1940;border-radius:24px;background:#eeece5;color:#080f19;font:inherit;font-size:14px;cursor:pointer}
 .orbit-retry:focus-visible{outline:2px solid #34455a;outline-offset:3px}
+
+/* Refined product turn: fixed geometry, hard cuts, and a visible pause control. */
+.hat-views{max-width:1240px;margin:clamp(72px,12vw,160px) auto 0;scroll-margin-top:32px}
+.refined-hat-stage{width:min(100%,960px);margin:0 auto;background:#fff;border-radius:18px;overflow:hidden}
+.refined-hat-stage svg{display:block;width:100%;height:auto;aspect-ratio:3/2;background:#fff}
+.refined-hat-stage image{transition:none!important}
+.refined-hat-controls{min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px 16px 0}
+.refined-hat-toggle{min-height:44px;padding:10px 20px;border:1px solid #080f1933;border-radius:24px;background:transparent;color:#344354;font:inherit;font-size:12px;line-height:1.4;cursor:pointer}
+.refined-hat-toggle:hover:not(:disabled){background:#fff8}.refined-hat-toggle:disabled{opacity:.6;cursor:default}
+.refined-hat-toggle:focus-visible{outline:2px solid #34455a;outline-offset:4px}
+.refined-hat-status{margin:0;color:#687381;font-size:11px;line-height:1.6;text-align:center}
+.refined-hat-controls [hidden]{display:none!important}
+@media(max-width:700px){.hat-views{margin-top:76px}.refined-hat-stage{border-radius:10px}.refined-hat-controls{padding-top:12px}}
