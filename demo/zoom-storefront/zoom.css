@@ -112,8 +112,9 @@
 .brandbar .bag-open .bag-count{position:absolute;right:-4px;top:-4px;display:grid;place-items:center;min-width:21px;height:21px;padding:0 4px;box-sizing:border-box;border-radius:50%;background:#c3def0;color:#142b3d;font-size:11px;line-height:1;border:2px solid #172331}
 .brandbar .bag-open .bag-count[hidden]{display:none}
 
-/* Follow the visible phone viewport as browser chrome expands/collapses.
+/* Keep the phone card at one screen height while browser chrome moves.
+   film-motion.js freezes this inset per viewport width; svh is the fallback.
    Native sticky containment still parks the card beneath the hat section. */
 @media(max-width:700px){
-  .shop-card{top:calc(100dvh - var(--card-height) - 14px - env(safe-area-inset-bottom))}
+  .shop-card{top:var(--mobile-card-top,calc(100svh - var(--card-height) - 14px - env(safe-area-inset-bottom)))}
 }

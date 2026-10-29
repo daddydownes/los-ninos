@@ -1,9 +1,9 @@
 # Mobile purchase card position
 
-30 October 2026: the card appeared to drift up on downward scroll and return on upward scroll. The sticky top used `100svh`, leaving extra space below the card when mobile browser chrome collapsed.
+30 October 2026: the purchase card and its docked hat moved vertically as Safari's toolbar expanded or collapsed. The dynamic viewport (`100dvh`) top offset followed the changing viewport height.
 
-The mobile override uses `100dvh` to preserve the 14px plus safe-area bottom gap within the current viewport. Native sticky containment is retained, so the card still stops beneath the hat section. Desktop positioning is unchanged. Unsupported dynamic viewport units fall back to the earlier `svh` declaration.
+The mobile card now resolves its small-viewport (`100svh`) top inset into pixels once per viewport width/orientation. Height-only changes do not update this anchor. Width and orientation changes recalculate it; desktop remains unchanged. Native sticky containment still stops the card beneath the rotating hat. The docked hat stays inside the card.
 
-The product card surface is 60% opaque / 40% transparent. The corner bag button remains opaque navy.
+Tradeoff: when Safari hides its toolbar, more space can appear below the card. This deliberately prioritizes a stable screen position over a constant bottom gap. The card surface remains 40% transparent and the corner bag button remains opaque navy.
 
-Build checked. Real-device Safari address-bar motion still needs visual confirmation; desktop emulation cannot fully reproduce browser chrome animation.
+Validation: focused WebKit and Chromium checks covered bidirectional scroll, same-width height changes, width/orientation changes, the native stopping boundary and bag actions. Build and syntax checks passed. Physical iPhone Safari toolbar/compositor behavior still needs confirmation on a real phone.
