@@ -19,7 +19,7 @@
     {
       "index": 0,
       "angle": 0.0,
-      "src": "rotation-assets/refined-hat-00.png",
+      "src": "rotation-assets/refined-hat-00.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -35,15 +35,17 @@
         "x": 315.75687409551375,
         "y": 52.38784370477569
       },
-      "sha256": "192c4df279e1cb45e0e09f9f14526de7c3faa850ce5c41ad3f9c34d3cca0fa7b",
+      "sha256": "304bc1af38be00dc40148404e04c09e737deb32b8cca328174999b0c71a6294a",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 0
+      "sourceIndex": 0,
+      "srcSmall": "rotation-assets/refined-hat-00-mobile.webp",
+      "originalSha256": "192c4df279e1cb45e0e09f9f14526de7c3faa850ce5c41ad3f9c34d3cca0fa7b"
     },
     {
       "index": 1,
       "angle": 7.5,
-      "src": "rotation-assets/refined-hat-01.png",
+      "src": "rotation-assets/refined-hat-01.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -59,15 +61,17 @@
         "x": 313.71843251088535,
         "y": 51.95936139332366
       },
-      "sha256": "582bbf67ba8b5f88e481c4e653c535950dd87c8e52e7644a1e42c0fe56f3b9e2",
+      "sha256": "6bd861e27a0c775500e979c53a668778d15d5f8debc5a0ea4dd16850765569c6",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 1
+      "sourceIndex": 1,
+      "srcSmall": "rotation-assets/refined-hat-01-mobile.webp",
+      "originalSha256": "582bbf67ba8b5f88e481c4e653c535950dd87c8e52e7644a1e42c0fe56f3b9e2"
     },
     {
       "index": 2,
       "angle": 15.0,
-      "src": "rotation-assets/refined-hat-02.png",
+      "src": "rotation-assets/refined-hat-02.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -83,15 +87,17 @@
         "x": 302.4827586206897,
         "y": 53.44827586206898
       },
-      "sha256": "ab711e2490d54318aa63f67526da824a0f63e793d304cb376df2a69adb741f90",
+      "sha256": "3c1a4e6c50b54ae2311d66eea0ea2eea36557fa44764532a3e5c9e8a609bb5f2",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 2
+      "sourceIndex": 2,
+      "srcSmall": "rotation-assets/refined-hat-02-mobile.webp",
+      "originalSha256": "ab711e2490d54318aa63f67526da824a0f63e793d304cb376df2a69adb741f90"
     },
     {
       "index": 3,
       "angle": 22.5,
-      "src": "rotation-assets/refined-hat-03.png",
+      "src": "rotation-assets/refined-hat-03.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -107,15 +113,17 @@
         "x": 240.5925925925926,
         "y": 43.703703703703724
       },
-      "sha256": "c4aaa8f1f7e68b7a64fd98e4fd51d9170c7552d0544b32fad4800bef1ec80a21",
+      "sha256": "b889485029706732f1a6b83c2131b4afeb883c60e57318097f3f8deae492a5df",
       "notes": "Between02 and04 but closer to04, angular spacing uneven. Front text modestly wider than04, brim projection and LN consistent. No structural failure. Use only as provisional visual frame, not measured22.5degrees.",
       "poseVerified": false,
-      "sourceIndex": 3
+      "sourceIndex": 3,
+      "srcSmall": "rotation-assets/refined-hat-03-mobile.webp",
+      "originalSha256": "c4aaa8f1f7e68b7a64fd98e4fd51d9170c7552d0544b32fad4800bef1ec80a21"
     },
     {
       "index": 4,
       "angle": 30.0,
-      "src": "rotation-assets/refined-hat-04.png",
+      "src": "rotation-assets/refined-hat-04.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -131,15 +139,17 @@
         "x": 232.0762463343109,
         "y": 46.7741935483871
       },
-      "sha256": "af9690bb6c9f66df772101d6e099c0297b5ae1eaa3dd67955f3ffec1fff203a3",
+      "sha256": "fbd09589172cf4261a31430f4b6e538f4fcea3476b3ac5b5b49e3b6dfb42e83e",
       "notes": "Visually advances from15 toward logo-side90. Full broad brim, cream edge, LOS/NI\u00d1OS and LN intact. Crown narrower by perspective; no clipping. Fine embroidery texture differs; exact angle not verified. Coarse parent check pending.",
       "poseVerified": false,
-      "sourceIndex": 4
+      "sourceIndex": 4,
+      "srcSmall": "rotation-assets/refined-hat-04-mobile.webp",
+      "originalSha256": "af9690bb6c9f66df772101d6e099c0297b5ae1eaa3dd67955f3ffec1fff203a3"
     },
     {
       "sourceIndex": 5,
       "angle": 37.5,
-      "src": "rotation-assets/refined-hat-05.png",
+      "src": "rotation-assets/refined-hat-05.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1254,
@@ -155,15 +165,17 @@
         "x": 236.60986547085201,
         "y": 28.101644245142012
       },
-      "sha256": "7dc367dc5055e8f7be3919427f7bafd37f3d3f8213b66afea6b2e84029cd3861",
+      "sha256": "88588bc9f4d14da0203f13f3988301e979ade3adc33e341efe1fe07579bf71c8",
       "notes": "Narrowly accepted as local improvement: normalized NI\u00d1OS width now lies between04 and06 (rough visual ratios .51,.50,.49) instead of current05 .48 below06. Brim complete and branding retained. Parent motion QA should confirm before selection.",
       "poseVerified": false,
-      "index": 5
+      "index": 5,
+      "srcSmall": "rotation-assets/refined-hat-05-mobile.webp",
+      "originalSha256": "7dc367dc5055e8f7be3919427f7bafd37f3d3f8213b66afea6b2e84029cd3861"
     },
     {
       "index": 6,
       "angle": 45.0,
-      "src": "rotation-assets/refined-hat-06.png",
+      "src": "rotation-assets/refined-hat-06.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -179,15 +191,17 @@
         "x": 83.87057010785816,
         "y": 91.37134052388289
       },
-      "sha256": "b30d01ea2ab43ff135f5bdd45744e410259b334dd16ba4f2e8d62c7a4ab6bb74",
+      "sha256": "140b178e9c33c6d1e84922215ae73ca08270578c118e9dc774598fb13b9445de",
       "notes": "Front lettering contraction and LN movement intermediate04/08 after crown registration. Broad full brim preserved. Slight seam variability remains. White background and branding intact.",
       "poseVerified": false,
-      "sourceIndex": 6
+      "sourceIndex": 6,
+      "srcSmall": "rotation-assets/refined-hat-06-mobile.webp",
+      "originalSha256": "b30d01ea2ab43ff135f5bdd45744e410259b334dd16ba4f2e8d62c7a4ab6bb74"
     },
     {
       "sourceIndex": null,
       "angle": 48.75,
-      "src": "rotation-assets/refined-hat-07.png",
+      "src": "rotation-assets/refined-hat-07.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -203,15 +217,17 @@
         "x": 79.53846153846155,
         "y": 89.23076923076923
       },
-      "sha256": "4ec3bd3b7bd8f4e85af8a9821b21aaefabf3ef5bf8aeade17f2792832c3f67c3",
+      "sha256": "791fa62cfa0abb13cad3b5264e218c17c5b34aa019f83e0912ff488a85fd9a75",
       "notes": "Modest visible progression from06 toward07: front wordmark narrows and LN moves left, brim contracts naturally in perspective. Preserves broad full brim and cap identity. Accepted as an additional smaller step rather than exact midpoint; parent motion review should confirm benefit.",
       "poseVerified": false,
-      "index": 7
+      "index": 7,
+      "srcSmall": "rotation-assets/refined-hat-07-mobile.webp",
+      "originalSha256": "4ec3bd3b7bd8f4e85af8a9821b21aaefabf3ef5bf8aeade17f2792832c3f67c3"
     },
     {
       "index": 8,
       "angle": 52.5,
-      "src": "rotation-assets/refined-hat-08.png",
+      "src": "rotation-assets/refined-hat-08.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -227,15 +243,17 @@
         "x": 73.59875583203734,
         "y": 81.02643856920685
       },
-      "sha256": "9e0960f900617c475b372d5730edcafde3b3be97ca9ceba8d481f9cb96b2a3ec",
+      "sha256": "f632db397a2f560d01bcc335c5ad94301da4453ee5f0024a7e0be362cd149264",
       "notes": "Between06/08 front wordmark widths; closer08 in shape. LN position almost unchanged versus08, so small yaw uneven. Brim and crown intact, no structural failure, requires sequence motion assessment.",
       "poseVerified": false,
-      "sourceIndex": 7
+      "sourceIndex": 7,
+      "srcSmall": "rotation-assets/refined-hat-08-mobile.webp",
+      "originalSha256": "9e0960f900617c475b372d5730edcafde3b3be97ca9ceba8d481f9cb96b2a3ec"
     },
     {
       "index": 9,
       "angle": 60.0,
-      "src": "rotation-assets/refined-hat-09.png",
+      "src": "rotation-assets/refined-hat-09.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -251,15 +269,17 @@
         "x": 77.67238689547582,
         "y": 80.65522620904837
       },
-      "sha256": "3d16d6ba797d996a60aa2610833867d757405871a0bc12d80c96402bf2903113",
+      "sha256": "b08d8514fe612ba4db4bb0cef5b6871e23ee6a72eed0e6303d40a7c2ee79d9f4",
       "notes": "Visually between30 and90: narrower front typography, more logo-side visible. Full broad brim and cream edge, no crop. Letterforms retained. Crown scale differs in pixel canvas, display registration needed. Fine seam position and shape still approximate; parent check pending.",
       "poseVerified": false,
-      "sourceIndex": 8
+      "sourceIndex": 8,
+      "srcSmall": "rotation-assets/refined-hat-09-mobile.webp",
+      "originalSha256": "3d16d6ba797d996a60aa2610833867d757405871a0bc12d80c96402bf2903113"
     },
     {
       "index": 10,
       "angle": 67.5,
-      "src": "rotation-assets/refined-hat-10.png",
+      "src": "rotation-assets/refined-hat-10.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -275,15 +295,17 @@
         "x": 87.65944272445813,
         "y": 83.12693498452012
       },
-      "sha256": "36d06a50fb7f7f1f1b573f9c8b60821b162a6c1500adc344b6e80c245914e8f7",
+      "sha256": "7d5bd86feaa3e3686663bb2a4fb8237e43a848f19a31348ef331a6ad64a94b2f",
       "notes": "Visible monotonic advancement08\u219209\u219210: front wordmark widths approximately218\u2192180\u2192149px and LN moves left. Complete brim unchanged, white background, no structural defect. Exactyaw remains unverified.",
       "poseVerified": false,
-      "sourceIndex": 9
+      "sourceIndex": 9,
+      "srcSmall": "rotation-assets/refined-hat-10-mobile.webp",
+      "originalSha256": "36d06a50fb7f7f1f1b573f9c8b60821b162a6c1500adc344b6e80c245914e8f7"
     },
     {
       "index": 11,
       "angle": 75.0,
-      "src": "rotation-assets/refined-hat-11.png",
+      "src": "rotation-assets/refined-hat-11.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -299,15 +321,17 @@
         "x": 107.17682926829264,
         "y": 90.2439024390244
       },
-      "sha256": "bd844b3459759089acc6288f99e498c73557ed676865d62bfc40cbf7bc95ff6f",
+      "sha256": "ed00bf40325838873aa01a8607b1f10ce3b2d42acaa9fff0f812621296025057",
       "notes": "Front text noticeably narrower than08 and larger than12, LN shifts left toward profile. Full brim present, physical embroidery scale consistent. Exact targetyaw unverified.",
       "poseVerified": false,
-      "sourceIndex": 10
+      "sourceIndex": 10,
+      "srcSmall": "rotation-assets/refined-hat-11-mobile.webp",
+      "originalSha256": "bd844b3459759089acc6288f99e498c73557ed676865d62bfc40cbf7bc95ff6f"
     },
     {
       "index": 12,
       "angle": 82.5,
-      "src": "rotation-assets/refined-hat-12.png",
+      "src": "rotation-assets/refined-hat-12.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -323,15 +347,17 @@
         "x": 113.68835098335865,
         "y": 91.83055975794252
       },
-      "sha256": "29eb6bbf05b54b4367cdaf3b54f18d5199da9ea40d3a25f0d8a5449479c95e43",
+      "sha256": "c45f3340c23fa5d9870b7bfa66cfe9e64647410bd46cb0818641c6c3c8020402",
       "notes": "Visible monotonic movement10\u219211\u219212. Front lettering narrower but more visible thanprofile12. LN movesleft towardprofilecentre. Brim remainsfull and broad; no missing elements, exactyaw unverified.",
       "poseVerified": false,
-      "sourceIndex": 11
+      "sourceIndex": 11,
+      "srcSmall": "rotation-assets/refined-hat-12-mobile.webp",
+      "originalSha256": "29eb6bbf05b54b4367cdaf3b54f18d5199da9ea40d3a25f0d8a5449479c95e43"
     },
     {
       "index": 13,
       "angle": 90.0,
-      "src": "rotation-assets/refined-hat-13.png",
+      "src": "rotation-assets/refined-hat-13.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -347,15 +373,17 @@
         "x": 81.90675241157555,
         "y": 48.07073954983923
       },
-      "sha256": "432648438bf6bf15d32063ae138bd612c9d6701f142097e2a2d474db65a099fd",
+      "sha256": "ebc1e26b37939bf3a01797579ed22f4733841bb1a7fd1b0b3f4cc41be2f55107",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 12
+      "sourceIndex": 12,
+      "srcSmall": "rotation-assets/refined-hat-13-mobile.webp",
+      "originalSha256": "432648438bf6bf15d32063ae138bd612c9d6701f142097e2a2d474db65a099fd"
     },
     {
       "index": 14,
       "angle": 97.5,
-      "src": "rotation-assets/refined-hat-14.png",
+      "src": "rotation-assets/refined-hat-14.webp",
       "status": "needs-review",
       "sourceDimensions": [
         1536,
@@ -371,15 +399,17 @@
         "x": 72.57227138643077,
         "y": 86.4306784660767
       },
-      "sha256": "5cc942cdc140a9e7ccc42abab55b699a72f4d6370b0810f03c19381b952e5836",
+      "sha256": "62e220c0ef65b079f26f07e2031633357ade6a09b355b16016af60c7d0e8b748",
       "notes": "Very close to105-degree candidate; no production acceptance. Brim intact and openingwhite, but angularprogression uncertain.",
       "poseVerified": false,
-      "sourceIndex": 13
+      "sourceIndex": 13,
+      "srcSmall": "rotation-assets/refined-hat-14-mobile.webp",
+      "originalSha256": "5cc942cdc140a9e7ccc42abab55b699a72f4d6370b0810f03c19381b952e5836"
     },
     {
       "index": 15,
       "angle": 105.0,
-      "src": "rotation-assets/refined-hat-15.png",
+      "src": "rotation-assets/refined-hat-15.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -395,15 +425,17 @@
         "x": 82.51612903225805,
         "y": 89.29618768328446
       },
-      "sha256": "34d0034596665a0ae1c9f81d227bd455897a4f8e512adcbb01ae40bcab68a3b8",
+      "sha256": "45991943542eae979cabdcf3a0400181d148da9a10addb56fb125972f48ca88e",
       "notes": "Narrow rearopening compared120, full connected brim; plausible coarse105 target. Angle unverified.",
       "poseVerified": false,
-      "sourceIndex": 14
+      "sourceIndex": 14,
+      "srcSmall": "rotation-assets/refined-hat-15-mobile.webp",
+      "originalSha256": "34d0034596665a0ae1c9f81d227bd455897a4f8e512adcbb01ae40bcab68a3b8"
     },
     {
       "sourceIndex": null,
       "angle": 108.75,
-      "src": "rotation-assets/refined-hat-16.png",
+      "src": "rotation-assets/refined-hat-16.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -419,15 +451,17 @@
         "x": 84.52046783625724,
         "y": 89.61988304093568
       },
-      "sha256": "2ccae5bbd8b57d37d1a35fe83a599c27537bd8ab5381c37bdf90434f45f76587",
+      "sha256": "6e388e04d0a4122cba11be36d152ab393657a810c2884543c6fbe977437eeadd",
       "notes": "Useful intermediate: LN centre about790 between850/680, side seam and rear opening advance together. Full attached brim preserved. First attempt overshot15 and was rejected.",
       "poseVerified": false,
-      "index": 16
+      "index": 16,
+      "srcSmall": "rotation-assets/refined-hat-16-mobile.webp",
+      "originalSha256": "2ccae5bbd8b57d37d1a35fe83a599c27537bd8ab5381c37bdf90434f45f76587"
     },
     {
       "index": 17,
       "angle": 112.5,
-      "src": "rotation-assets/refined-hat-17.png",
+      "src": "rotation-assets/refined-hat-17.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -443,15 +477,17 @@
         "x": 101.33333333333337,
         "y": 94.92753623188406
       },
-      "sha256": "06923abe9b023aa858b575433ecc0ed10518aac46ef50b8a4dfc92536e609b9a",
+      "sha256": "20718a64fb78e90ea6aeb1c395ae15028b40c3d8c35e4275c18bc11621049249",
       "notes": "Opening corrected to white. Local turn plausible; angular spacing unverified.",
       "poseVerified": false,
-      "sourceIndex": 15
+      "sourceIndex": 15,
+      "srcSmall": "rotation-assets/refined-hat-17-mobile.webp",
+      "originalSha256": "06923abe9b023aa858b575433ecc0ed10518aac46ef50b8a4dfc92536e609b9a"
     },
     {
       "index": 18,
       "angle": 120.0,
-      "src": "rotation-assets/refined-hat-18.png",
+      "src": "rotation-assets/refined-hat-18.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -467,15 +503,17 @@
         "x": 112.0233236151604,
         "y": 83.38192419825074
       },
-      "sha256": "2843ebae734835f0e54949566fc4df4f24a1bf1fdcc861be4bcc44e01c77e4ad",
+      "sha256": "d73d57f35d5019a24640da02caedb98116825c1fe9ee8c64490e75466af05547",
       "notes": "Rearopening and logo visibility intermediate90/135, connectedbrim visibleleft. Coarse localpass only.",
       "poseVerified": false,
-      "sourceIndex": 16
+      "sourceIndex": 16,
+      "srcSmall": "rotation-assets/refined-hat-18-mobile.webp",
+      "originalSha256": "2843ebae734835f0e54949566fc4df4f24a1bf1fdcc861be4bcc44e01c77e4ad"
     },
     {
       "index": 19,
       "angle": 127.5,
-      "src": "rotation-assets/refined-hat-19.png",
+      "src": "rotation-assets/refined-hat-19.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -491,15 +529,17 @@
         "x": 137.4404591104734,
         "y": 84.50502152080344
       },
-      "sha256": "db6e04f3e93998bb8735a1ad36b0d4274a3f1c286c5cb5bd1003f6ad6ad8e584",
+      "sha256": "4d1ba09c13a6f9a0ae5cb3903e48ed970f68c7376038c370233ad8cec164ef98",
       "notes": "White opening, rear landmarks advance between16 and18.",
       "poseVerified": false,
-      "sourceIndex": 17
+      "sourceIndex": 17,
+      "srcSmall": "rotation-assets/refined-hat-19-mobile.webp",
+      "originalSha256": "db6e04f3e93998bb8735a1ad36b0d4274a3f1c286c5cb5bd1003f6ad6ad8e584"
     },
     {
       "index": 20,
       "angle": 135.0,
-      "src": "rotation-assets/refined-hat-20.png",
+      "src": "rotation-assets/refined-hat-20.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -515,15 +555,17 @@
         "x": 143.5395683453238,
         "y": 79.13669064748203
       },
-      "sha256": "54f1ec475f1692f49092e12bbe2301ec8b5b123baf29e01f86179a48908fbcf4",
+      "sha256": "e94e9ffb16562f11b698188cf8872c286605a6433eb8b87fcb0d51437ee0127a",
       "notes": "Brim exposed imageleft behindcrown; rearopeningwhite and finewording preserved. Coarse localpass.",
       "poseVerified": false,
-      "sourceIndex": 18
+      "sourceIndex": 18,
+      "srcSmall": "rotation-assets/refined-hat-20-mobile.webp",
+      "originalSha256": "54f1ec475f1692f49092e12bbe2301ec8b5b123baf29e01f86179a48908fbcf4"
     },
     {
       "index": 21,
       "angle": 142.5,
-      "src": "rotation-assets/refined-hat-21.png",
+      "src": "rotation-assets/refined-hat-21.webp",
       "status": "needs-review",
       "sourceDimensions": [
         1536,
@@ -539,15 +581,17 @@
         "x": 153.8156028368794,
         "y": 88.65248226950354
       },
-      "sha256": "aa56f4e3da4b571a7066e238be77702eb55be654ff41ab44b819939dd5a5f2e0",
+      "sha256": "fb686e7b005fd70fe0f973986714e5bc9fad1ccf571d2cd5f5dc221aae3a6034",
       "notes": "Replacement improves crown and rear opening progression between18 and20. Brim projection remains too similar to18; exact angle unverified.",
       "poseVerified": false,
-      "sourceIndex": 19
+      "sourceIndex": 19,
+      "srcSmall": "rotation-assets/refined-hat-21-mobile.webp",
+      "originalSha256": "aa56f4e3da4b571a7066e238be77702eb55be654ff41ab44b819939dd5a5f2e0"
     },
     {
       "index": 22,
       "angle": 150.0,
-      "src": "rotation-assets/refined-hat-22.png",
+      "src": "rotation-assets/refined-hat-22.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -563,15 +607,17 @@
         "x": 156.48920863309354,
         "y": 82.01438848920864
       },
-      "sha256": "d0b095a0e309bffdc4082dcb31a18eb0eb0c4e70b12e908fed1998ab9f7e80f1",
+      "sha256": "19b6e906133d7e2054f189e6713a3d1505d42a8a347ccf69161c32f1752b730c",
       "notes": "Less brimexposed than135, rearopeningmoves towardcentre, connectednavybrim andwhiteopening. Actualangle unverified.",
       "poseVerified": false,
-      "sourceIndex": 20
+      "sourceIndex": 20,
+      "srcSmall": "rotation-assets/refined-hat-22-mobile.webp",
+      "originalSha256": "d0b095a0e309bffdc4082dcb31a18eb0eb0c4e70b12e908fed1998ab9f7e80f1"
     },
     {
       "index": 23,
       "angle": 157.5,
-      "src": "rotation-assets/refined-hat-23.png",
+      "src": "rotation-assets/refined-hat-23.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -587,15 +633,17 @@
         "x": 166.42632331902723,
         "y": 89.12732474964236
       },
-      "sha256": "d5b21a3839872328e7814570ceb3cf0fecf3df9783b830d060775c8e841c2bfb",
+      "sha256": "2cc427abfa2e0a9703ad750b4a111a2957bbbd95f6102ecb2d3c127765222afa",
       "notes": "Rear opening moves toward centre; attached left brim tip reduces; white opening.",
       "poseVerified": false,
-      "sourceIndex": 21
+      "sourceIndex": 21,
+      "srcSmall": "rotation-assets/refined-hat-23-mobile.webp",
+      "originalSha256": "d5b21a3839872328e7814570ceb3cf0fecf3df9783b830d060775c8e841c2bfb"
     },
     {
       "sourceIndex": 22,
       "angle": 165.0,
-      "src": "rotation-assets/refined-hat-24.png",
+      "src": "rotation-assets/refined-hat-24.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -611,15 +659,17 @@
         "x": 190.69503546099293,
         "y": 92.19858156028369
       },
-      "sha256": "28227d25aa86927aa222010f532b8d4d9f26caabf21600162619f0357a06328d",
+      "sha256": "96e5887cb81324bd20f76c37bc6701109b72199908e4ac4fa1563b510d340cdf",
       "notes": "Rear seam/opening now intermediate between21 and23; smaller residual jump. White opening preserved. LN and brim details still redraw subtly.",
       "poseVerified": false,
-      "index": 24
+      "index": 24,
+      "srcSmall": "rotation-assets/refined-hat-24-mobile.webp",
+      "originalSha256": "28227d25aa86927aa222010f532b8d4d9f26caabf21600162619f0357a06328d"
     },
     {
       "index": 25,
       "angle": 172.5,
-      "src": "rotation-assets/refined-hat-25.png",
+      "src": "rotation-assets/refined-hat-25.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -635,15 +685,17 @@
         "x": 187.35483870967744,
         "y": 69.50146627565982
       },
-      "sha256": "3803dd1b7c07c22a84bc5411f7b420e298509ff7517e72ab5352d62d4be69aa8",
+      "sha256": "658df707d092258eea68e942c0a6b69a1bd66d04932b5dbdf5e77a9e91c0e17d",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 23
+      "sourceIndex": 23,
+      "srcSmall": "rotation-assets/refined-hat-25-mobile.webp",
+      "originalSha256": "3803dd1b7c07c22a84bc5411f7b420e298509ff7517e72ab5352d62d4be69aa8"
     },
     {
       "index": 26,
       "angle": 180.0,
-      "src": "rotation-assets/refined-hat-26.png",
+      "src": "rotation-assets/refined-hat-26.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -659,15 +711,17 @@
         "x": 203.29411764705878,
         "y": 68.38235294117646
       },
-      "sha256": "4761772733845c0c19f5b08aec85c55e3e7dd63646df9b33082d9fe370370568",
+      "sha256": "16d9f295e540893dc98eb40c4886599c8f7694977e521f7677a475a0674cf080",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 24
+      "sourceIndex": 24,
+      "srcSmall": "rotation-assets/refined-hat-26-mobile.webp",
+      "originalSha256": "4761772733845c0c19f5b08aec85c55e3e7dd63646df9b33082d9fe370370568"
     },
     {
       "index": 27,
       "angle": 187.5,
-      "src": "rotation-assets/refined-hat-27.png",
+      "src": "rotation-assets/refined-hat-27.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -683,15 +737,17 @@
         "x": 228.20260492040518,
         "y": 72.64833574529668
       },
-      "sha256": "b75547f9d069565008b5c865e7aca5086ee99d9fc739c46af3579716aebca0d2",
+      "sha256": "41523f7905a5f509802f281a70b07e76abed1c19fd859a877371a86df2e48da1",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 25
+      "sourceIndex": 25,
+      "srcSmall": "rotation-assets/refined-hat-27-mobile.webp",
+      "originalSha256": "b75547f9d069565008b5c865e7aca5086ee99d9fc739c46af3579716aebca0d2"
     },
     {
       "index": 28,
       "angle": 195.0,
-      "src": "rotation-assets/refined-hat-28.png",
+      "src": "rotation-assets/refined-hat-28.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -707,18 +763,20 @@
         "x": 246.73900293255133,
         "y": 74.63343108504398
       },
-      "sha256": "a013263fe70ca0d1ed158b4ade7a92a5bf4045bd396af67f700fccf11ca632da",
+      "sha256": "0f228f1031404d2e7e432ba16be857c8bdd6a168ef2cc3aa6ef43b1d1e3b7582",
       "notes": [
         "Rear aperture shifts left vs25, brim small40px emerging on right vs165px28. Plausible intermediate, all lettering/whitehole/navystrap maintained.",
         "Crown consistent approx682px button-to-hem."
       ],
       "poseVerified": false,
-      "sourceIndex": 26
+      "sourceIndex": 26,
+      "srcSmall": "rotation-assets/refined-hat-28-mobile.webp",
+      "originalSha256": "a013263fe70ca0d1ed158b4ade7a92a5bf4045bd396af67f700fccf11ca632da"
     },
     {
       "index": 29,
       "angle": 202.5,
-      "src": "rotation-assets/refined-hat-29.png",
+      "src": "rotation-assets/refined-hat-29.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -734,19 +792,21 @@
         "x": 270.18023255813955,
         "y": 77.90697674418605
       },
-      "sha256": "262685c0d6a72b6696a0381b510a3452ce64c2db35b4c67504e4d08a3a4a32c0",
+      "sha256": "4aadc61caef059ea510f755edba8599ef47f6e6bbd831872e4922d136b985bda",
       "notes": [
         "Changed local-anchor approach produced real crown seam/eyelet/opening motion to left, not just brim extension.",
         "Brim approximately75px beyond crown, between26 (~40px) and28 (~165px). Rear text/whitehole/navystrap preserved. Target yaw remains unproven.",
         "Earlier held27 preserved in reviews/frame-27-held-v1.png/json."
       ],
       "poseVerified": false,
-      "sourceIndex": 27
+      "sourceIndex": 27,
+      "srcSmall": "rotation-assets/refined-hat-29-mobile.webp",
+      "originalSha256": "262685c0d6a72b6696a0381b510a3452ce64c2db35b4c67504e4d08a3a4a32c0"
     },
     {
       "index": 30,
       "angle": 210.0,
-      "src": "rotation-assets/refined-hat-30.png",
+      "src": "rotation-assets/refined-hat-30.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -762,7 +822,7 @@
         "x": 273.12445095168374,
         "y": 71.8887262079063
       },
-      "sha256": "c85e18e38f4157ef145336442e2c2d447a47b4de62551ef7961194d266a4697d",
+      "sha256": "67fb93f9712ed48b1cabbe11feb929d77374e1832395d6a47abfa10291c43246",
       "notes": [
         "Visual coarse-keyframe pass: rear aperture shifts left, plain side turns into view; no LN.",
         "Rear opening white, strap navy, readable small rear text. Crown scale similar anchor25.",
@@ -770,12 +830,14 @@
         "No pixel manipulation; built-in image generation."
       ],
       "poseVerified": false,
-      "sourceIndex": 28
+      "sourceIndex": 28,
+      "srcSmall": "rotation-assets/refined-hat-30-mobile.webp",
+      "originalSha256": "c85e18e38f4157ef145336442e2c2d447a47b4de62551ef7961194d266a4697d"
     },
     {
       "index": 31,
       "angle": 217.5,
-      "src": "rotation-assets/refined-hat-31.png",
+      "src": "rotation-assets/refined-hat-31.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -791,18 +853,20 @@
         "x": 270.94985250737466,
         "y": 72.4188790560472
       },
-      "sha256": "a39a4883f09575aca0013249c5682fba4993045a9552fc88005e7b4094e549cf",
+      "sha256": "51791882ba5e47424a39b98137e9d62bc6146d1288a4ca14db8d0227f77b7532",
       "notes": [
         "Reused overshoot candidate originally target27 as29 to reduce waste.",
         "Opening and rear words farther left than28, brimabout190px versus165px28, plausible nextstep. Exact yaw notverified."
       ],
       "poseVerified": false,
-      "sourceIndex": 29
+      "sourceIndex": 29,
+      "srcSmall": "rotation-assets/refined-hat-31-mobile.webp",
+      "originalSha256": "a39a4883f09575aca0013249c5682fba4993045a9552fc88005e7b4094e549cf"
     },
     {
       "index": 32,
       "angle": 225.0,
-      "src": "rotation-assets/refined-hat-32.png",
+      "src": "rotation-assets/refined-hat-32.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -818,18 +882,20 @@
         "x": 276.27067669172936,
         "y": 71.42857142857144
       },
-      "sha256": "e35492c0932ee223bafe2e1b99d0c0f325e93fee9170a990a11b1619219635aa",
+      "sha256": "949eafc7eb91cbd080507b53224e36c5c854262bcd8d588221bcc55bf280f474",
       "notes": [
         "Visible advance vs29; rear hole narrower and left, brim more visible. Between29 and32, but angular spacing not proven/even.",
         "Navyshape/whitehole/rearphrase maintained. Button-to-hem665px; displayregistration needed."
       ],
       "poseVerified": false,
-      "sourceIndex": 30
+      "sourceIndex": 30,
+      "srcSmall": "rotation-assets/refined-hat-32-mobile.webp",
+      "originalSha256": "e35492c0932ee223bafe2e1b99d0c0f325e93fee9170a990a11b1619219635aa"
     },
     {
       "index": 33,
       "angle": 232.5,
-      "src": "rotation-assets/refined-hat-33.png",
+      "src": "rotation-assets/refined-hat-33.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -845,18 +911,20 @@
         "x": 280.03007518796994,
         "y": 73.6842105263158
       },
-      "sha256": "9c8405256f8414aa273b3c62dc909c57fa2bb38644311f66f0ab2ef1d59c18ac",
+      "sha256": "e1d555573f01dbbe54e465a406baaadf5a4e4c4cbfbc0dc419f9352464b5a744",
       "notes": [
         "Small consistent advance30to32: rearhole rightedge512 between545and450; eyelets/seams/text move together.",
         "Brim and rearstrap/whitehole consistent visually, noLN. Pose spacing approximate."
       ],
       "poseVerified": false,
-      "sourceIndex": 31
+      "sourceIndex": 31,
+      "srcSmall": "rotation-assets/refined-hat-33-mobile.webp",
+      "originalSha256": "9c8405256f8414aa273b3c62dc909c57fa2bb38644311f66f0ab2ef1d59c18ac"
     },
     {
       "index": 34,
       "angle": 240.0,
-      "src": "rotation-assets/refined-hat-34.png",
+      "src": "rotation-assets/refined-hat-34.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -872,7 +940,7 @@
         "x": 288.23988005997006,
         "y": 71.81409295352324
       },
-      "sha256": "829d062aad95cc94074175d77f10ace3b4e5ba923ac48d14d36e543a7a6aadcd",
+      "sha256": "e92e14f987a0b12cf448700f42061d58d21383c51d15ed27cfe98ce4eda1d7b2",
       "notes": [
         "Coarse-keyframe visual pass: rear opening shifts left and narrows, plain side increases vs28; brim extension increases on image-right.",
         "White rear empty arch preserved, navy strap and fine lettering present, no LN.",
@@ -880,12 +948,14 @@
         "Button-to-hem667px vs683px at28; modest display registration needed, no pixel edits."
       ],
       "poseVerified": false,
-      "sourceIndex": 32
+      "sourceIndex": 32,
+      "srcSmall": "rotation-assets/refined-hat-34-mobile.webp",
+      "originalSha256": "829d062aad95cc94074175d77f10ace3b4e5ba923ac48d14d36e543a7a6aadcd"
     },
     {
       "index": 35,
       "angle": 247.5,
-      "src": "rotation-assets/refined-hat-35.png",
+      "src": "rotation-assets/refined-hat-35.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -901,18 +971,20 @@
         "x": 294.5151515151515,
         "y": 71.21212121212122
       },
-      "sha256": "f8f665c07b40968f6e55a504a1a6dd549fb455da8e09edbb69800ca516503f10",
+      "sha256": "038f3b3f124f4de58e505e1f0d715c5eb756772190992985684182f491550c5f",
       "notes": [
         "Clear progression32to36: aperture narrows about200px/atleft, reartext starts wrapping left, plainpanel increases.",
         "Brim connected and progressively exposed. Navystrap/whitehole intact. Camera/crownscale similar."
       ],
       "poseVerified": false,
-      "sourceIndex": 33
+      "sourceIndex": 33,
+      "srcSmall": "rotation-assets/refined-hat-35-mobile.webp",
+      "originalSha256": "f8f665c07b40968f6e55a504a1a6dd549fb455da8e09edbb69800ca516503f10"
     },
     {
       "sourceIndex": null,
       "angle": 251.25,
-      "src": "rotation-assets/refined-hat-36.png",
+      "src": "rotation-assets/refined-hat-36.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -928,18 +1000,20 @@
         "x": 308.09077155824514,
         "y": 72.16338880484116
       },
-      "sha256": "a01ea64818166dfca2030d45787303a7acb511afaa0ca061c3d341a253dffae3",
+      "sha256": "516be29d11056e1324abf2ddc7a113c44e54c6e49e8e0b7dde9d42651df74b9d",
       "notes": [
         "Useful midpoint: rearhole width~145 between33~200 and34~90, mainseam~710 between775and650, eyelet~465 between515and425.",
         "Rearphrase graduallyoccludes, small frontedge appears, brim remainsconnected. Whiteemptyopening/navystrap retained."
       ],
       "poseVerified": false,
-      "index": 36
+      "index": 36,
+      "srcSmall": "rotation-assets/refined-hat-36-mobile.webp",
+      "originalSha256": "a01ea64818166dfca2030d45787303a7acb511afaa0ca061c3d341a253dffae3"
     },
     {
       "index": 37,
       "angle": 255.0,
-      "src": "rotation-assets/refined-hat-37.png",
+      "src": "rotation-assets/refined-hat-37.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -955,19 +1029,21 @@
         "x": 301.5365853658536,
         "y": 68.14024390243901
       },
-      "sha256": "4e92702ba1e3e31642da674fe664b78b7b63f710e00f73e023e55b3dd78fcf13",
+      "sha256": "e2fb775360b42bfbb5ca0de35b4ef1a80b1c1f2df1f6604fb5f2a5ea0ddf9e22",
       "notes": [
         "Rearhole nowabout90px wide atleft; rearphrase partiallyhidden asplainpanel grows. Smallfrontletteredge appearsright.",
         "Progresses toward36, though33\u219234 visible rotation step is larger than30\u219231. Exact spacing unverified.",
         "Brimconnected, whitehole/navystrap preserved."
       ],
       "poseVerified": false,
-      "sourceIndex": 34
+      "sourceIndex": 34,
+      "srcSmall": "rotation-assets/refined-hat-37-mobile.webp",
+      "originalSha256": "4e92702ba1e3e31642da674fe664b78b7b63f710e00f73e023e55b3dd78fcf13"
     },
     {
       "sourceIndex": 35,
       "angle": 262.5,
-      "src": "rotation-assets/refined-hat-38.png",
+      "src": "rotation-assets/refined-hat-38.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -983,18 +1059,20 @@
         "x": 303.0076103500761,
         "y": 70.6240487062405
       },
-      "sha256": "3c3314f58e0df8164569533bdcece83f33ce0c4f75155323182f0d28c15de081",
+      "sha256": "ae916ffc811300e0a8e7640cba4ba12f81742f33347c24b1434a2cb832e4960e",
       "notes": [
         "Visible improvement: mainseam moves to~540px between34~650 and36~400; eyelet~775 between34~820 and36~650.",
         "Old35 repeated34panel positions; candidate genuine panel/seam shift with connectedbrim, whiteemptyrearopening/navystrap."
       ],
       "poseVerified": false,
-      "index": 38
+      "index": 38,
+      "srcSmall": "rotation-assets/refined-hat-38-mobile.webp",
+      "originalSha256": "3c3314f58e0df8164569533bdcece83f33ce0c4f75155323182f0d28c15de081"
     },
     {
       "index": 39,
       "angle": 270.0,
-      "src": "rotation-assets/refined-hat-39.png",
+      "src": "rotation-assets/refined-hat-39.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -1010,15 +1088,17 @@
         "x": 305.33031674208144,
         "y": 69.53242835595776
       },
-      "sha256": "5e1cd2c4bc9fc15f5304dd070cae5cb7094a3cdb32062ec825d0768cc5952f90",
+      "sha256": "e107398bafe91f627241dc85a4db72a48888e7f541ec41f097c2c8b4fe7a5f48",
       "notes": "Local candidate only; full-sequence consistency unproven.",
       "poseVerified": false,
-      "sourceIndex": 36
+      "sourceIndex": 36,
+      "srcSmall": "rotation-assets/refined-hat-39-mobile.webp",
+      "originalSha256": "5e1cd2c4bc9fc15f5304dd070cae5cb7094a3cdb32062ec825d0768cc5952f90"
     },
     {
       "index": 40,
       "angle": 277.5,
-      "src": "rotation-assets/refined-hat-40.png",
+      "src": "rotation-assets/refined-hat-40.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -1034,19 +1114,21 @@
         "x": 294.395173453997,
         "y": 74.05731523378583
       },
-      "sha256": "a8f0bb2ce8e9e98346459b2165e9823bddfe71226f017cfb39a070e8395cc23b",
+      "sha256": "a402d3c2bae8b4a908b0680531576afa7e31bc9e320226c0bb319bc22025f42b",
       "notes": [
         "Small progress from36; still side dominant, wordmark narrow on right.",
         "Pose close to38 but less front visible and brim narrower; exact spacing unverified.",
         "No branding inversion, clipped brim or obvious structural failure."
       ],
       "poseVerified": false,
-      "sourceIndex": 37
+      "sourceIndex": 37,
+      "srcSmall": "rotation-assets/refined-hat-40-mobile.webp",
+      "originalSha256": "a8f0bb2ce8e9e98346459b2165e9823bddfe71226f017cfb39a070e8395cc23b"
     },
     {
       "index": 41,
       "angle": 285.0,
-      "src": "rotation-assets/refined-hat-41.png",
+      "src": "rotation-assets/refined-hat-41.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -1062,19 +1144,21 @@
         "x": 278.6060606060606,
         "y": 70.45454545454547
       },
-      "sha256": "cb427eea95c4dca01ea5824fb4689776a7008a5934368e54d6865b432cdcfb2d",
+      "sha256": "18cc32fc1190c9adfd857f8c3eb84611f969af2d78b1ce0b5f08d246c2b68b9a",
       "notes": [
         "Pose lies between plain profile36 and forward40; lettering begins emerging on right.",
         "Brim remains full, cream edge continuous, no LN on plain side.",
         "Target yaw visually estimated only."
       ],
       "poseVerified": false,
-      "sourceIndex": 38
+      "sourceIndex": 38,
+      "srcSmall": "rotation-assets/refined-hat-41-mobile.webp",
+      "originalSha256": "cb427eea95c4dca01ea5824fb4689776a7008a5934368e54d6865b432cdcfb2d"
     },
     {
       "index": 42,
       "angle": 292.5,
-      "src": "rotation-assets/refined-hat-42.png",
+      "src": "rotation-assets/refined-hat-42.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -1090,19 +1174,21 @@
         "x": 276.3841463414634,
         "y": 72.71341463414635
       },
-      "sha256": "b999babc2553190d88e584aa23a5405e50241f5bb67538440a62102a262bb2d5",
+      "sha256": "3f6399f95a0bc695188a4753e3d847046a5d6c2fe4d64849764c8fd3209417c2",
       "notes": [
         "Initial rejected because near-duplicate40 pose.",
         "Targeted retry shifts front-side hem seam to about750, between38(~817) and40(~718); brim attachment between endpoints.",
         "Progression visible but exact7.5-degree spacing unverified."
       ],
       "poseVerified": false,
-      "sourceIndex": 39
+      "sourceIndex": 39,
+      "srcSmall": "rotation-assets/refined-hat-42-mobile.webp",
+      "originalSha256": "b999babc2553190d88e584aa23a5405e50241f5bb67538440a62102a262bb2d5"
     },
     {
       "index": 43,
       "angle": 300.0,
-      "src": "rotation-assets/refined-hat-43.png",
+      "src": "rotation-assets/refined-hat-43.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -1118,7 +1204,7 @@
         "x": 270.3219814241486,
         "y": 60.68111455108357
       },
-      "sha256": "347917a93557c261aeeebe4ea2156d15c345d9c2306e2546cbd34b939c1f050c",
+      "sha256": "97122178d2b74c6f62357994addd7a81ad4d509fd88651dd2d82fd88e5b961c5",
       "notes": [
         "Distinct forward turn from plain profile; brim remains full length, now broadening naturally toward viewer.",
         "White LOS/NI\u00d1OS remains legible and narrower front-master shape; far end appropriately foreshortened.",
@@ -1126,12 +1212,14 @@
         "Target angle estimated visually; exact 3D pose not verified."
       ],
       "poseVerified": false,
-      "sourceIndex": 40
+      "sourceIndex": 40,
+      "srcSmall": "rotation-assets/refined-hat-43-mobile.webp",
+      "originalSha256": "347917a93557c261aeeebe4ea2156d15c345d9c2306e2546cbd34b939c1f050c"
     },
     {
       "sourceIndex": 41,
       "angle": 307.5,
-      "src": "rotation-assets/refined-hat-44.png",
+      "src": "rotation-assets/refined-hat-44.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -1147,19 +1235,21 @@
         "x": 244.37795275590543,
         "y": 62.99212598425197
       },
-      "sha256": "1a1772076d151840c6fc9f6799f5e394ae626278ceb6b8c6e8d3c68683814494",
+      "sha256": "794c22c015d2d5285404ef67a9d0496f64564651b9195493c10002cf139789bb",
       "notes": [
         "Visually improved intermediate: lower wordmark projectedwidth about235px between40(~210) and42(~270), unlike original41(~280).",
         "Front-side seam/wordmark progression now monotonic; brim continuous, no LN wronglyadded.",
         "Exact7.5degree yaw unverified; texture and crownwidth vary slightly; requires parent uniform registration review."
       ],
       "poseVerified": false,
-      "index": 44
+      "index": 44,
+      "srcSmall": "rotation-assets/refined-hat-44-mobile.webp",
+      "originalSha256": "1a1772076d151840c6fc9f6799f5e394ae626278ceb6b8c6e8d3c68683814494"
     },
     {
       "index": 45,
       "angle": 315.0,
-      "src": "rotation-assets/refined-hat-45.png",
+      "src": "rotation-assets/refined-hat-45.webp",
       "status": "provisional",
       "sourceDimensions": [
         1536,
@@ -1175,19 +1265,21 @@
         "x": 213.15103338632753,
         "y": 60.89030206677265
       },
-      "sha256": "7e8ba4e1f46d1d1d7777383e42ddf68032d4d5a23734568a392a8087e46a10c9",
+      "sha256": "d7d687deacbf660153fdec8b9c9311b02c87b2f765eb2bea14139d6dd9842001",
       "notes": [
         "Front wordmark broadens compared40, plain side still visible; usable progression toward44.",
         "Crown optical height differs and needs uniform display registration.",
         "Brim full, typography identity preserved; exact midpoint pose unverified."
       ],
       "poseVerified": false,
-      "sourceIndex": 42
+      "sourceIndex": 42,
+      "srcSmall": "rotation-assets/refined-hat-45-mobile.webp",
+      "originalSha256": "7e8ba4e1f46d1d1d7777383e42ddf68032d4d5a23734568a392a8087e46a10c9"
     },
     {
       "sourceIndex": null,
       "angle": 318.75,
-      "src": "rotation-assets/refined-hat-46.png",
+      "src": "rotation-assets/refined-hat-46.webp",
       "status": "refined-provisional",
       "sourceDimensions": [
         1536,
@@ -1203,19 +1295,21 @@
         "x": 211.5612082670906,
         "y": 66.45468998410175
       },
-      "sha256": "e39642975c6f253ce0ab8eb2db0ac709ebb937736f063f113a16c9a37be6d925",
+      "sha256": "ba5faf638a08af73895cb0710e5d58606b93d73cfdd65221e5d9c1f89f27803b",
       "notes": [
         "Visibly intermediate front dominance: projected wordmark offset frombutton/crownheight about.36, between42~.51 and43~.29.",
         "Brim turn and front-facing wordmark noticeably soften42\u219243 jump, no wrongside LN or clipping.",
         "Not exact yaw; wordmark projectedwidth slightly generous versus43 after heightregistration, fabric detail differs; parent motionreview required."
       ],
       "poseVerified": false,
-      "index": 46
+      "index": 46,
+      "srcSmall": "rotation-assets/refined-hat-46-mobile.webp",
+      "originalSha256": "e39642975c6f253ce0ab8eb2db0ac709ebb937736f063f113a16c9a37be6d925"
     },
     {
       "index": 47,
       "angle": 322.5,
-      "src": "rotation-assets/refined-hat-47.png",
+      "src": "rotation-assets/refined-hat-47.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -1231,18 +1325,20 @@
         "x": 353.2769679300292,
         "y": 45.481049562682216
       },
-      "sha256": "46a065152ce534e901ca04b034d118ea7e0c0ea2f3e82e80b56c4a475fb6d8de",
+      "sha256": "4895b1c4b427e666888a60b47656918b2a6df1d8d947bc2b6a835fb8dd493c70",
       "notes": [
         "Visible shallow turn away from44 toward plain side; wordmark narrows and movesright, correct direction.",
         "Full brim maintained and exact branding legible. Per-frame pass provisional only; unequal yaw spacing remains possible."
       ],
       "poseVerified": false,
-      "sourceIndex": 43
+      "sourceIndex": 43,
+      "srcSmall": "rotation-assets/refined-hat-47-mobile.webp",
+      "originalSha256": "46a065152ce534e901ca04b034d118ea7e0c0ea2f3e82e80b56c4a475fb6d8de"
     },
     {
       "index": 48,
       "angle": 330.0,
-      "src": "rotation-assets/refined-hat-48.png",
+      "src": "rotation-assets/refined-hat-48.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -1258,7 +1354,7 @@
         "x": 357.98548621190133,
         "y": 49.056603773584925
       },
-      "sha256": "e30ce935cd23f5d70e763403ea84cf88c608d2365bd0f412458c7f77e21fb115",
+      "sha256": "dd1a9ec50e89f5d2adb927288c2066e9cfcb9a1e3de537943f4b82ba88156999",
       "notes": [
         "Initial attempt held: insufficient pose change toward front.",
         "One targeted retry gives distinct front-dominant shallow three-quarter; approved master letters retained, brim full and uncropped.",
@@ -1266,12 +1362,14 @@
         "Exact 30-degree pose estimated visually, not mathematically proven."
       ],
       "poseVerified": false,
-      "sourceIndex": 44
+      "sourceIndex": 44,
+      "srcSmall": "rotation-assets/refined-hat-48-mobile.webp",
+      "originalSha256": "e30ce935cd23f5d70e763403ea84cf88c608d2365bd0f412458c7f77e21fb115"
     },
     {
       "index": 49,
       "angle": 337.5,
-      "src": "rotation-assets/refined-hat-49.png",
+      "src": "rotation-assets/refined-hat-49.webp",
       "status": "needs-review",
       "sourceDimensions": [
         1254,
@@ -1287,19 +1385,21 @@
         "x": 349.17816091954023,
         "y": 52.011494252873575
       },
-      "sha256": "96c60cae16828af0e8893972b32a6e5b4558da945d86619ee38e54494c223a6a",
+      "sha256": "038c3569ac81b7c6030421515763af0d449e0cffde8e21ed08bafae05125ac8c",
       "notes": [
         "Initial nearly duplicated44; targeted retry yields modest advance with centre seam shiftleft.",
         "Pose remains too close to44, exact increment unproven. Best available retained as needs-review per renewed authorization.",
         "Typography and full brim remain intact."
       ],
       "poseVerified": false,
-      "sourceIndex": 45
+      "sourceIndex": 45,
+      "srcSmall": "rotation-assets/refined-hat-49-mobile.webp",
+      "originalSha256": "96c60cae16828af0e8893972b32a6e5b4558da945d86619ee38e54494c223a6a"
     },
     {
       "index": 50,
       "angle": 345.0,
-      "src": "rotation-assets/refined-hat-50.png",
+      "src": "rotation-assets/refined-hat-50.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -1315,19 +1415,21 @@
         "x": 337.68390804597703,
         "y": 52.011494252873575
       },
-      "sha256": "fc4ba01da86949df22d6b7d27c1e63eb2abf1255da8f14551f84aa6a9ca6bf14",
+      "sha256": "cacfddc86e7c2a11a8e571213d20ff9dc24f254c239f039d10ccb94b7aa23271",
       "notes": [
         "Good visible progression towardfront; wordmark shifts towardcentre, side strip diminishes, brimapproaches symmetry.",
         "LN begins tiny sliver on far imageRIGHT, same side as frontmaster.",
         "Fullbrim, typography intact. Exact15degree pose unverified."
       ],
       "poseVerified": false,
-      "sourceIndex": 46
+      "sourceIndex": 46,
+      "srcSmall": "rotation-assets/refined-hat-50-mobile.webp",
+      "originalSha256": "fc4ba01da86949df22d6b7d27c1e63eb2abf1255da8f14551f84aa6a9ca6bf14"
     },
     {
       "index": 51,
       "angle": 352.5,
-      "src": "rotation-assets/refined-hat-51.png",
+      "src": "rotation-assets/refined-hat-51.webp",
       "status": "provisional",
       "sourceDimensions": [
         1254,
@@ -1343,14 +1445,16 @@
         "x": 316.9913544668588,
         "y": 53.02593659942363
       },
-      "sha256": "bcc22a11557e07b49cb0c2aefc890d11c0bcdb531440bfdace39617befaac8ee",
+      "sha256": "650b77e6a84a72d0c37d02866e859847221b6e6f0bb1e21aa84bd0b964a3e509",
       "notes": [
         "Progresses correctly from46 towardfront, slightrightward wordmarkoffset; LN peeks on imageRIGHT consistent withmaster.",
         "47\u219200 seam inspected against approvedfront: nearfrontalpose closes withsmallremainingrotation; brim continuous and wordmark same basicshape.",
         "Residual crown/brimwidth and fabrictexture variation versusmaster remain (especially left silhouette); not pixelidentical or proven7.5degree spacing."
       ],
       "poseVerified": false,
-      "sourceIndex": 47
+      "sourceIndex": 47,
+      "srcSmall": "rotation-assets/refined-hat-51-mobile.webp",
+      "originalSha256": "bcc22a11557e07b49cb0c2aefc890d11c0bcdb531440bfdace39617befaac8ee"
     }
   ]
 }

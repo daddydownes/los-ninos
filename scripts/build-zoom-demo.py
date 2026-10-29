@@ -113,14 +113,15 @@ def package(output):
     for name in sorted(set(re.findall(r'zoom-photos/([\w-]+\.webp)', html))):
         copy_asset(ROOT / 'demo/archive-ideas/assets/photos' / name, output,
                    Path('zoom-photos') / name)
-    # Package the selected refined sequence, including its unchanged PNG sources.
+    # Package the selected refined sequence, including desktop and mobile WebP images.
     manifest = json.loads((ZOOM / 'rotation-assets/refined-hat.json').read_text())
     copy_asset(ZOOM / 'rotation-assets/refined-hat.json', output, 'rotation-assets/refined-hat.json')
     for frame in manifest['frames']:
-        relative = frame['src']
-        if not re.fullmatch(r'rotation-assets/refined-hat-\d{2}\.png', relative):
-            raise ValueError('Unexpected refined hat source path')
-        copy_asset(ZOOM / relative, output, relative)
+        for key in ('src', 'srcSmall'):
+            relative = frame[key]
+            if not re.fullmatch(r'rotation-assets/refined-hat-\d{2}(?:-mobile)?\.webp', relative):
+                raise ValueError('Unexpected refined hat source path')
+            copy_asset(ZOOM / relative, output, relative)
     copy_asset(ROOT / 'commerce/public/bag-state.js', output, 'bag-state.js')
     (output / 'demo-catalog.json').write_text(json.dumps(CATALOG, indent=2) + '\n', encoding='utf-8')
     (output / 'checkout.html').write_text(CHECKOUT, encoding='utf-8')

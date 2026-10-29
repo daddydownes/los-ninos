@@ -1,4 +1,4 @@
-/* Registered original PNG views, cut at their angular intervals in a 3.6s loop. */
+/* Compressed registered views, cut at their angular intervals in a 3.6s loop. */
 (() => {
   'use strict';
   const section = document.querySelector('[data-refined-hat]');
@@ -130,6 +130,8 @@
       const response = await fetch(section.dataset.refinedManifest);
       if (!response.ok) throw new Error('Sequence unavailable');
       frames = validate(await response.json());
+      const small = matchMedia('(max-width: 700px)').matches || navigator.connection?.saveData;
+      frames = frames.map(frame => ({...frame, src: small && frame.srcSmall ? frame.srcSmall : frame.src}));
       let cursor = 0, complete = 0;
       const errors = [];
       async function worker() {
