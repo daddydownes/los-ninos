@@ -92,10 +92,10 @@
 }
 .shop-card .stepper,.zoom-product .stepper{border:0;background:none;overflow:visible}
 .shop-card .stepper button,.zoom-product .stepper button{
-  border-radius:50%;background:#ffffff0b;color:#f7f4ee;box-shadow:inset 0 1px 0 #ffffff16;
+  border-radius:50%;background:#c3def0;color:#142b3d;border:1px solid #e4f2fc;opacity:1;box-shadow:inset 0 1px 0 #fff9,0 3px 8px #07101b25;
   transition:background .18s ease,transform .18s ease,box-shadow .18s ease;
 }
-.shop-card .stepper button:hover:not(:disabled),.zoom-product .stepper button:hover:not(:disabled){background:#ffffff18}
+.shop-card .stepper button:hover:not(:disabled),.zoom-product .stepper button:hover:not(:disabled){background:#c3def0;box-shadow:inset 0 1px 0 #fff9,0 0 0 3px #c3def01f}
 .shop-card .stepper button:active:not(:disabled),.zoom-product .stepper button:active:not(:disabled){transform:scale(.9);box-shadow:inset 0 1px 4px #080f1940}
 .shop-card .stepper button:focus-visible,.zoom-product .stepper button:focus-visible{outline:2px solid #b2d4ef;outline-offset:2px}
 .add .bag-confirm-icon{display:none}
@@ -106,3 +106,6 @@
   .shop-card .add[data-add-to-bag]::after,.zoom-product .add[data-add-to-bag]::after{animation:none}
   .shop-card .add[data-add-to-bag],.zoom-product .add[data-add-to-bag],.shop-card .stepper button,.zoom-product .stepper button{transition:none}
 }
+
+/* Preserve identical ice-blue circles at quantity limits. */
+.shop-card .stepper button:disabled,.zoom-product .stepper button:disabled{opacity:1;background:#c3def0;color:#142b3d;border-color:#e4f2fc;cursor:default}
