@@ -1,0 +1,90 @@
+{
+  "sourceFirst": 1543,
+  "sourceEnd": 2061,
+  "frames": 518,
+  "fps": 30,
+  "sourceOrderUnchanged": true,
+  "phoneNativeCrop": [
+    1000,
+    2160
+  ],
+  "crf": 18,
+  "shots": [
+    {
+      "first": 1543,
+      "end": 1658,
+      "x": "480-210*(1-pow(1-min(1,t/1.7),2))"
+    },
+    {
+      "first": 1658,
+      "end": 1696,
+      "x": "200"
+    },
+    {
+      "first": 1696,
+      "end": 1734,
+      "x": "400+90*min(1,t/1.25)"
+    },
+    {
+      "first": 1734,
+      "end": 1773,
+      "x": "330"
+    },
+    {
+      "first": 1773,
+      "end": 1792,
+      "x": "435"
+    },
+    {
+      "first": 1792,
+      "end": 1850,
+      "x": "205+110*sin(1.570796*min(1,t/.6))-135*pow(max(0,min(1,(t-.6)/1.3)),1.5)"
+    },
+    {
+      "first": 1850,
+      "end": 1907,
+      "x": "235-100*min(1,max(0,t-.133333)/1.7)"
+    },
+    {
+      "first": 1907,
+      "end": 1926,
+      "x": "250"
+    },
+    {
+      "first": 1926,
+      "end": 1964,
+      "x": "430"
+    },
+    {
+      "first": 1964,
+      "end": 2061,
+      "x": "355-120*min(1,max(0,(t-.933333)/.5))"
+    }
+  ],
+  "openings": [
+    {
+      "id": "model",
+      "sourceFrame": 1563,
+      "posterSourceFrame": 1563,
+      "outputFrame": 20,
+      "time": 0.6666666666666666,
+      "duration": 16.6
+    },
+    {
+      "id": "portrait",
+      "sourceFrame": 1742,
+      "posterSourceFrame": 1742,
+      "outputFrame": 199,
+      "time": 6.633333333333334,
+      "duration": 10.633333333333333
+    },
+    {
+      "id": "campaign",
+      "sourceFrame": 1563,
+      "posterSourceFrame": 1742,
+      "outputFrame": 20,
+      "time": 0.6666666666666666,
+      "duration": 16.6
+    }
+  ]
+}
