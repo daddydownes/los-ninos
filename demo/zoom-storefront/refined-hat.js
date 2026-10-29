@@ -124,7 +124,7 @@
     if (ready || loading) return;
     loading = true; failed = false;
     section.dataset.rotationState = 'loading';
-    status.hidden = false; status.textContent = 'Loading rotation…';
+    status.hidden = true; status.textContent = '';
     updateControl();
     try {
       const response = await fetch(section.dataset.refinedManifest);
@@ -132,15 +132,13 @@
       frames = validate(await response.json());
       const small = matchMedia('(max-width: 700px)').matches || navigator.connection?.saveData;
       frames = frames.map(frame => ({...frame, src: small && frame.srcSmall ? frame.srcSmall : frame.src}));
-      let cursor = 0, complete = 0;
+      let cursor = 0;
       const errors = [];
       async function worker() {
         while (cursor < frames.length) {
           const index = cursor++;
           try { decoded[index] = await loadImage(frames[index]); }
           catch (error) { errors.push(error); }
-          complete++;
-          if (complete % 4 === 0 || complete === frames.length) status.textContent = `Loading rotation… ${Math.round(complete / frames.length * 100)}%`;
         }
       }
       await Promise.all([worker(), worker(), worker(), worker()]);
