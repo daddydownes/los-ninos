@@ -45,3 +45,26 @@
 @media(max-width:700px) and (orientation:portrait){
   .film-plane video.film-raised-framing{object-position:50% 100%;transform:scale(1.20);transform-origin:50% 100%}
 }
+
+/* Matched Silver sweep treatment, selected from the name/price design review. */
+.product-name-ink,.price [data-product-price],.zoom-product-meta h3,.zoom-price b{
+  color:#e2eaf0;
+}
+@supports ((background-clip:text) or (-webkit-background-clip:text)){
+  .product-name-ink,.price [data-product-price],.zoom-product-meta h3,.zoom-price b{
+    background-image:linear-gradient(110deg,#c2cbd3 15%,#fff 28%,#8095a7 40%,#eef6fa 53%,#acbbc9 65%);
+    background-size:250% 100%;background-position:0% 50%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+}
+.shop-card.is-ready .product-name-ink,.shop-card.is-ready .price [data-product-price],
+.zoom-buy.is-visible .zoom-product-meta h3,.zoom-buy.is-visible .zoom-price b{
+  animation:ln-silver-sweep 2.6s ease-in-out both;
+}
+.shop-card.is-ready .price [data-product-price],.zoom-buy.is-visible .zoom-price b{animation-delay:.18s}
+.price::after{display:none}
+@keyframes ln-silver-sweep{from{background-position:100% 50%}to{background-position:0% 50%}}
+@media(prefers-reduced-motion:reduce){
+  .shop-card.is-ready .product-name-ink,.shop-card.is-ready .price [data-product-price],
+  .zoom-buy.is-visible .zoom-product-meta h3,.zoom-buy.is-visible .zoom-price b{animation:none}
+}
