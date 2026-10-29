@@ -5,6 +5,7 @@
   const card = document.querySelector('.shop-card');
   const track = document.querySelector('.shop-track');
   const coin = document.querySelector('.brandbar .bag-open');
+  const edge = document.querySelector('.mobile-card-edge');
   if (!card || !track || !coin) return;
 
   const version = selector => {
@@ -49,25 +50,24 @@
     if (stopped) return;
     const cardRect = rectangle(card), trackRect = rectangle(track), coinRect = rectangle(coin);
     const cardStyle = getComputedStyle(card), anchor = card.style.getPropertyValue('--mobile-card-top');
-    // The parked card's computed top is relative to its track. Keep boundary
-    // clearance relative to the controller's intended viewport anchor instead.
-    const anchorInset = parseFloat(anchor);
-    const inset = Number.isFinite(anchorInset) ? anchorInset : parseFloat(cardStyle.top) || 0;
+    // The fixed ruler tracks the browser-owned bottom even while parked.
+    const rulerBottom = edge?.getBoundingClientRect().top;
+    const inset = Number.isFinite(rulerBottom) ? rulerBottom - cardRect.height : parseFloat(cardStyle.top) || 0;
     const offset = viewport?.offsetTop || 0;
     const clearance = trackRect.bottom - inset - cardRect.height;
     const entry = {
       ms: rounded(performance.now() - started), reason: [...reasons].join(','),
       scrollY: rounded(window.scrollY), innerHeight: window.innerHeight,
       viewport: {offsetTop: rounded(offset), height: rounded(viewport?.height ?? innerHeight), scale: rounded(viewport?.scale ?? 1)},
-      card: {...cardRect, visualTop: rounded(cardRect.top - offset), stickyInset: cardStyle.top, anchorVariable: anchor, position: cardStyle.position},
-      trackBottom: trackRect.bottom, boundaryClearance: rounded(clearance),
+      card: {...cardRect, visualTop: rounded(cardRect.top - offset), stickyInset: cardStyle.top, anchorVariable: anchor, position: cardStyle.position, bottomRule: cardStyle.bottom},
+      nativeBottom: rounded(rulerBottom), trackBottom: trackRect.bottom, boundaryClearance: rounded(clearance),
       state: card.dataset.mobilePosition || (clearance <= 1 ? 'at/past boundary' : clearance < 80 ? 'near boundary' : 'floating'),
       coin: {...coinRect, visualTop: rounded(coinRect.top - offset)},
       bodyPosition: getComputedStyle(document.body).position,
       bagOpen: document.documentElement.hasAttribute('data-journey-bag-open')
     };
     reasons.clear(); samples.push(entry); if (samples.length > 180) samples.shift();
-    output.textContent = `build ${build.motion}\ncard layout ${entry.card.top} · visual ${entry.card.visualTop}\ninset ${entry.card.stickyInset} · anchor ${entry.card.anchorVariable || 'none'}\nviewport offset ${entry.viewport.offsetTop}\nheight ${entry.viewport.height} · scale ${entry.viewport.scale}\ntrack bottom ${entry.trackBottom}\n${entry.state} · clearance ${entry.boundaryClearance}\ncoin layout ${entry.coin.top} · visual ${entry.coin.visualTop}\nscroll ${entry.scrollY} · body ${entry.bodyPosition}\nsamples ${samples.length}/180`;
+    output.textContent = `build ${build.motion}\ncard layout ${entry.card.top} · visual ${entry.card.visualTop}\nbottom rule ${entry.card.bottomRule} · ruler ${entry.nativeBottom}\nviewport offset ${entry.viewport.offsetTop}\nheight ${entry.viewport.height} · scale ${entry.viewport.scale}\ntrack bottom ${entry.trackBottom}\n${entry.state} · clearance ${entry.boundaryClearance}\ncoin layout ${entry.coin.top} · visual ${entry.coin.visualTop}\nscroll ${entry.scrollY} · body ${entry.bodyPosition}\nsamples ${samples.length}/180`;
   }
   function schedule(event) {
     if (stopped) return;

@@ -112,12 +112,13 @@
 .brandbar .bag-open .bag-count{position:absolute;right:-4px;top:-4px;display:grid;place-items:center;min-width:21px;height:21px;padding:0 4px;box-sizing:border-box;border-radius:50%;background:#c3def0;color:#142b3d;font-size:11px;line-height:1;border:2px solid #172331}
 .brandbar .bag-open .bag-count[hidden]{display:none}
 
-/* The mobile controller fixes the travelling card to the visible viewport,
-   then parks it at the existing track boundary. Sticky is the no-JS fallback. */
+/* The browser owns the floating position. The controller only parks the card
+   at its document boundary; no JS top/transform follows toolbar animations. */
+.mobile-card-edge{position:fixed;top:auto;bottom:calc(14px + env(safe-area-inset-bottom));left:0;width:0;height:0;visibility:hidden;pointer-events:none}
 @media(max-width:700px){
   .shop-card{top:calc(100svh - var(--card-height) - 14px - env(safe-area-inset-bottom))}
   .shop-card[data-mobile-position]{margin:0 14px;width:calc(100% - 28px);left:0;right:0}
-  .shop-card[data-mobile-position="floating"]{position:fixed;top:var(--mobile-card-top);bottom:auto}
+  .shop-card[data-mobile-position="floating"]{position:fixed;top:auto;bottom:calc(14px + env(safe-area-inset-bottom))}
   .shop-card[data-mobile-position="parked"]{position:absolute;top:auto;bottom:0}
   .shop-card[data-mobile-position="before"]{position:absolute;top:0;bottom:auto}
 }
