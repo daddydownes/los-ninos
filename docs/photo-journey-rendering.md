@@ -1,6 +1,6 @@
 # Photo journey rendering
 
-30 October 2026 — photo-canvas-1.
+30 October 2026 — photo-canvas-2.
 
 ## Report and reproduced cause
 
@@ -14,7 +14,7 @@ Fast swipes could replace a decoded photograph with an image that had not loaded
 - The backing buffer is capped at 3 million pixels and device pixel ratio 2. Each image draw is clipped in source coordinates to the visible destination, so historical layers never grow into enormous composited surfaces.
 - All five photos (approximately 0.5 MB total) are requested at low priority after the opening, with a near-section fallback for restored positions and direct links. Each must finish decoding before it is drawn.
 - If a requested image is unavailable, retain the last decoded photograph at full-frame size. When decoding completes, repaint the latest scroll position without requiring another scroll. A failed image cannot erase the last good background.
-- The stage fills the current mobile viewport; the travel ruler subtracts stable 100svh from the section height. Expanding browser controls therefore does not alter the distance between stops. The final .65 units retain the pause on the last photograph.
+- The stage fills the current mobile viewport; the travel ruler subtracts stable 100svh from the section height. Expanding browser controls therefore does not alter the distance between stops. The final hold is .5 photo intervals, shortened from .65 (23% less). Section height is reduced proportionally to 564.516129svh (293.548387svh with reduced motion), preserving the original distance between photograph transitions. Normal end hold is about 51.6svh instead of 67.1svh.
 - Scroll events request at most one paint per animation frame. Paint reads the latest position directly, without queuing intermediate animation destinations. Nothing continuously animates while stationary or off screen.
 - Resize and drawing occur in one paint. Reduced motion shows complete photographs. Opening the bag freezes photo painting during its body lock. Page restoration/context restoration trigger a repaint.
 - If canvas is unavailable or lost, a decoded DOM photograph remains available with its alternative text.

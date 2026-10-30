@@ -58,7 +58,7 @@ async function jump(page, depth) {
     const journey = document.querySelector('.zoom-journey');
     const distance = document.querySelector('.zoom-distance').clientHeight;
     const top = scrollY + journey.getBoundingClientRect().top;
-    scrollTo({ top: top + distance * value / 4.65, behavior: 'instant' });
+    scrollTo({ top: top + distance * value / 4.5, behavior: 'instant' });
   }, depth);
   await expect.poll(() => section(page).evaluate(element => Number(element.dataset.zoomDepth)), {
     message: `The requested scroll position should produce depth ${depth}`,
@@ -175,7 +175,7 @@ test('rapid jumps and reversals across every stop leave a complete photograph pa
     await expectFrame(page, Math.floor(depth), depth);
     if (Number.isInteger(depth)) await expectFullPhoto(page, depth);
   }
-  await jump(page, 4.65);
+  await jump(page, 4.5);
   await expectFrame(page, 4, 4);
   await expect(page.locator('[data-zoom-hint]')).toHaveText('Scroll to shop');
   await expectBounds(page);

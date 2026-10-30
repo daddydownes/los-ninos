@@ -24,7 +24,9 @@
   section.append(distance);
 
   const last = images.length - 1;
-  const span = last + .65;
+  // A shorter final hold; zoom.css reduces total travel proportionally so
+  // the distance between photographs stays unchanged.
+  const span = last + .5;
   const ratio = 5;
   const ready = images.map(() => false);
   const decoding = images.map(() => false);
