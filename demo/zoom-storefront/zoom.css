@@ -133,3 +133,8 @@
 @media(hover:none),(pointer:coarse){
   .brandbar .bag-open:hover,.brandbar .bag-open:active{transform:none}
 }
+
+/* Centred closing message with the original bold brand type. */
+.zoom-buy-copy{min-width:0;container-type:inline-size;text-align:center}
+.zoom-buy-copy h2{font-family:Barlow,Arial,sans-serif;font-weight:800;font-size:clamp(34px,12cqi,100px);margin:20px 0 28px;line-height:1;letter-spacing:-.035em;text-wrap:balance}
+.zoom-dream-tagline{margin:0 0 32px;color:#c9d1dc;font-size:clamp(12px,2.8cqi,15px);font-weight:500;line-height:1.9;letter-spacing:.12em;text-transform:uppercase}
