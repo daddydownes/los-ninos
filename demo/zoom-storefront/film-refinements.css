@@ -22,13 +22,18 @@
 @keyframes price-light-pass{to{transform:translateX(150%) skewX(-18deg)}}
 .worn-heading h2{font-weight:500;line-height:.98}
 .place-line{display:block;overflow:hidden;padding-bottom:.07em;margin-bottom:-.07em}
-.place-ink{display:block;will-change:auto}
+.place-ink{display:block;will-change:auto;color:#122031}
 .worn-heading.is-visible .place-ink{animation:place-arrive 1100ms cubic-bezier(.16,1,.3,1) both}
 .worn-heading.is-visible .place-line:last-child .place-ink{animation-delay:130ms}
-.place-line:last-child .place-ink{background:linear-gradient(110deg,#122031 25%,#59758e 44%,#122031 61%);background-size:240% 100%;color:#122031;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.worn-heading.is-visible .place-line:last-child .place-ink{animation:place-arrive 1100ms 130ms cubic-bezier(.16,1,.3,1) both,place-light-pass 2200ms 600ms ease-out both}
+/* One repeating gradient tile moves a full tile per cycle: no reset flash,
+   disappearing text, or pause between passes. The entrance still runs once. */
+@supports ((background-clip:text) or (-webkit-background-clip:text)){
+  .place-ink{background-image:linear-gradient(90deg,#122031 0%,#122031 25%,#59758e 44%,#122031 61%,#122031 100%);background-size:200% 100%;background-repeat:repeat-x;background-position:0% 50%;background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .worn-heading.is-visible .place-ink{animation:place-arrive 1100ms cubic-bezier(.16,1,.3,1) both,place-light-pass 2800ms 600ms linear infinite}
+  .worn-heading.is-visible .place-line:last-child .place-ink{animation-delay:130ms,730ms}
+}
 @keyframes place-arrive{from{opacity:0;transform:translateY(65%)}to{opacity:1;transform:none}}
-@keyframes place-light-pass{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes place-light-pass{from{background-position:0% 50%}to{background-position:-200% 50%}}
 .bag-controller-unavailable .card-order{display:none}
 .bag-controller-unavailable .film-fallback-link{display:flex;grid-column:1/-1;grid-row:2}
 .bag-controller-unavailable .bag-open{display:none}
