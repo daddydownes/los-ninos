@@ -1,3 +1,16 @@
+# Production Cloudflare release
+
+The `codex/cloudflare-live-launch` branch combines the approved film/photo design with the existing live checkout and owner dashboard.
+
+- Build: `npm run build:shop`
+- Local preview: `npm run preview:shop` (local test orders only)
+- Commerce checks: `npm run test:commerce`
+- Publish the existing shop: `npx wrangler@4 deploy --keep-vars`
+
+See [launch notes](docs/cloudflare-design-launch.md) and the [owner guide](docs/commerce-owner-guide.md). The separate `main` branch remains the GitHub Pages preview. The remaining notes below describe that preview.
+
+---
+
 # Los Niños
 
 Storefront preview with the stitched opening, photography, interactive hat views,
