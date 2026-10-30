@@ -399,10 +399,11 @@ async function setOrderStatus(request, env, ctx, id, actor) {
     stmt(env, 'UPDATE orders SET status=?, updated_at=?, tracking_number=?,mutation_id=? WHERE id=? AND updated_at=? AND status=?', body.status, updatedAt, trackingNumber, mutationId, id, row.updated_at, row.status),
     stmt(env, `INSERT INTO order_history(id,order_id,status,created_at,actor,note) SELECT ?,?,?,?,?,?
       WHERE EXISTS (SELECT 1 FROM orders WHERE id=? AND mutation_id=?)`, crypto.randomUUID(), id, body.status, updatedAt, actor.email, note, id, mutationId),
-    stmt(env, `UPDATE email_outbox SET status='cancelled' WHERE order_id=? AND kind IN ('awaiting_payment','owner_order') AND status IN ('queued','failed','needs_review')
-      AND EXISTS (SELECT 1 FROM orders WHERE id=? AND mutation_id=?)`, id, id, mutationId),
+    stmt(env, `UPDATE email_outbox SET status='cancelled' WHERE order_id=? AND (kind IN ('awaiting_payment','paid') OR (kind='owner_order' AND ?='cancelled')) AND status IN ('queued','failed','needs_review')
+      AND EXISTS (SELECT 1 FROM orders WHERE id=? AND mutation_id=?)`, id, body.status, id, mutationId),
   ];
-  if (['paid', 'shipped'].includes(body.status)) batch.push(outboxInsert(env, order, body.status, config, crypto.randomUUID(), mutationId));
+  // Payment is recorded internally; dispatch sends the single combined receipt.
+  if (body.status === 'shipped') batch.push(outboxInsert(env, order, 'shipped', config, crypto.randomUUID(), mutationId));
   const result = await env.DB.batch(batch);
   if (result[0].meta.changes === 0) fail(409, 'This order changed. Refresh it before continuing.', 'order_changed');
   if (canSendOrderEmail(env, order)) ctx?.waitUntil?.(processOutbox(env));
@@ -497,7 +498,8 @@ async function resend(request, env, ctx, id) {
   const body = await readJSON(request);
   const row = await stmt(env, 'SELECT * FROM orders WHERE id=?', id).first();
   if (!row) fail(404, 'Order not found.', 'not_found');
-  if (!EMAIL_KINDS.has(body.kind) || (body.kind !== 'owner_order' && body.kind !== row.status)) fail(400, 'Choose the email for the current order status.', 'invalid_input');
+  if (body.kind === 'paid') fail(400, 'Payment confirmation is included in the dispatch email. Mark the order dispatched when it has been sent.', 'combined_dispatch_email');
+  if (!EMAIL_KINDS.has(body.kind) || (body.kind !== 'owner_order' && body.kind !== row.status) || (body.kind === 'owner_order' && row.status === 'cancelled')) fail(400, 'Choose the email for the current order status.', 'invalid_input');
   const existing = await stmt(env, `SELECT id FROM email_outbox WHERE order_id=? AND kind=? AND
     (status IN ('queued','sending') OR created_at > ?) LIMIT 1`, id, body.kind, new Date(Date.now() - 60000).toISOString()).first();
   if (existing) return response({ ok: true, message: 'An email is already queued or was recently created.' });
@@ -560,8 +562,10 @@ export async function processOutbox(env) {
     ORDER BY e.created_at LIMIT 5`, mode, testRecipient, current, current).all();
   const sendFetch = env.FETCH || fetch;
   for (const entry of due.results) {
-    if (['awaiting_payment','owner_order'].includes(entry.kind) && entry.order_status !== 'awaiting_payment') {
-      await stmt(env, "UPDATE email_outbox SET status='cancelled' WHERE id=? AND status IN ('queued','sending')", entry.id).run(); continue;
+    if (entry.kind === 'paid' || (entry.kind === 'awaiting_payment' && entry.order_status !== 'awaiting_payment') ||
+        (entry.kind === 'owner_order' && entry.order_status === 'cancelled')) {
+      // Do not interrupt another sender's active lease or retry obsolete payment emails.
+      await stmt(env, "UPDATE email_outbox SET status='cancelled' WHERE id=? AND (status='queued' OR (status='sending' AND lease_until<?))", entry.id, current).run(); continue;
     }
     if (entry.mode === 'preview') {
       // Recheck the immutable order and rendered payload at the actual send boundary.
@@ -581,7 +585,9 @@ export async function processOutbox(env) {
       ((status='queued' AND next_attempt_at<=?) OR (status='sending' AND lease_until<?))
       AND EXISTS (SELECT 1 FROM orders WHERE id=email_outbox.order_id AND mode=?
         AND (mode='live' OR (json_extract(snapshot,'$.testDelivery')=1 AND json_extract(snapshot,'$.testEmailRecipient')=?))
-        AND (email_outbox.kind NOT IN ('awaiting_payment','owner_order') OR status='awaiting_payment'))`,
+        AND email_outbox.kind!='paid'
+        AND (email_outbox.kind!='awaiting_payment' OR status='awaiting_payment')
+        AND (email_outbox.kind!='owner_order' OR status!='cancelled'))`,
       lease, current, current, entry.id, current, current, mode, testRecipient).run();
     if (!claim.meta.changes) continue;
     let result;

@@ -1,7 +1,7 @@
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const state = { orders: [], selectedId: null, order: null, settings: null, settingsEditable: false, testCheckout: null, listRequest: 0, detailRequest: 0, busy: false };
 const statuses = { awaiting_payment: 'Awaiting payment', paid: 'Paid — ready to pack', shipped: 'Shipped', cancelled: 'Cancelled' };
-const emailKinds = { awaiting_payment: 'Payment instructions', paid: 'Payment confirmation', shipped: 'Shipping confirmation', owner: 'Owner notification', owner_order: 'Owner notification' };
+const emailKinds = { awaiting_payment: 'Payment instructions', paid: 'Payment confirmation', shipped: 'Payment & dispatch confirmation', owner: 'Owner notification', owner_order: 'Owner notification' };
 const emailStatusLabels = { queued: 'Queued', sending: 'Sending', sent: 'Sent · delivery pending', delivered: 'Delivered', failed: 'Failed', bounced: 'Bounced', complained: 'Marked as spam', needs_review: 'Needs review', preview: 'Preview only', cancelled: 'Cancelled' };
 const emailNeedsAttention = email => ['failed', 'bounced', 'complained', 'needs_review'].includes(email.status);
 const money = (cents, placeholder = 'To be set') => cents === null || cents === undefined || !Number.isFinite(Number(cents)) ? placeholder : new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(Number(cents) / 100);
@@ -161,12 +161,13 @@ function renderOrderDetail() {
   for (const email of emailRecords) { const row = element('div', `admin-email-item${emailNeedsAttention(email) ? ' has-error' : ''}`); row.append(element('span', '', emailKinds[email.kind] || email.kind || 'Email'), element('span', '', emailStatusLabels[email.status] || email.status || 'Queued')); emailList.append(row); }
   if (!emailRecords.length) emailList.append(element('p', 'admin-small muted', 'No email delivery events recorded yet.'));
   emails.append(emailList);
-  if (['awaiting_payment', 'paid', 'shipped'].includes(order.status)) {
+  if (['awaiting_payment', 'shipped'].includes(order.status)) {
     const emailActions = element('div', 'admin-action-buttons');
     const preview = element('a', 'button button-secondary button-small', 'Preview customer email');
     preview.href = `/api/admin/email-preview/${encodeURIComponent(order.status)}?orderId=${encodeURIComponent(order.id)}`; preview.target = '_blank'; preview.rel = 'noopener';
     emailActions.append(preview, button(order.preview ? order.testDelivery ? 'Resend test email' : 'Test email retry' : `Resend ${emailKinds[order.status].toLowerCase()}`, () => resendEmail(order))); emails.append(emailActions);
   }
+  if (order.status === 'paid') emails.append(element('p', 'admin-small muted', 'Payment is recorded. The customer receives one combined payment and dispatch email when you mark the order shipped.'));
   emails.append(element('p', 'admin-small muted', order.preview && !order.testDelivery ? 'Preview emails are saved for testing only. No emails are sent.' : 'Sent means the email service accepted it. Delivery to an inbox can take longer.'));
   panel.append(emails);
   const history = element('details', 'admin-detail-disclosure'); history.append(element('summary', '', 'Order history')); const timeline = element('ol', 'admin-history');
@@ -235,12 +236,12 @@ function showAction(status) {
     ? { paid: 'Test payment confirmation', shipped: 'Test the shipping step', cancelled: 'Cancel this test order?' }
     : { paid: 'Has the money arrived?', shipped: 'Ready to send?', cancelled: 'Cancel this order?' };
   form.append(element('h4', '', titles[status]));
-  if (status === 'paid') form.append(element('p', '', order.preview ? `This simulates confirming a payment. Do not make a bank transfer. ${order.testDelivery ? 'A payment-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : `Check your bank account for ${money(order.totalCents)} with reference ${order.reference}. A customer screenshot alone does not confirm payment.`));
-  if (status === 'shipped') form.append(element('p', '', order.preview ? `No parcel is sent. ${order.testDelivery ? 'A dispatch-confirmation email will go to the test inbox.' : 'No customer email will be sent.'}` : 'The customer will receive a dispatch confirmation. Send their tracking number separately by text.'));
+  if (status === 'paid') form.append(element('p', '', order.preview ? 'This simulates confirming a payment. Do not make a bank transfer. No separate payment email is sent; the combined confirmation is sent at dispatch.' : `Check your bank account for ${money(order.totalCents)} with reference ${order.reference}. A customer screenshot alone does not confirm payment. No separate email is sent; the combined confirmation is sent at dispatch.`));
+  if (status === 'shipped') form.append(element('p', '', order.preview ? `No parcel is sent. ${order.testDelivery ? 'A combined payment and dispatch email will go to the test inbox.' : 'No customer email will be sent.'}` : 'The customer will receive one combined payment and dispatch confirmation. Send their tracking number separately by text.'));
   if (status === 'cancelled') form.append(element('p', '', order.preview ? 'This cancels the test order and releases its reserved preview stock. No customer email will be sent.' : 'This cancels the unpaid order and releases its reserved stock. Check the bank account first in case a transfer has arrived.'));
   const note = field(status === 'cancelled' ? 'Reason or note' : 'Internal note (optional)', 'note', 'textarea'); note.input.maxLength = 2000; if (status === 'cancelled') note.input.required = true; form.append(note.wrap);
-  const confirmed = checkbox(order.preview ? order.testDelivery && status !== 'cancelled' ? 'I understand this is a simulation and an email will go to the test inbox.' : 'I understand this is a test and no customer email will be sent.' : status === 'paid' ? 'I have checked the bank account and the full payment has arrived.' : status === 'shipped' ? 'I have handed this parcel over for delivery.' : 'I have checked this order and want to cancel it.', 'confirmed'); form.append(confirmed.wrap);
-  const submitLabel = order.preview ? (status === 'paid' ? 'Confirm test payment' : status === 'shipped' ? 'Confirm test shipment' : 'Cancel test order') : (status === 'paid' ? 'Mark paid & send confirmation' : status === 'shipped' ? 'Mark shipped & send confirmation' : 'Confirm cancellation');
+  const confirmed = checkbox(order.preview ? order.testDelivery && status === 'shipped' ? 'I understand this is a simulation and an email will go to the test inbox.' : 'I understand this is a test and no customer email will be sent.' : status === 'paid' ? 'I have checked the bank account and the full payment has arrived.' : status === 'shipped' ? 'I have handed this parcel over for delivery.' : 'I have checked this order and want to cancel it.', 'confirmed'); form.append(confirmed.wrap);
+  const submitLabel = order.preview ? (status === 'paid' ? 'Confirm test payment' : status === 'shipped' ? 'Confirm test shipment' : 'Cancel test order') : (status === 'paid' ? 'Mark payment received' : status === 'shipped' ? 'Mark shipped & send confirmation' : 'Confirm cancellation');
   const buttons = element('div', 'admin-action-buttons'); const submit = element('button', 'button button-small', submitLabel); submit.type = 'submit'; buttons.append(submit, button('Back', () => { slot.replaceChildren(); $('#order-detail').focus({ preventScroll: true }); })); form.append(buttons);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -250,7 +251,7 @@ function showAction(status) {
     try {
       const result = await api(`/api/admin/orders/${encodeURIComponent(order.id)}/status`, { method: 'POST', body });
       state.order = result.order; renderOrderDetail(); await loadOrders({ quiet: true });
-      notice(order.preview ? order.testDelivery && status !== 'cancelled' ? 'Test order updated. Its confirmation email has been queued for the test inbox.' : 'Preview order updated. No email sent.' : status === 'cancelled' ? 'Order cancelled. Reserved stock has been released.' : status === 'paid' ? 'Payment confirmed. The customer confirmation has been queued.' : 'Order marked as shipped. The dispatch confirmation has been queued.');
+      notice(order.preview ? order.testDelivery && status === 'shipped' ? 'Test order updated. Its confirmation email has been queued for the test inbox.' : 'Preview order updated. No email sent.' : status === 'cancelled' ? 'Order cancelled. Reserved stock has been released.' : status === 'paid' ? 'Payment recorded. The customer will receive a combined confirmation when the order is shipped.' : 'Order marked as shipped. The combined payment and dispatch confirmation has been queued.');
       $('#order-detail').focus({ preventScroll: true });
     } catch (error) { notice(error.message, true); [...form.elements].forEach((node) => { node.disabled = false; }); }
     finally { state.busy = false; }
@@ -291,7 +292,24 @@ function showTestCheckout(config) {
     : 'Test purchases with email will be available once the test inbox and sender are connected.';
 }
 
+function showStoreDetails(settings) {
+  if (!settings) return;
+  const list = $('#store-details-values');
+  list.replaceChildren();
+  for (const [label, value] of [
+    ['Account name', settings.bank?.accountName],
+    ['BSB', settings.bank?.bsb],
+    ['Account number', settings.bank?.accountNumber],
+    ['Customer support / replies', settings.supportEmail],
+    ['Owner notifications', settings.ownerEmail],
+  ]) {
+    list.append(element('dt', 'admin-small muted', label), element('dd', '', value || 'Not configured'));
+  }
+  $('#store-details').hidden = false;
+}
+
 function populateSettings(settings) {
+  showStoreDetails(settings);
   state.settings = settings;
   const form = $('#settings-form');
   const set = (name, value) => { form.elements.namedItem(name).value = value ?? ''; };
@@ -379,7 +397,7 @@ api('/api/catalog').then((catalog) => {
     $('span', preview).textContent = 'Live checkout is not enabled. Public preview orders do not send emails. Use Test purchase for the private email test.';
   }
 }).catch(() => {});
-api('/api/admin/settings').then(result => { state.settingsEditable = result.settingsEditable !== false; $('#settings-tab').hidden = !state.settingsEditable; showTestCheckout(result.testCheckout); $('#owner-signout').hidden = result.ownerAuthMode !== 'email'; }).catch(() => {
+api('/api/admin/settings').then(result => { showStoreDetails(result.settings); state.settingsEditable = result.settingsEditable !== false; $('#settings-tab').hidden = !state.settingsEditable; showTestCheckout(result.testCheckout); $('#owner-signout').hidden = result.ownerAuthMode !== 'email'; }).catch(() => {
   $('#test-purchase-help').textContent = 'Test setup could not be checked. Reload the dashboard to try again.';
 });
 loadOrders();

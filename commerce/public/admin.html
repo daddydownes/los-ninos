@@ -27,6 +27,7 @@
         <div><h1>Orders</h1><p class="muted">Your orders, one step at a time.</p></div>
         <details class="admin-tools"><summary>Tools</summary><div class="admin-title-actions"><button class="button button-small" id="test-purchase" type="button" aria-describedby="test-purchase-help" disabled>Test purchase</button><p class="admin-test-help" id="test-purchase-help">Checking test email setup…</p><a class="button button-secondary button-small" id="export-orders" href="/api/admin/export" download>Export orders</a></div></details>
       </div>
+      <details id="store-details" class="panel" hidden><summary>Store details</summary><p class="admin-small muted">Saved payment and contact details for new orders. Read only.</p><dl id="store-details-values"></dl></details>
       <nav class="admin-nav" aria-label="Owner workspace">
         <button class="admin-nav-button" id="orders-tab" type="button" aria-current="page" aria-controls="orders-view">Orders</button>
         <button class="admin-nav-button" id="settings-tab" type="button" aria-controls="settings-view" hidden>Store settings</button>

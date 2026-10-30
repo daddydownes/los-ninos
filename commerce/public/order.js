@@ -68,7 +68,7 @@ function render(order) {
     text($('bank-account'), preview && !testDelivery ? '[Account number]' : bankValue(order.bank?.accountNumber, 'To be confirmed'));
     text($('bank-reference'), order.reference);
     text($('reference-help'), preview ? 'Each real order gets a unique reference so the owner can match the transfer to the order.' : 'Enter this in your banking app’s reference or description field so we can match your payment.');
-    text($('payment-next-copy'), preview ? 'For a real order, the owner checks the bank payment and confirms it. The customer is then emailed, with dispatch within 1–3 business days after payment is confirmed.' : 'We’ll email you when we’ve confirmed your payment. We dispatch within 1–3 business days after payment is confirmed.');
+    text($('payment-next-copy'), preview ? 'For a real order, the owner checks the bank payment and confirms it. Dispatch follows within 1–3 business days after payment is confirmed. One email then confirms payment and dispatch together.' : 'We dispatch within 1–3 business days after payment is confirmed, then email you one combined payment and dispatch confirmation.');
     setupCopy('copy-amount', typeof order.totalCents === 'number' ? (order.totalCents / 100).toFixed(2) : '', 'Amount', canPay);
     setupCopy('copy-name', order.bank?.accountName, 'Account name', canPay);
     setupCopy('copy-bsb', order.bank?.bsb, 'BSB', canPay);
@@ -79,13 +79,13 @@ function render(order) {
     text($('order-intro'), preview ? 'Test payment marked as confirmed. No real payment has been taken.' : 'Thank you—we’ve confirmed your payment. Your hat is getting ready to go.');
     text($('state-eyebrow'), 'Next up · dispatch');
     text($('state-heading'), 'We’re getting it ready.');
-    text($('state-description'), preview ? 'In the live shop, the owner packs the hat and confirms when it is dispatched.' : 'We dispatch within 1–3 business days after payment is confirmed. We’ll email you again when your order has been shipped.');
+    text($('state-description'), preview ? 'In the live shop, the owner packs the hat and confirms when it is dispatched.' : 'We dispatch within 1–3 business days after payment is confirmed. We’ll email your combined payment and dispatch confirmation when your order has been shipped.');
   } else if (order.status === 'shipped') {
     text($('order-title'), 'On its way.');
     text($('order-intro'), preview ? 'This test order has been marked as shipped. No parcel has been sent.' : 'Your hat has been dispatched. Thanks for being part of Los Niños.');
     text($('state-eyebrow'), 'Order dispatched');
     text($('state-heading'), 'Keep an eye out.');
-    text($('state-description'), preview ? 'The customer receives a dispatch confirmation after the owner sends the parcel.' : 'Your order has been sent. Reply to your confirmation email if you need help.');
+    text($('state-description'), preview ? 'The customer receives a combined payment and dispatch confirmation after the owner sends the parcel.' : 'Your order has been sent. Reply to your confirmation email if you need help.');
     if (order.trackingNumber) {
       $('tracking-details').hidden = false;
       text($('tracking-number'), order.trackingNumber);

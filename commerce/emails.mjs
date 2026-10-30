@@ -81,9 +81,9 @@ function viewOrder(kind, order) {
 }
 
 function wording(kind, view) {
-  const titles = { awaiting_payment: 'Order received.', paid: 'Payment confirmed.', shipped: 'Your order is on its way.', owner_order: 'New order received.' };
-  const states = { awaiting_payment: 'Awaiting payment', paid: 'Paid', shipped: 'Shipped', owner_order: 'Awaiting payment' };
-  const subjects = { awaiting_payment: 'bank transfer instructions', paid: 'payment received', shipped: 'dispatched with Australia Post', owner_order: 'new order awaiting payment' };
+  const titles = { awaiting_payment: 'Order received.', paid: 'Payment confirmed.', shipped: 'Payment received. Order dispatched.', owner_order: 'New order received.' };
+  const states = { awaiting_payment: 'Awaiting payment', paid: 'Paid', shipped: 'Paid & dispatched', owner_order: 'Order received' };
+  const subjects = { awaiting_payment: 'bank transfer instructions', paid: 'payment received', shipped: 'payment received & order dispatched', owner_order: 'new order received' };
   const firstName = view.customer.name.split(/\s+/)[0];
   const greeting = firstName ? `Thanks, ${firstName}.` : 'Thanks for your order.';
   let introduction, next;
@@ -91,7 +91,7 @@ function wording(kind, view) {
     introduction = {
       awaiting_payment: 'This preview shows the bank transfer instructions a customer will receive after placing an order.',
       paid: 'This preview shows the confirmation a customer will receive after the owner checks that payment has arrived.',
-      shipped: 'This preview shows the dispatch email a customer will receive after the owner records shipment.',
+      shipped: 'This preview shows the combined payment and dispatch confirmation a customer receives after the owner records shipment.',
       owner_order: 'This preview shows the notification the owner will receive when a customer places an order.'
     }[kind];
     next = 'No payment is required. This preview does not confirm a payment or a shipment.';
@@ -102,10 +102,10 @@ function wording(kind, view) {
     introduction = `${greeting} We’ve checked our bank account and confirmed your payment. No further payment is needed for this order.`;
     next = 'We’ll dispatch your order within 1–3 business days after this payment confirmation and email you when it ships.';
   } else if (kind === 'shipped') {
-    introduction = 'Your Los Niños order has been dispatched with Australia Post. Thanks for supporting Los Niños.';
+    introduction = `${greeting} We’ve received your payment and your Los Niños order has been dispatched with Australia Post. No further payment is needed. Thanks for supporting Los Niños.`;
     next = 'Reply to this email if you need help with your order.';
   } else {
-    introduction = 'A customer has placed an order and has been given bank transfer instructions. Payment is still awaiting confirmation.';
+    introduction = 'A customer has placed an order and has been given bank transfer instructions. Open the dashboard to check the current payment and dispatch status.';
     next = 'Check the receiving bank account and match the amount and payment reference before marking the order paid. After confirming payment, dispatch within 1–3 business days and mark the order shipped in the dashboard.';
   }
   const subject = `${view.testDelivery ? '[TEST] ' : view.preview ? 'PREVIEW — no payment required — ' : ''}Los Niños ${view.reference} — ${subjects[kind]}`.replace(/[\r\n]/g, ' ').slice(0, 240);
@@ -126,10 +126,11 @@ function button(url, label, light = false) {
 
 function paymentPanel(kind, view) {
   let rows = '', bottom = '';
-  let label = kind === 'paid' ? 'Payment received' : kind === 'shipped' ? 'Order dispatched' : kind === 'owner_order' ? 'Order to reconcile' : 'Bank transfer details';
+  let label = kind === 'paid' ? 'Payment received' : kind === 'shipped' ? 'Payment received · order dispatched' : kind === 'owner_order' ? 'Order to reconcile' : 'Bank transfer details';
   if (view.preview) label = `Sample ${label.toLowerCase()}`;
   if (kind === 'shipped') {
-    rows = panelRow('Order reference', view.reference, { large: true });
+    rows = panelRow('Amount received', view.total, { large: true });
+    rows += panelRow('Order reference', view.reference, { large: true, line: true });
   } else {
     rows = panelRow(kind === 'paid' ? 'Amount received' : kind === 'owner_order' ? 'Order total' : 'Amount to transfer', view.total, { large: true });
     if (kind === 'awaiting_payment') {
@@ -192,7 +193,7 @@ function textEmail(kind, view, copy, config) {
   } else if (kind === 'paid') {
     lines.push(view.preview ? 'SAMPLE PAYMENT RECEIVED' : 'PAYMENT RECEIVED', `Amount received: ${view.total}`, `Payment reference: ${view.reference}`);
   } else if (kind === 'shipped') {
-    lines.push(view.preview ? 'SAMPLE DISPATCH CONFIRMATION' : 'ORDER DISPATCHED', `Order reference: ${view.reference}`);
+    lines.push(view.preview ? 'SAMPLE PAYMENT & DISPATCH CONFIRMATION' : 'PAYMENT RECEIVED · ORDER DISPATCHED', `Amount received: ${view.total}`, `Order reference: ${view.reference}`);
   } else {
     lines.push('ORDER TO RECONCILE', `Order total: ${view.total}`, `Payment reference: ${view.reference}`);
   }

@@ -60,9 +60,17 @@ test('all four email kinds have complete HTML and plain text and truthful state-
   assert.match(paid.text, /confirmed your payment/);
   assert.match(paid.text, /No further payment is needed/);
   assert.doesNotMatch(paid.text, /Account number:|Amount to transfer:/);
+  const combined = renderEmail('shipped', order({ status: 'shipped' }), config);
+  assert.match(combined.subject, /payment received & order dispatched/);
+  assert.match(combined.text, /received your payment/);
+  assert.match(combined.text, /dispatched with Australia Post/);
+  assert.match(combined.text, /Amount received: \$106\.00 AUD/);
+  assert.doesNotMatch(combined.text, /Account number:|Amount to transfer:/);
   const owner = renderEmail('owner_order', order(), config);
   assert.match(owner.text, /Check the receiving bank account/);
   assert.match(owner.text, /alex@example\.test/);
+  assert.match(owner.text, /current payment and dispatch status/);
+  assert.doesNotMatch(owner.text, /Payment is still awaiting confirmation/);
   assert.match(owner.html, /href="https:\/\/store\.example\.test\/admin"/);
 });
 

@@ -116,21 +116,22 @@ test('test checkout binds both customer and owner email to the approved inbox an
   assert.equal((await env.DB.prepare("SELECT reserved FROM inventory WHERE mode='preview'").first()).reserved, 1);
 });
 
-test('all four real-delivery test stages use the test inbox, then scheduled delivery checks work in preview', async t => {
+test('all three real-delivery test emails use the test inbox, then scheduled delivery checks work in preview', async t => {
   const { env, call, checkout, sent } = await setup(t);
   const created = await call('/api/admin/test-orders', 'POST', checkout());
   const id = created.data.order.id;
   await processOutbox(env);
   assert.equal((await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'paid' })).status, 200);
   await processOutbox(env);
+  assert.equal(sent.length, 2, 'recording payment must not send a separate email');
+  assert.equal((await call(`/api/admin/orders/${id}/resend`, 'POST', { kind: 'paid' })).status, 400);
   assert.equal((await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'shipped' })).status, 200);
   await processOutbox(env);
-  assert.equal(sent.length, 4);
+  assert.equal(sent.length, 3);
   assert.ok(sent.every(item => item.payload.to.length === 1 && item.payload.to[0] === recipient && item.payload.reply_to === recipient));
-  assert.match(sent[2].payload.text, /does not confirm a payment/);
-  assert.match(sent[3].payload.text, /does not confirm a payment or a shipment/);
-  assert.match(sent[3].payload.text, /DISPATCH CONFIRMATION/);
-  assert.doesNotMatch(sent[3].payload.text + sent[3].payload.html, /tracking|auspost\.com/i);
+  assert.match(sent[2].payload.text, /does not confirm a payment or a shipment/);
+  assert.match(sent[2].payload.text, /DISPATCH CONFIRMATION/);
+  assert.doesNotMatch(sent[2].payload.text + sent[2].payload.html, /tracking|auspost\.com/i);
   await worker.scheduled({}, env, {});
   const order = (await call(`/api/admin/orders/${id}`)).data.order;
   assert.ok(order.emails.every(message => message.status === 'delivered'));
@@ -274,4 +275,46 @@ test('quantity-tier quotes match both catalogs, receipts and delivered test emai
   assert.equal(fourMessages.length, 2);
   assert.ok(fourMessages.every(({ payload }) => payload.text.includes('Shipping: $25.00 AUD') && payload.text.includes('Total: $145.00 AUD')));
   assert.ok(sent.every(({ payload }) => payload.to.length === 1 && payload.to[0] === recipient));
+});
+
+test('payment cancels stale transfer instructions but preserves the new-order owner notice until dispatch', async t => {
+  const { env, call, checkout, sent } = await setup(t);
+  const created = await call('/api/admin/test-orders', 'POST', checkout());
+  const id = created.data.order.id;
+  assert.equal((await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'paid' })).status, 200);
+  const rows = (await env.DB.prepare('SELECT kind,status FROM email_outbox WHERE order_id=?').bind(id).all()).results;
+  assert.equal(rows.find(row => row.kind === 'awaiting_payment').status, 'cancelled');
+  assert.equal(rows.find(row => row.kind === 'owner_order').status, 'queued');
+  assert.equal(rows.some(row => row.kind === 'paid'), false);
+  await processOutbox(env);
+  assert.equal(sent.length, 1);
+  assert.match(sent[0].payload.text, /New order received/i);
+  assert.equal((await call(`/api/admin/orders/${id}/resend`, 'POST', { kind: 'awaiting_payment' })).status, 400);
+  const outcomes = await Promise.all([1, 2].map(() => call(`/api/admin/orders/${id}/status`, 'POST', { status: 'shipped' })));
+  assert.ok(outcomes.every(result => [200, 409].includes(result.status)));
+  assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM email_outbox WHERE order_id=? AND kind='shipped'").bind(id).first()).n, 1);
+  await processOutbox(env);
+  assert.equal(sent.length, 2);
+});
+
+test('legacy separate payment messages cannot send or resend, while active provider leases remain untouched', async t => {
+  const { env, call, checkout, sent } = await setup(t);
+  const created = await call('/api/admin/test-orders', 'POST', checkout());
+  const id = created.data.order.id;
+  await processOutbox(env);
+  await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'paid' });
+  for (const [suffix, status, lease] of [['queued', 'queued', 0], ['expired', 'sending', 1], ['active', 'sending', Math.floor(Date.now() / 1000) + 120]]) {
+    await env.DB.prepare(`INSERT INTO email_outbox(id,order_id,kind,payload,status,created_at,next_attempt_at,lease_until)
+      SELECT ?,order_id,'paid',payload,?,created_at,0,? FROM email_outbox WHERE order_id=? AND kind='awaiting_payment'`)
+      .bind('legacy-' + suffix, status, lease, id).run();
+  }
+  await processOutbox(env);
+  assert.equal(sent.length, 2);
+  const states = (await env.DB.prepare("SELECT id,status FROM email_outbox WHERE kind='paid'").all()).results;
+  assert.equal(states.find(row => row.id === 'legacy-queued').status, 'cancelled');
+  assert.equal(states.find(row => row.id === 'legacy-expired').status, 'cancelled');
+  assert.equal(states.find(row => row.id === 'legacy-active').status, 'sending');
+  assert.equal((await call(`/api/admin/orders/${id}/resend`, 'POST', { kind: 'paid' })).status, 400);
+  await call(`/api/admin/orders/${id}/status`, 'POST', { status: 'shipped' });
+  assert.equal((await call(`/api/admin/orders/${id}/resend`, 'POST', { kind: 'paid' })).status, 400);
 });

@@ -454,13 +454,13 @@ test('manual cancellation releases stock exactly once and shipped orders deduct 
   assert.equal(stock.stock_on_hand, 9); assert.equal(stock.reserved, 0);
 });
 
-test('concurrent owner edits create only one history entry and message', async t => {
+test('concurrent payment confirmations create one history entry and no payment email', async t => {
   const env = await setup(t);
   const order = (await call(env, '/api/orders', 'POST', checkout())).data.order;
   const results = await Promise.all([1, 2].map(() => call(env, `/api/admin/orders/${order.id}/status`, 'POST', { status: 'paid', expectedUpdatedAt: order.updatedAt })));
   assert.ok(results.every(item => [200, 409].includes(item.status)));
   assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM order_history WHERE status='paid'").first()).n, 1);
-  assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM email_outbox WHERE kind='paid'").first()).n, 1);
+  assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM email_outbox WHERE kind='paid'").first()).n, 0);
 });
 
 test('admin pages, APIs and exports reject forged email headers; preview bypass never works remotely or live', async t => {

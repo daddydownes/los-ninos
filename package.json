@@ -8,7 +8,8 @@
     "test:zoom": "playwright test --config playwright.zoom.config.js",
     "build:shop": "python3 scripts/build-zoom-shop.py",
     "preview:shop": "npm run build:shop && node scripts/commerce-local.mjs",
-    "test:commerce": "node --test commerce/tests/*.test.mjs"
+    "test:commerce": "node --test commerce/tests/*.test.mjs",
+    "preview:commerce-review": "python3 scripts/build-commerce-review.py && node scripts/commerce-local.mjs --review"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1"

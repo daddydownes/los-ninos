@@ -7,11 +7,13 @@ import worker from '../commerce/worker.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const filmDemo = process.argv.includes('--film');
-const assets = resolve(root, filmDemo ? '.local/film-demo-site' : '_site');
-const port = Number(process.env.PORT || (filmDemo ? 8793 : 8766));
+const reviewDemo = process.argv.includes('--review');
+if (filmDemo && reviewDemo) throw new Error('Choose either --film or --review.');
+const assets = resolve(root, reviewDemo ? '.local/commerce-review-site' : filmDemo ? '.local/film-demo-site' : '_site');
+const port = Number(process.env.PORT || (reviewDemo ? 8784 : filmDemo ? 8793 : 8766));
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('PORT must be between 1024 and 65535.');
 await mkdir(resolve(root, '.local'), { recursive: true });
-const databasePath = resolve(root, filmDemo ? '.local/film-demo-orders.sqlite' : '.local/orders.sqlite');
+const databasePath = resolve(root, reviewDemo ? '.local/commerce-review-orders.sqlite' : filmDemo ? '.local/film-demo-orders.sqlite' : '.local/orders.sqlite');
 const existingDatabase = await stat(databasePath).then(() => true, () => false);
 const db = new SqliteD1(databasePath);
 await db.exec(await readFile(resolve(root, 'commerce/schema.sql'), 'utf8'));
@@ -19,6 +21,9 @@ if (filmDemo && !existingDatabase) {
   const row = await db.prepare('SELECT value FROM settings WHERE id=1').first();
   const value = { ...JSON.parse(row.value), maxQuantity: 5 };
   await db.prepare('UPDATE settings SET value=? WHERE id=1').bind(JSON.stringify(value)).run();
+  await db.prepare("UPDATE inventory SET stock_on_hand=100 WHERE mode='preview'").run();
+}
+if (reviewDemo && !existingDatabase) {
   await db.prepare("UPDATE inventory SET stock_on_hand=100 WHERE mode='preview'").run();
 }
 

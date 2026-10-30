@@ -54,17 +54,17 @@ return to the list. **Tools** holds test and export actions.
    the order. A customer's screenshot or statement that they paid is not a bank
    confirmation. Resolve short payments or unclear references before proceeding.
 4. Choose **Confirm payment**, confirm that the full payment has arrived, then
-   **Mark paid & send confirmation**. The order becomes **Paid — ready to pack**
-   and its payment-confirmation email is queued.
+   **Mark payment received**. The order becomes **Paid — ready to pack**.
+   No separate payment email is sent.
 5. Pack and dispatch within **1–3 business days after payment is confirmed**.
    After handing the parcel over, choose **Mark as shipped**, then **Mark shipped
-   & send confirmation**. The order becomes **Shipped** and a dispatch email is
+   & send confirmation**. The order becomes **Shipped** and one combined payment and dispatch email is
    queued. Send the tracking number to the customer separately by text; email
    confirmations do not include tracking numbers or tracking links. The website
    does not send text messages automatically.
 
-The first email confirms receipt of the order. The second confirms receipt of
-money. Marking an order shipped is your record of dispatch; the shop does not
+The first customer email confirms receipt of the order and supplies payment instructions.
+The second customer email confirms receipt of money and dispatch together. Marking an order shipped is your record of dispatch; the shop does not
 purchase postage or book a pickup.
 
 New live references count upward: `001`, `002`, through `999`. Keep the leading
