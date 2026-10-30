@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Owner demo · Los Niños</title>
+  <link rel="icon" href="/assets/brand-icon.svg">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/owner-demo.css?v=1">
+  <script defer src="/owner-demo.js?v=5"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to orders</a>
+  <header><a class="brand" href="/" aria-label="Los Niños home">LOS<br>NIÑOS</a><span>Owner demo</span><button class="quiet" id="reset" type="button">Reset demo</button></header>
+  <div class="demo-note"><span class="demo-dot" aria-hidden="true"></span>Sample orders. Nothing here changes the shop.</div>
+  <main id="main" tabindex="-1">
+    <p id="feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+    <section id="list-view" aria-labelledby="list-title">
+      <div class="heading"><div><h1 id="list-title">Orders</h1><p id="work-count"></p></div></div>
+      <div class="tabs" aria-label="Filter orders"><button id="todo" type="button" aria-pressed="true">To do <span id="todo-count"></span></button><button id="all" type="button" aria-pressed="false">All orders <span id="all-count"></span></button></div>
+      <div id="orders" class="orders"></div>
+      <p class="hint">Open an order to try confirming payment and dispatch.</p>
+    </section>
+    <section id="detail-view" hidden aria-labelledby="order-title"></section>
+    <noscript><p>Enable JavaScript to try this interactive demo.</p></noscript>
+  </main>
+  <footer>A simpler owner workspace · Design preview</footer>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-copy">
+    <form id="confirm-form">
+      <h2 id="confirm-title"></h2><p id="confirm-copy"></p>
+      <label class="check"><input id="confirm-check" type="checkbox" required><span id="confirm-label"></span></label>
+      <div class="dialog-actions"><button id="confirm-submit" class="primary" type="submit"></button><button id="cancel-action" class="quiet" type="button">Go back</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

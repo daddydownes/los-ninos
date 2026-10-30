@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "los-ninos-shop",
+  "account_id": "8f39a28cf1182e60854d27594f29ecde",
+  "main": "commerce/worker.mjs",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "losninos.com.au/*", "zone_name": "losninos.com.au" },
+    { "pattern": "www.losninos.com.au/*", "zone_name": "losninos.com.au" }
+  ],
+  "assets": {
+    "directory": "./_site",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "los-ninos-orders",
+    "database_id": "6287e424-8621-4be2-9bb5-5157d6202831"
+  }],
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": {
+    "STORE_MODE": "live",
+    "LAUNCH_CONFIRMED": "true",
+    "HOSTED_TEST_CHECKOUT": "false",
+    "TEST_EMAILS_ENABLED": "false",
+    "LOCAL_PREVIEW": "false",
+    "PUBLIC_STORE_URL": "https://losninos.com.au",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "OWNER_AUTH_MODE": "email",
+    "OWNER_SETTINGS_EDITABLE": "false",
+    "EMAIL_FROM": "Los Niños <orders@losninos.com.au>"
+  },
+  "observability": { "enabled": false }
+}
