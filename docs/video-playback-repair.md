@@ -11,3 +11,5 @@ The original MP4 files, commerce backend, original loading/retry implementation 
 Validation: native WebKit phone reduced-motion cover, Chromium desktop reduced-motion cover, Chromium simulated autoplay denial, and normal Chromium autoplay. No Play button in any state. This is not a physical-device Low Power Mode test. The supplied file is copied byte-for-byte. Existing full-file video startup latency remains.
 
 Prior live deployment for rollback: `15fdc777-f254-4a4a-9472-c1227dce97f6`.
+
+Published successfully: Worker version `0da07c5d-5080-42f5-9df8-dd60307589a1`. Live HTML, player, poster selection and supplied image matched the final build byte-for-byte. Only four static assets were uploaded; no MP4 or commerce backend changes.
