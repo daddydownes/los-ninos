@@ -1,6 +1,7 @@
 """Serve the built fixture with enough pending connections for browser workers."""
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import os
 
 
 class TestServer(ThreadingHTTPServer):
@@ -10,6 +11,6 @@ class TestServer(ThreadingHTTPServer):
 
 
 if __name__ == '__main__':
-    handler = partial(SimpleHTTPRequestHandler, directory='_site')
-    with TestServer(('127.0.0.1', 8765), handler) as server:
+    handler = partial(SimpleHTTPRequestHandler, directory=os.environ.get('SITE_DIR', '_site'))
+    with TestServer(('127.0.0.1', int(os.environ.get('PORT', '8765'))), handler) as server:
         server.serve_forever()

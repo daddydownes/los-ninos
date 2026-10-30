@@ -4,7 +4,8 @@
   "scripts": {
     "build": "python3 scripts/build-site.py",
     "test": "playwright test",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:zoom": "playwright test --config playwright.zoom.config.js"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1"

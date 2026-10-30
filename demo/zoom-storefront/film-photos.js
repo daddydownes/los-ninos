@@ -2,12 +2,16 @@
   'use strict';
   const story=document.querySelector('.journey-worn');
   if(!story)return;
+  // Prepare the three story photos before a quick swipe reaches them.
+  function warmPhotos(){story.querySelectorAll('.photo-slot img').forEach(image=>{image.loading='eager';image.fetchPriority='low';});}
+  document.addEventListener('ln:intro-complete',warmPhotos,{once:true});
+  if(!document.documentElement.classList.contains('intro-pending'))warmPhotos();
   const reduced=matchMedia('(prefers-reduced-motion:reduce)');
   if('IntersectionObserver' in window&&!reduced.matches){
     const observer=new IntersectionObserver(entries=>{
       for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}
-    },{threshold:.05});
-    story.querySelectorAll('[data-reveal]').forEach(element=>{element.classList.add('reveal-pending');observer.observe(element)});
+    },{threshold:0,rootMargin:'180px 0px'});
+    story.querySelectorAll('.worn-heading[data-reveal]').forEach(element=>{element.classList.add('reveal-pending');observer.observe(element)});
   }
   story.querySelectorAll('.photo-slot').forEach(slot=>{
     const image=slot.querySelector('img'),error=slot.querySelector('.photo-error');

@@ -138,7 +138,7 @@
   let layout={width:0,height:0,startSize:0};
   const hold=350, duration=1900;
   let settling=false, startedAt=0, fallback=0;
-  function finishOpening(){settling=false;progress=1;clearTimeout(fallback);document.documentElement.classList.remove('opening-settling');scene.dataset.openingPhase='complete';card.classList.add('hat-docked');product.hidden=true;header.inert=false;clearTimeout(window.lnFilmGuard);schedule();}
+  function finishOpening(){unlockInput();settling=false;progress=1;clearTimeout(fallback);document.documentElement.classList.remove('opening-settling');scene.dataset.openingPhase='complete';card.classList.add('hat-docked');product.hidden=true;header.inert=false;clearTimeout(window.lnFilmGuard);schedule();}
   function beginOpening(){
     ready=true;
     if(motion.matches||document.hidden||window.lnSkipIntro){finishOpening();return;}
@@ -187,6 +187,7 @@
   addEventListener('pointerup',retryFilm,{passive:true});
   addEventListener('keydown',retryFilm);
   addEventListener('online',retryFilm);
+  let paintedProgress = -1;
   function paint(now){scheduled=false;
     if(settling){progress=clamp((now-startedAt-hold)/duration);if(progress>=1)finishOpening();}
     const move=ease((progress-.08)/.66),reveal=ease((progress-.015)/.48),land=ease((progress-.45)/.30),details=ease((progress-.60)/.23);
@@ -199,11 +200,14 @@
     product.style.transform=`translate3d(${x}px,${y}px,0) scale(${scale})`;
     const campaignBounds=campaign.getBoundingClientRect();product.style.visibility=campaignBounds.bottom<0?'hidden':'visible';
     }
+    if (paintedProgress !== progress) {
+    paintedProgress = progress;
     plane.style.opacity=reveal;plane.style.transform=`scale(${1.035-.035*reveal})`;
     shell.style.opacity=land;shell.style.transform=`translateY(${12*(1-land)}px)`;
     copies.forEach(el=>{el.style.opacity=details;el.style.transform=`translateY(${9*(1-details)}px)`});
     card.inert=details<.94;card.style.pointerEvents=details>.94?'auto':'none';
     if(details>.94)card.classList.add('is-ready');
+    }
     document.documentElement.classList.toggle('past-film',story.getBoundingClientRect().bottom<80);
     playback();
     if(settling)schedule();
@@ -269,7 +273,13 @@
   addEventListener('pageshow',e=>{if(e.persisted){finishOpening();measure();updateCard();}});
   const lockInput=e=>{if(document.documentElement.matches('.intro-pending,.opening-settling'))e.preventDefault()};
   addEventListener('wheel',lockInput,{passive:false});addEventListener('touchmove',lockInput,{passive:false});
-  addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Home','End'].includes(e.key))lockInput(e)});
+  const lockKey=e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Home','End'].includes(e.key))lockInput(e)};
+  addEventListener('keydown',lockKey);
+  function unlockInput(){
+    removeEventListener('wheel',lockInput);
+    removeEventListener('touchmove',lockInput);
+    removeEventListener('keydown',lockKey);
+  }
   // The existing intro has its own ten-second preparation fallback.
   scene.dataset.openingPhase=ready?'complete':'stitch';
   if(ready)finishOpening();

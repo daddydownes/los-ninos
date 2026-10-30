@@ -18,9 +18,13 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps webkit chromium
       - run: npm test
+      - name: Check published photo journey under rapid scrolling and image failures
+        run: npm run test:zoom
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: browser-test-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            .local/zoom-test-report/
           retention-days: 14
