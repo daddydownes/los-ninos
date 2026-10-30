@@ -7,12 +7,12 @@
   const preview=$('#preview'); let bagOpen=false;
   const motion=matchMedia('(prefers-reduced-motion:reduce)'),mobile=matchMedia('(max-width:700px)');
   const portraitFilm=matchMedia('(max-width:700px) and (orientation:portrait)');
-  const opening=window.LosNinosFilmOpenings?.selected||{id:'campaign',time:0,poster:'assets/film/model-portrait.jpg',mobilePoster:'assets/film/model-portrait-mobile.jpg'};
+  const opening=window.LosNinosFilmOpenings?.selected||{id:'campaign',time:0,poster:'assets/film/campaign-cover.jpg',mobilePoster:'assets/film/campaign-cover.jpg'};
   const desktopPoster=opening.poster||`assets/film/opening-${opening.id}.jpg`;
   const mobilePoster=opening.mobilePoster||`assets/film/opening-${opening.id}-mobile.jpg`;
   preview.loop=false;
   function filmSource(){return portraitFilm.matches?(opening.mobileSrc||preview.dataset.mobileSrc):(opening.src||preview.dataset.src);}
-  const poster=$('.film-poster'),filmButton=$('.film-play'),filmStatus=$('.film-status');
+  const poster=$('.film-poster');
   let revealCallback=0,revealRaf=0;
   function coverFilm(){
     if(revealCallback)preview.cancelVideoFrameCallback(revealCallback);
@@ -48,21 +48,6 @@
   let filmBuffered=false,filmLoading=false,filmUnavailable=false,filmTimer=0,filmTotalTimer=0,stallTimer=0;
   let filmRequest=null,filmObjectURL='',filmGeneration=0,playAttempt=0;
   let autoplayBlocked=false,filmRetryable=false,stallRecoveryUsed=false;
-  let userPlayback=false,userPaused=false,filmEnded=false;
-  function updateFilmControl(){
-    if(!filmButton)return;
-    const preference=motion.matches||Boolean(navigator.connection?.saveData);
-    const failed=filmUnavailable&&filmRetryable;
-    filmButton.hidden=!(ready&&progress>=1&&scene.dataset.openingPhase==='complete'&&(preference||autoplayBlocked||failed||userPlayback));
-    filmButton.disabled=userPlayback&&(filmLoading||(requested&&preview.dataset.playback!=='playing'));
-    const label=failed?'Retry film':filmEnded?'Replay film':userPlayback&&requested&&!preview.paused&&preview.dataset.playback==='playing'?'Pause film':filmButton.disabled?'Loading film…':'Play film';
-    filmButton.setAttribute('aria-label',label);
-    const text=filmButton.querySelector('span');if(text)text.textContent=label;
-    filmButton.classList.toggle('is-playing',label==='Pause film');
-    const status=failed?'The film could not load. Select Retry film.':autoplayBlocked?'Select Play film to start the video.':userPlayback&&filmLoading?'The film is loading.':filmEnded?'The film has finished.':preview.dataset.playback==='playing'?'Film playing.':preference&&!userPlayback?'Automatic video is off. You can choose Play film.':'';
-    if(filmStatus&&filmStatus.textContent!==status)filmStatus.textContent=status;
-  }
-  function setFilmState(state){preview.dataset.playback=state;updateFilmControl();}
   function releaseFilm(){
     filmGeneration++;playAttempt++;
     clearTimeout(filmTimer);clearTimeout(filmTotalTimer);clearTimeout(stallTimer);
@@ -76,11 +61,11 @@
     filmLoading=false;filmBuffered=false;filmUnavailable=true;requested=false;
     autoplayBlocked=false;filmRetryable=retryable;stallRecoveryUsed=false;
     releaseFilm();coverFilm();preview.pause();preview.removeAttribute('src');preview.load();
-    setFilmState('still');
+    preview.dataset.playback='still';
   }
   async function prepareFilm(){
     if(filmLoading||filmUnavailable)return;
-    if(navigator.connection?.saveData&&!userPlayback){stillFilm(false);return;}
+    if(navigator.connection?.saveData){stillFilm(false);return;}
     const generation=++filmGeneration,controller=new AbortController();
     const current=()=>generation===filmGeneration&&!controller.signal.aborted;
     const expire=()=>{if(current())stillFilm()};
@@ -89,7 +74,7 @@
       clearTimeout(filmTimer);filmTimer=setTimeout(expire,30000);
     };
     filmRequest=controller;
-    filmLoading=true;filmRetryable=false;setFilmState('loading');
+    filmLoading=true;filmRetryable=false;preview.dataset.playback='loading';
     preview.dataset.source=filmSource();
     // A healthy slower download may take longer than the loop itself. Keep
     // showing the portrait while bytes arrive, with separate idle/total bounds.
@@ -118,7 +103,7 @@
       clearTimeout(filmTimer);clearTimeout(filmTotalTimer);
       filmRequest=null;filmLoading=false;filmBuffered=true;stallRecoveryUsed=false;
       preview.dataset.downloadBytes=String(bytes.size);
-      setFilmState('ready');
+      preview.dataset.playback='ready';
       filmObjectURL=URL.createObjectURL(bytes);
       preview.preload='auto';preview.src=filmObjectURL;preview.load();
     }catch(error){
@@ -129,13 +114,7 @@
   preview.addEventListener('error',()=>{if(filmBuffered&&preview.error)stillFilm()});
   preview.addEventListener('playing',()=>{
     if(!filmBuffered||!requested)return;
-    clearTimeout(stallTimer);stallRecoveryUsed=false;setFilmState('playing');
-  });
-  preview.addEventListener('pause',()=>{
-    // Application pauses clear requested first. A pause imposed by iOS or the
-    // browser needs an explicit Play action, while retaining the current frame.
-    if(!requested||!preview.paused||preview.ended)return;
-    requested=false;playAttempt++;autoplayBlocked=true;clearTimeout(stallTimer);setFilmState('paused');
+    clearTimeout(stallTimer);stallRecoveryUsed=false;preview.dataset.playback='playing';
   });
   function recoverStall(){
     if(!filmBuffered||!requested)return;
@@ -153,9 +132,7 @@
   preview.addEventListener('waiting',recoverStall);
   preview.addEventListener('seeked',playback);
   preview.addEventListener('ended',()=>{
-    requested=false;
-    if(motion.matches){filmEnded=true;userPaused=true;setFilmState('ended');return;}
-    preview.currentTime=opening.time;
+    requested=false;preview.currentTime=opening.time;
   });
   let selected=1;
   let layout={width:0,height:0,startSize:0};
@@ -172,50 +149,33 @@
     measure();
   }
   function measure(){layout.width=scene.clientWidth;layout.height=scene.clientHeight;layout.startSize=Math.min(mobile.matches?layout.width*.98:layout.width*.57,layout.height*(mobile.matches?.70:.80),720);product.style.width=layout.startSize+'px';product.style.height=layout.startSize+'px';schedule();}
-  function playback(fromGesture=false){
-    const active=ready&&visible&&!document.hidden&&!bagOpen&&!userPaused&&(!motion.matches||userPlayback);
-    if(!active){requested=false;playAttempt++;clearTimeout(stallTimer);preview.pause();updateFilmControl();return;}
-    if(filmUnavailable||autoplayBlocked){updateFilmControl();return;}
+  function playback(){
+    const active=ready&&visible&&!document.hidden&&!bagOpen&&!motion.matches;
+    if(!active){requested=false;playAttempt++;clearTimeout(stallTimer);preview.pause();return;}
+    if(filmUnavailable||autoplayBlocked)return;
     // Prepare during the handover, but never play over the moving hat.
     if(!filmBuffered){if(progress>.025)prepareFilm();return;}
     // Decode the chosen opening during the hat handover, behind an exact
     // matching cover. Native video posters can disappear during a seek.
-    if((preview.readyState<1||preview.seeking)&&fromGesture!==true)return;
-    if(preview.readyState>=1&&preview.currentTime<opening.time-.015){preview.currentTime=opening.time;if(fromGesture!==true)return;}
+    if(preview.readyState<1||preview.seeking)return;
+    if(preview.currentTime<opening.time-.015){preview.currentTime=opening.time;return;}
     if(settling||progress<1||scene.dataset.openingPhase!=='complete')return;
     if(requested)return;
     const generation=filmGeneration,attempt=++playAttempt;
-    requested=true;filmEnded=false;updateFilmControl();revealFilmWhenReady();
+    requested=true;revealFilmWhenReady();
     preview.play().catch(error=>{
       if(generation!==filmGeneration||attempt!==playAttempt||!requested)return;
       requested=false;clearTimeout(stallTimer);coverFilm();
       if(error?.name==='NotAllowedError'){
-        // Low Power Mode can reject muted autoplay. Keep the downloaded Blob
-        // and offer a visible control whose click can grant playback permission.
-        autoplayBlocked=true;setFilmState('paused');
+        // Keep the downloaded film. A natural tap/key can grant playback
+        // permission without restarting the download or adding another button.
+        autoplayBlocked=true;preview.dataset.playback='paused';
       }else stillFilm();
     });
   }
-  filmButton?.addEventListener('click',()=>{
-    if(!ready||!visible||document.hidden||bagOpen||progress<1||settling)return;
-    if(userPlayback&&requested&&!preview.paused&&preview.dataset.playback==='playing'){
-      userPaused=true;requested=false;playAttempt++;clearTimeout(stallTimer);preview.pause();setFilmState('paused');return;
-    }
-    userPlayback=true;userPaused=false;autoplayBlocked=false;
-    if(filmUnavailable){filmUnavailable=false;filmRetryable=false;}
-    if(filmEnded||preview.ended){filmEnded=false;if(preview.readyState>=1)preview.currentTime=opening.time;}
-    // A ready Blob plays synchronously inside the click, satisfying iOS's
-    // gesture requirement. If a download is needed, a rejected later autoplay
-    // leaves this control available for one further explicit Play.
-    if(requested){playAttempt++;requested=false;}
-    playback(true);updateFilmControl();
-  });
   function retryFilm(event){
-    // pointerup precedes click: do not let the generic retry start playback
-    // and then make this button's click accidentally pause it again.
-    if(event?.target?.closest?.('.film-controls')||userPaused)return;
     if(event?.type==='keydown'&&(event.repeat||!['Enter',' '].includes(event.key)))return;
-    if(!ready||!visible||document.hidden||bagOpen||(!userPlayback&&(motion.matches||navigator.connection?.saveData)))return;
+    if(!ready||!visible||document.hidden||bagOpen||motion.matches||navigator.connection?.saveData)return;
     if(filmUnavailable&&filmRetryable){filmUnavailable=false;filmRetryable=false;}
     if(autoplayBlocked){
       // An online event is not a user gesture and cannot grant autoplay.
@@ -255,17 +215,11 @@
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(paint)}}
   addEventListener('scroll',schedule,{passive:true});addEventListener('resize',measure,{passive:true});
   const observer=new ResizeObserver(measure);observer.observe(scene);observer.observe(card);
-  motion.addEventListener('change',()=>{
-    if(motion.matches){
-      userPlayback=false;userPaused=false;requested=false;playAttempt++;clearTimeout(stallTimer);preview.pause();
-      if(ready)finishOpening();
-    }
-    playback();measure();
-  });mobile.addEventListener('change',measure);
+  motion.addEventListener('change',()=>{if(motion.matches&&ready)finishOpening();measure()});mobile.addEventListener('change',measure);
   portraitFilm.addEventListener('change',()=>{
     requested=false;preview.pause();
     filmBuffered=false;filmLoading=false;filmUnavailable=false;
-    autoplayBlocked=false;filmRetryable=false;stallRecoveryUsed=false;filmEnded=false;
+    autoplayBlocked=false;filmRetryable=false;stallRecoveryUsed=false;
     releaseFilm();coverFilm();preview.removeAttribute('src');preview.load();choosePoster();playback();
   });
   document.addEventListener('ln:intro-complete',beginOpening,{once:true});

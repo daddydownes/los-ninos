@@ -25,8 +25,8 @@
     {id:'model',time:20/30,name:'Full scene',sourceFrame:1563},
     {id:'portrait',time:199/30,name:'Portrait',sourceFrame:1742},
     {id:'campaign',time:0,name:'Portrait to full film',sourceFrame:1563,posterId:'portrait',duration:421/30,src:'assets/film/campaign.mp4',mobileSrc:'assets/film/campaign-mobile.mp4'},
-  ].map(option=>({...option,poster:`assets/film/model-${option.posterId||option.id}.jpg`,
-    mobilePoster:`assets/film/model-${option.posterId||option.id}-mobile.jpg`,
+  ].map(option=>({...option,poster:option.id==='campaign'?'assets/film/campaign-cover.jpg':`assets/film/model-${option.posterId||option.id}.jpg`,
+    mobilePoster:option.id==='campaign'?'assets/film/campaign-cover.jpg':`assets/film/model-${option.posterId||option.id}-mobile.jpg`,
     src:option.src||'assets/film/continuous.mp4',mobileSrc:option.mobileSrc||'assets/film/continuous-mobile.mp4'}));
   const choice = new URL(location.href).searchParams.get('opening');
   window.LosNinosFilmOpenings = Object.freeze({

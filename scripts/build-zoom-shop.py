@@ -20,13 +20,13 @@ COMMERCE_FILES = {
     'owner-login.html', 'owner-login.js', 'owner-login.css',
 }
 FILM_FILES = {'campaign.mp4', 'campaign-mobile.mp4',
-              'model-portrait.jpg', 'model-portrait-mobile.jpg'}
+              'campaign-cover.jpg'}
 CAMPAIGN = """(() => {
   'use strict';
   const selected = Object.freeze({id:'campaign',time:0,
     name:'Portrait to full film',sourceFrame:1563,posterId:'portrait',duration:421/30,
     src:'assets/film/campaign.mp4',mobileSrc:'assets/film/campaign-mobile.mp4',
-    poster:'assets/film/model-portrait.jpg',mobilePoster:'assets/film/model-portrait-mobile.jpg'});
+    poster:'assets/film/campaign-cover.jpg',mobilePoster:'assets/film/campaign-cover.jpg'});
   window.LosNinosFilmOpenings = Object.freeze({selected});
 })();
 """
