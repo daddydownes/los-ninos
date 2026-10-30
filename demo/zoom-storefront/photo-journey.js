@@ -212,8 +212,8 @@
     touch.x = point.clientX; touch.y = point.clientY;
     if (!event.cancelable || Math.abs(dx) > Math.abs(dy)) { touch = null; return; }
     event.preventDefault();
-    // Follow the finger at 15% travel, without a long fling after release.
-    moveBy(dy * .15);
+    // Follow the finger at 30% travel, without a long fling after release.
+    moveBy(dy * .30);
   }, {passive: false});
   for (const name of ['touchend', 'touchcancel']) {
     document.addEventListener(name, () => { touch = null; }, {passive: true});
@@ -223,7 +223,7 @@
         !event.cancelable || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
     event.preventDefault();
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
-    moveBy(clamp(event.deltaY * unit * .12, -25, 25));
+    moveBy(clamp(event.deltaY * unit * .24, -50, 50));
   }, {passive: false});
   document.addEventListener('ln:bag-visibility', () => { touch = null; });
   function travel(top) {
