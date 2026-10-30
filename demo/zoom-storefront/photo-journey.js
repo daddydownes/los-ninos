@@ -189,92 +189,45 @@
       if (!ready[index] && !decoding[index]) { image.src = image.getAttribute('src'); decode(index); }
     });
   });
-  // Demo: one deliberate gesture per photograph. Never queue transitions.
-  // Keep native scrolling outside the photographs and allow pinch zoom/controls.
-  let animation = 0, touching = false, consumed = false, originX = 0, originY = 0;
-  let entryLimit = null, wheelTimer = 0, wheelUsed = false, wheelTotal = 0;
-  function geometry() {
-    const start = scrollY + section.getBoundingClientRect().top;
-    const step = Math.max(1, distance.clientHeight) / span;
-    return {start, step, end: start + step * last};
-  }
-  function blocked(target) {
+  // GitHub demo: continuous, damped input. No photo stops, timers, momentum
+  // animation or scroll-position correction can trap a reverse gesture.
+  let touch = null;
+  function nativeInput(target) {
     return bagOpen || document.documentElement.hasAttribute('data-journey-bag-open') ||
-      target?.closest?.('button,a,input,select,textarea,[contenteditable],dialog');
+      document.documentElement.matches('.intro-pending,.opening-settling') ||
+      target?.closest?.('button,a,input,select,textarea,[contenteditable],dialog,[role="dialog"]');
   }
-  function cancelStep() { cancelAnimationFrame(animation); animation = 0; }
-  function settle(top) {
-    cancelStep(); entryLimit = null;
-    const from = scrollY, started = performance.now();
-    const duration = motion.matches ? 0 : 650;
-    function tick(now) {
-      const t = duration ? Math.min(1, (now - started) / duration) : 1;
-      const ease = t * t * (3 - 2 * t);
-      window.scrollTo({top: from + (top - from) * ease, behavior: 'instant'});
-      if (t < 1) animation = requestAnimationFrame(tick); else animation = 0;
-    }
-    animation = requestAnimationFrame(tick);
-  }
-  function nextStop(direction) {
-    const {start, step, end} = geometry();
-    const depth = (scrollY - start) / step;
-    if (scrollY < start - 2 || scrollY > end + 2) return null;
-    if (direction < 0 && depth <= .015) return null;
-    if (direction > 0 && depth >= last - .015) return null;
-    const index = direction > 0 ? Math.floor(depth + .015) + 1 : Math.ceil(depth - .015) - 1;
-    return start + clamp(index, 0, last) * step;
+  function moveBy(delta) {
+    window.scrollBy({top: delta, behavior: 'instant'});
   }
   document.addEventListener('touchstart', event => {
-    entryLimit = null; touching = false; consumed = false;
-    if (event.touches.length !== 1 || blocked(event.target)) return;
-    cancelStep(); touching = true;
-    originX = event.touches[0].clientX; originY = event.touches[0].clientY;
-    const {start, end} = geometry();
-    if (scrollY < start - 2) entryLimit = {top: start, direction: 1};
-    else if (scrollY > end + 2) entryLimit = {top: end, direction: -1};
+    touch = event.touches.length === 1 && !nativeInput(event.target)
+      ? {x: event.touches[0].clientX, y: event.touches[0].clientY, target: event.target}
+      : null;
   }, {passive: true});
   document.addEventListener('touchmove', event => {
-    if (!touching || event.touches.length !== 1 || blocked(event.target)) return;
-    const dy = originY - event.touches[0].clientY;
-    const dx = originX - event.touches[0].clientX;
-    if (Math.abs(dx) > Math.abs(dy) || Math.abs(dy) < 12) return;
-    if (consumed) { if (event.cancelable) event.preventDefault(); return; }
-    const top = nextStop(Math.sign(dy));
-    if (top === null || !event.cancelable) return;
-    event.preventDefault(); consumed = true; settle(top);
+    if (!touch || event.touches.length !== 1 || nativeInput(touch.target)) { touch = null; return; }
+    const point = event.touches[0];
+    const dx = touch.x - point.clientX, dy = touch.y - point.clientY;
+    touch.x = point.clientX; touch.y = point.clientY;
+    if (!event.cancelable || Math.abs(dx) > Math.abs(dy)) { touch = null; return; }
+    event.preventDefault();
+    // Follow the finger at 60% travel, without a long fling after release.
+    moveBy(dy * .6);
   }, {passive: false});
-  document.addEventListener('touchend', () => { touching = false; }, {passive: true});
-  document.addEventListener('touchcancel', () => {
-    touching = false; entryLimit = null; consumed = false;
-  }, {passive: true});
-  // Catch native fling momentum entering from the preceding/following section.
-  addEventListener('scroll', () => {
-    if (!entryLimit || blocked(null)) return;
-    if ((scrollY - entryLimit.top) * entryLimit.direction > 0) {
-      const top = entryLimit.top; entryLimit = null; consumed = true;
-      window.scrollTo({top, behavior: 'instant'});
-    }
-  }, {passive: true});
+  for (const name of ['touchend', 'touchcancel']) {
+    document.addEventListener(name, () => { touch = null; }, {passive: true});
+  }
   document.addEventListener('wheel', event => {
-    entryLimit = null;
-    if (event.ctrlKey || blocked(event.target) || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-    clearTimeout(wheelTimer);
-    wheelTimer = setTimeout(() => { wheelUsed = false; wheelTotal = 0; }, 180);
-    if (wheelUsed || animation) { if (event.cancelable) event.preventDefault(); return; }
-    let top = nextStop(Math.sign(event.deltaY));
-    const {start, end} = geometry();
-    const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1);
-    if (top === null && scrollY < start && scrollY + delta >= start) top = start;
-    if (top === null && scrollY > end && scrollY + delta <= end) top = end;
-    if (top === null || !event.cancelable) return;
-    event.preventDefault(); wheelTotal += delta;
-    if (Math.abs(wheelTotal) < 24) return;
-    wheelUsed = true; settle(top);
+    if (event.ctrlKey || event.metaKey || nativeInput(event.target) ||
+        !event.cancelable || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+    event.preventDefault();
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
+    moveBy(clamp(event.deltaY * unit * .45, -100, 100));
   }, {passive: false});
-  addEventListener('keydown', () => { entryLimit = null; cancelStep(); });
-  document.addEventListener('ln:bag-visibility', () => { entryLimit = null; cancelStep(); });
+  document.addEventListener('ln:bag-visibility', () => { touch = null; });
   function travel(top) {
-    entryLimit = null; cancelStep();
+    touch = null;
     window.scrollTo({top, behavior: motion.matches ? 'instant' : 'smooth'});
   }
   dots.forEach((button, index) => button.addEventListener('click', () => {
